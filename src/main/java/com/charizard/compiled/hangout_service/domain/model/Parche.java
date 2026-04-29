@@ -7,7 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +21,10 @@ public class Parche {
     private UUID id;
     private String name;
     private String description;
+    private String place;
     private ParcheType type;
+    private LocalDate date;
+    private LocalTime hour;
     private int maximumQuota;
     private LocalDateTime dateRealization;
     private ParcheStatus status = ParcheStatus.ACTIVE;
