@@ -28,4 +28,6 @@ public class Parche {
     private LocalDateTime creationDate;
     private List<Member> members;
 
+    private UUID eventId;
+
 }

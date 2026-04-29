@@ -38,7 +38,7 @@ public class ParcheEntity {
     private ParcheType type;
 
     @Column(nullable = false)
-    @Min(2) @Max(50)
+    @Min(2) @Max(30)
     private int maximumQuota;
 
     @Column(nullable = false)
@@ -55,6 +55,9 @@ public class ParcheEntity {
 
     @OneToMany(mappedBy = "parche", cascade = CascadeType.ALL)
     private List<MemberEntity> members;
+
+    @Column(nullable = true)
+    private UUID eventId;
 
     @PrePersist
     public void prePersist() {
