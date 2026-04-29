@@ -26,7 +26,7 @@ public class MemberEntity {
 
     @ManyToOne
     @JoinColumn(name = "parche_id", nullable = false)
-    private ParcheEntity parcheId;
+    private ParcheEntity parche;
 
     @Column(nullable = false)
     private UUID studentId;

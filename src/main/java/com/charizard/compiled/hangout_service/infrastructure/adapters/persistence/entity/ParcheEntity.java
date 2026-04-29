@@ -3,6 +3,7 @@ package com.charizard.compiled.hangout_service.infrastructure.adapters.persisten
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class ParcheEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
 
+    @NotNull
     @Column(nullable = false, length = 100)
     private String name;
 

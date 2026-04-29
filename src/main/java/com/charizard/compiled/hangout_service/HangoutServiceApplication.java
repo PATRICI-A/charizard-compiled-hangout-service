@@ -1,4 +1,4 @@
-package com.charizad.compiled.hangout_service;
+package com.charizard.compiled.hangout_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
