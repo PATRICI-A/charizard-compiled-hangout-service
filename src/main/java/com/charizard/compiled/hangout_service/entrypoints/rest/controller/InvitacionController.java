@@ -2,7 +2,7 @@ package com.charizard.compiled.hangout_service.entrypoints.rest.controller;
 
 import com.charizard.compiled.hangout_service.application.dto.request.EnviarInvitacionRequest;
 import com.charizard.compiled.hangout_service.application.dto.response.EnviarInvitacionResponse;
-import com.charizard.compiled.hangout_service.application.service.InvitacionService;
+import com.charizard.compiled.hangout_service.domain.ports.in.InvitacionInputPort;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +25,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class InvitacionController {
 
-    private final InvitacionService invitacionService;
+    private final InvitacionInputPort invitacionService;
 
     @Operation(
         summary = "Enviar invitaciones a un parche privado",

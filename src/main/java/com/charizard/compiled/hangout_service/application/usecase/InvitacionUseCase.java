@@ -3,7 +3,7 @@ package com.charizard.compiled.hangout_service.application.usecase;
 import com.charizard.compiled.hangout_service.application.dto.response.EnviarInvitacionResponse;
 import com.charizard.compiled.hangout_service.application.dto.response.ErrorResponse;
 import com.charizard.compiled.hangout_service.application.dto.response.InvitacionResponse;
-import com.charizard.compiled.hangout_service.application.service.InvitacionService;
+import com.charizard.compiled.hangout_service.domain.ports.in.InvitacionInputPort;
 import com.charizard.compiled.hangout_service.domain.events.InvitacionEnviadaEvent;
 import com.charizard.compiled.hangout_service.domain.exceptions.EstudianteYaEsMiembroException;
 import com.charizard.compiled.hangout_service.domain.exceptions.InvitacionDuplicadaException;
@@ -30,7 +30,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class InvitacionUseCase implements InvitacionService {
+public class InvitacionUseCase implements InvitacionInputPort {
 
     private final InvitacionRepositoryPort invitacionRepository;
     private final MemberRepositoryPort memberRepository;

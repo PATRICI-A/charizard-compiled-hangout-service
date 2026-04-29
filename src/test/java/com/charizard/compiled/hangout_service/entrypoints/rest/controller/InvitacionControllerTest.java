@@ -4,7 +4,7 @@ import com.charizard.compiled.hangout_service.application.dto.request.EnviarInvi
 import com.charizard.compiled.hangout_service.application.dto.response.EnviarInvitacionResponse;
 import com.charizard.compiled.hangout_service.application.dto.response.ErrorResponse;
 import com.charizard.compiled.hangout_service.application.dto.response.InvitacionResponse;
-import com.charizard.compiled.hangout_service.application.service.InvitacionService;
+import com.charizard.compiled.hangout_service.domain.ports.in.InvitacionInputPort;
 import com.charizard.compiled.hangout_service.domain.model.enums.EstadoInvitacion;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +33,7 @@ class InvitacionControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    private InvitacionService invitacionService;
+    private InvitacionInputPort invitacionService;
 
     @InjectMocks
     private InvitacionController invitacionController;
