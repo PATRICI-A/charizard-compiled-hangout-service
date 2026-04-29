@@ -11,13 +11,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ParcheRepository extends JpaRepository<ParcheEntity, Long> {
+public interface ParcheRepository extends JpaRepository<ParcheEntity, UUID> {
 
-    Optional<ParcheEntity> findByStatus(ParcheStatus status);
+    List<ParcheEntity> findByStatus(ParcheStatus status);
 
     List<ParcheEntity> findByCaptainId(UUID captainId);
 
-    Integer countMembersByParcheId(UUID parcheId);
-
     List<ParcheEntity> findByType(ParcheType type);
+
+    List<ParcheEntity> findByTypeAndStatus(ParcheType type, ParcheStatus status);
 }

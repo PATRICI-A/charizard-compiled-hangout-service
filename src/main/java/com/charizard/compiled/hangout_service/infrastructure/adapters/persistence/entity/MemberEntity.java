@@ -16,12 +16,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "members", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"parche_id", "estudiante_id"})
+        @UniqueConstraint(columnNames = {"parche_id", "student_id"})
 })
 public class MemberEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne
