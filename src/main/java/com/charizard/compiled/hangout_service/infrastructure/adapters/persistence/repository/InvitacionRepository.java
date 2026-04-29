@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.stereotype.Repository;
+
+@Repository
 public interface InvitacionRepository extends JpaRepository<InvitacionEntity, UUID> {
 
     Optional<InvitacionEntity> findByParcheIdAndEstudianteInvitadoId(UUID parcheId, UUID estudianteId);

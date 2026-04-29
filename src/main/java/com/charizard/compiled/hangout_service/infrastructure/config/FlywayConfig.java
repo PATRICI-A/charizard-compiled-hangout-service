@@ -6,10 +6,11 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
-@Configuration
+// TODO: Enable when using PostgreSQL in production. H2 doesn't support gen_random_uuid()
+// @Configuration
 public class FlywayConfig {
 
-    @Bean(initMethod = "migrate")
+    // @Bean(initMethod = "migrate")
     public Flyway flyway(DataSource dataSource) {
         return Flyway.configure()
                 .dataSource(dataSource)
