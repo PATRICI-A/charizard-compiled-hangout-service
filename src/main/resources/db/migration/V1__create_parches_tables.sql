@@ -9,7 +9,7 @@ CREATE TABLE parches (
                          description     VARCHAR(500),
                          place           VARCHAR(200)    NOT NULL,
                          type            VARCHAR(20)     NOT NULL,
-                         maximum_quota   INTEGER         NOT NULL CHECK (maximum_quota >= 2 AND maximum_quota <= 50),
+                         maximum_quota   INTEGER         NOT NULL CHECK (maximum_quota >= 2 AND maximum_quota <= 30),
                          date_realization TIMESTAMP      NOT NULL,
                          status          VARCHAR(20)     NOT NULL DEFAULT 'ACTIVE',
                          captain_id      UUID            NOT NULL,

@@ -1,16 +1,16 @@
 package com.charizard.compiled.hangout_service.entrypoints.advice;
 
-import com.charizard.compiled.hangout_service.domain.exceptions.AccessDeniedException;
-import com.charizard.compiled.hangout_service.domain.exceptions.MaximumCapacityReachedException;
-import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundException;
+import com.charizard.compiled.hangout_service.domain.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.stream.Collectors;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -61,4 +61,28 @@ public class GlobalExceptionHandler {
     }
 
     public record ErrorResponse(int status, String message) {}
+
+    @ExceptionHandler(EstudianteYaEsMiembroException.class)
+    public ResponseEntity<Map<String, String>> handleEstudianteYaEsMiembro(EstudianteYaEsMiembroException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvitacionDuplicadaException.class)
+    public ResponseEntity<Map<String, String>> handleInvitacionDuplicada(InvitacionDuplicadaException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, String>> handleConstraintViolation(ConstraintViolationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode())
+                .body(Map.of("error", ex.getReason()));
+    }
 }
