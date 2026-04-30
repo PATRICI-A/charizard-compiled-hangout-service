@@ -26,5 +26,4 @@ public interface MemberRepository extends JpaRepository<MemberEntity, UUID> {
     int countParchesActivosByStudentIdAndStatus(@Param("studentId") UUID studentId,
                                                 @Param("status") ParcheStatus status);
 
-    int countByParcheId(UUID parcheId);
 }

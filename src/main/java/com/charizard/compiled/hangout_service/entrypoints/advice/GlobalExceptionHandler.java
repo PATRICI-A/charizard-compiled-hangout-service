@@ -16,11 +16,7 @@ import java.util.Map;
  * Global exception handler for the invitations module.
  * Converts domain exceptions into appropriate HTTP status codes.
  */
-@ControllerAdvice
-public class GlobalExceptionHandler {
 
-    @ExceptionHandler(InvitationAlreadyRespondedException.class)
-    public ResponseEntity<Map<String, String>> handleInvitationAlreadyResponded(InvitationAlreadyRespondedException ex) {
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -70,12 +66,6 @@ public class GlobalExceptionHandler {
     }
 
     public record ErrorResponse(int status, String message) {}
-
-    @ExceptionHandler(EstudianteYaEsMiembroException.class)
-    public ResponseEntity<Map<String, String>> handleEstudianteYaEsMiembro(EstudianteYaEsMiembroException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", ex.getMessage()));
-    }
 
     @ExceptionHandler(MaxHangoutsReachedException.class)
     public ResponseEntity<Map<String, String>> handleMaxHangoutsReached(MaxHangoutsReachedException ex) {
