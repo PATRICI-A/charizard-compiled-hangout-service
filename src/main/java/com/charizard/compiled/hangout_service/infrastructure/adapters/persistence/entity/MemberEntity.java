@@ -16,9 +16,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-    @Table(name = "members", uniqueConstraints = {
-            @UniqueConstraint(columnNames = {"parche_id", "student_id"})
-    })
+@Table(name = "members", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"parche_id", "student_id"})
+})
 public class MemberEntity {
 
     @Id
