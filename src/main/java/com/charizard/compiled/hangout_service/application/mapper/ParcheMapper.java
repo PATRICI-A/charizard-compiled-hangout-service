@@ -16,9 +16,9 @@ public interface ParcheMapper {
     ParcheResponse toResponse(Parche parche, int memberCount);
 
     @Mapping(source = "captainId", target = "captainId")
-    @Mapping(target = "id", expression = "java(java.util.UUID.randomUUID())")
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", expression = "java(ParcheStatus.ACTIVE)")
-    @Mapping(target = "creationDate", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "creationDate", ignore = true)
     @Mapping(target = "dateRealization", expression = "java(java.time.LocalDateTime.of(request.getDate(), request.getHour()))")
     @Mapping(target = "members", ignore = true)
     Parche toDomain(CreateParcheRequest request, UUID captainId);
