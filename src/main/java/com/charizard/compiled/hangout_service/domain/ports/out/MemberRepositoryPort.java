@@ -11,4 +11,5 @@ public interface MemberRepositoryPort {
     int countParchesActivosByStudentId(UUID studentId);
     int countByParcheId(UUID parcheId);
     Member save(Member member);
+    void deleteByParcheIdAndStudentId(UUID parcheId, UUID studentId);
 }

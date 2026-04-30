@@ -42,4 +42,9 @@ public class MemberRepositoryAdapter implements MemberRepositoryPort {
     public Member save(Member member) {
         return mapper.toDomain(memberRepository.save(mapper.toEntity(member)));
     }
+
+    @Override
+    public void deleteByParcheIdAndStudentId(UUID parcheId, UUID studentId) {
+        memberRepository.deleteByParcheIdAndStudentId(parcheId, studentId);
+    }
 }
