@@ -1,7 +1,11 @@
 package com.charizard.compiled.hangout_service.application.dto.request;
 
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,14 +30,14 @@ public class CreateParcheRequest {
     private String place;
 
     @NotNull(message = "Date is required")
-    @Future(message = "Date must be in the future")
+    @FutureOrPresent(message = "Date must be today or in the future")
     private LocalDate date;
 
     @NotNull(message = "Hour is required")
     private LocalTime hour;
 
     @Min(value = 2, message = "Maximum quota must be at least 2")
-    @Max(value = 50, message = "Maximum quota cannot exceed 50")
+    @Max(value = 30, message = "Maximum quota cannot exceed 30")
     private int maximumQuota;
 
     @NotNull(message = "Type is required")
