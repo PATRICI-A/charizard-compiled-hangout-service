@@ -1,6 +1,6 @@
 package com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity;
 
-import com.charizard.compiled.hangout_service.domain.model.enums.EstadoInvitacion;
+import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +19,7 @@ import java.util.UUID;
 @Table(name = "invitaciones", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"parche_id", "estudiante_invitado_id"})
 })
-public class InvitacionEntity {
+public class InvitationEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,24 +29,24 @@ public class InvitacionEntity {
     private UUID parcheId;
 
     @Column(name = "capitan_id", nullable = false)
-    private UUID capitanId;
+    private UUID captainId;
 
     @Column(name = "estudiante_invitado_id", nullable = false)
-    private UUID estudianteInvitadoId;
+    private UUID invitedStudentId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private EstadoInvitacion estado = EstadoInvitacion.PENDIENTE;
+    private InvitationStatus status = InvitationStatus.PENDING;
 
     @Column(name = "fecha_envio", nullable = false)
-    private LocalDateTime fechaEnvio;
+    private LocalDateTime sentAt;
 
     @Column(name = "fecha_respuesta")
-    private LocalDateTime fechaRespuesta;
+    private LocalDateTime respondedAt;
 
     @PrePersist
     public void prePersist() {
-        this.fechaEnvio = LocalDateTime.now();
+        this.sentAt = LocalDateTime.now();
     }
 }

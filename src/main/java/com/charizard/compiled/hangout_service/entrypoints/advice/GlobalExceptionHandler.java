@@ -12,6 +12,15 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.stream.Collectors;
 import java.util.Map;
 
+/**
+ * Global exception handler for the invitations module.
+ * Converts domain exceptions into appropriate HTTP status codes.
+ */
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvitationAlreadyRespondedException.class)
+    public ResponseEntity<Map<String, String>> handleInvitationAlreadyResponded(InvitationAlreadyRespondedException ex) {
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -68,8 +77,20 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler(InvitacionDuplicadaException.class)
-    public ResponseEntity<Map<String, String>> handleInvitacionDuplicada(InvitacionDuplicadaException ex) {
+    @ExceptionHandler(MaxHangoutsReachedException.class)
+    public ResponseEntity<Map<String, String>> handleMaxHangoutsReached(MaxHangoutsReachedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(StudentAlreadyMemberException.class)
+    public ResponseEntity<Map<String, String>> handleStudentAlreadyMember(StudentAlreadyMemberException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicateInvitationException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateInvitation(DuplicateInvitationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
