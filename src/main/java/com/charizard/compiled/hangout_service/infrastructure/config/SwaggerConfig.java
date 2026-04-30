@@ -15,7 +15,7 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Hangout Service API")
-                        .description("API para gestionar parches (hangouts) e invitaciones")
+                        .description("API for managing patches (hangouts) and invitations")
                         .version("v1.0.0")
                         .contact(new Contact()
                                 .name("Charizard Team")

@@ -12,6 +12,7 @@ import java.util.UUID;
 @Repository
 public interface MemberRepository extends JpaRepository<MemberEntity, UUID> {
 
+    int countByParcheId(UUID parcheId);
     @Query("SELECT COUNT(m) > 0 FROM MemberEntity m WHERE m.parche.id = :parcheId AND m.studentId = :studentId")
     boolean existsByParcheIdAndStudentId(@Param("parcheId") UUID parcheId, @Param("studentId") UUID studentId);
 
