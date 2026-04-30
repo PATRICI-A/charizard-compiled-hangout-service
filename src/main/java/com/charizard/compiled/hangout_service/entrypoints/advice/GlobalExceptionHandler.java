@@ -3,6 +3,8 @@ package com.charizard.compiled.hangout_service.entrypoints.advice;
 import com.charizard.compiled.hangout_service.domain.exceptions.ConstraintViolationException;
 import com.charizard.compiled.hangout_service.domain.exceptions.EstudianteYaEsMiembroException;
 import com.charizard.compiled.hangout_service.domain.exceptions.InvitacionDuplicadaException;
+import com.charizard.compiled.hangout_service.domain.exceptions.InvitacionYaRespondidaException;
+import com.charizard.compiled.hangout_service.domain.exceptions.LimiteParchesAlcanzadoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,6 +19,18 @@ import java.util.Map;
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvitacionYaRespondidaException.class)
+    public ResponseEntity<Map<String, String>> handleInvitacionYaRespondida(InvitacionYaRespondidaException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(LimiteParchesAlcanzadoException.class)
+    public ResponseEntity<Map<String, String>> handleLimiteParchesAlcanzado(LimiteParchesAlcanzadoException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
 
     @ExceptionHandler(EstudianteYaEsMiembroException.class)
     public ResponseEntity<Map<String, String>> handleEstudianteYaEsMiembro(EstudianteYaEsMiembroException ex) {

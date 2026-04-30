@@ -1,6 +1,7 @@
 package com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository;
 
 import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
+import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.MemberEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +21,9 @@ public interface MemberRepository extends JpaRepository<MemberEntity, UUID> {
                                                        @Param("studentId") UUID studentId,
                                                        @Param("role") MemberRole role);
 
+    @Query("SELECT COUNT(m) FROM MemberEntity m WHERE m.studentId = :studentId AND m.parche.status = :status")
+    int countParchesActivosByStudentIdAndStatus(@Param("studentId") UUID studentId,
+                                                @Param("status") ParcheStatus status);
+
+    int countByParcheId(UUID parcheId);
 }

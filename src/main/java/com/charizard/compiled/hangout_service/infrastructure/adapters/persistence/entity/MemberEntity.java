@@ -4,6 +4,7 @@ import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,8 +25,11 @@ public class MemberEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "parche_id", nullable = false, insertable = false, updatable = false)
+    @Column(name = "parche_id", nullable = false)
+    private UUID parcheId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parche_id", insertable = false, updatable = false)
     private ParcheEntity parche;
 
     @Column(name = "student_id", nullable = false)

@@ -21,4 +21,6 @@ public class InvitacionResponse {
     private EstadoInvitacion estado;
     @Schema(description = "Fecha y hora de envío de la invitación")
     private LocalDateTime fechaEnvio;
+    @Schema(description = "Fecha y hora de respuesta de la invitación")
+    private LocalDateTime fechaRespuesta;
 }

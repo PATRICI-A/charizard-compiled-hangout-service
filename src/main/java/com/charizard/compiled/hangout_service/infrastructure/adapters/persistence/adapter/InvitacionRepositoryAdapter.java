@@ -84,4 +84,9 @@ public class InvitacionRepositoryAdapter implements InvitacionRepositoryPort {
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Optional<Invitacion> findById(UUID invitacionId) {
+        return invitacionRepository.findById(invitacionId).map(mapper::toDomain);
+    }
 }

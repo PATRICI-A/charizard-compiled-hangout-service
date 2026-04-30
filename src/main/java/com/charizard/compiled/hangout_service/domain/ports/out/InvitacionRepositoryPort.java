@@ -45,4 +45,6 @@ public interface InvitacionRepositoryPort {
      * @return lista de invitaciones del parche
      */
     List<Invitacion> findByParcheId(UUID parcheId);
+
+    Optional<Invitacion> findById(UUID invitacionId);
 }
