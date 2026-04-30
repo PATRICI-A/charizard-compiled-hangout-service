@@ -9,6 +9,7 @@ import com.charizard.compiled.hangout_service.infrastructure.adapters.persistenc
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +29,11 @@ public class ParcheRepositoryAdapter implements ParcheRepositoryPort {
     @Override
     public Parche save(Parche parche) {
         return mapper.toDomain(parcheRepository.save(mapper.toEntity(parche)));
+    }
+
+    @Override
+    public List<Parche> findArchivables(ParcheStatus status, LocalDateTime threshold) {
+        return parcheRepository.findArchivables(status, threshold).stream().map(mapper::toDomain).toList();
     }
 
     @Override

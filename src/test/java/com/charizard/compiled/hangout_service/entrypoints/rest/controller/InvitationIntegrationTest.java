@@ -14,12 +14,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,10 +31,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
 class InvitationIntegrationTest {
 
     @Autowired
+    private WebApplicationContext context;
+
     private MockMvc mockMvc;
 
     @Autowired
@@ -50,15 +54,20 @@ class InvitationIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
         captainId = UUID.randomUUID();
         studentId = UUID.randomUUID();
 
+        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
         ParcheEntity parche = ParcheEntity.builder()
                 .name("Parche test")
                 .description("Test description")
+                .place("Test place")
                 .type(ParcheType.PRIVATE)
                 .maximumQuota(10)
-                .dateRealization(LocalDateTime.now().plusDays(1))
+                .date(dateRealization.toLocalDate())
+                .hour(dateRealization.toLocalTime())
+                .dateRealization(dateRealization)
                 .status(ParcheStatus.ACTIVE)
                 .captainId(captainId)
                 .build();
@@ -129,12 +138,16 @@ class InvitationIntegrationTest {
 
     @Test
     void accept_hangoutFull_returns409() throws Exception {
+        LocalDateTime fullDate = LocalDateTime.now().plusDays(1);
         ParcheEntity fullParche = ParcheEntity.builder()
                 .name("Full hangout")
                 .description("No capacity")
+                .place("Full place")
                 .type(ParcheType.PRIVATE)
                 .maximumQuota(2)
-                .dateRealization(LocalDateTime.now().plusDays(1))
+                .date(fullDate.toLocalDate())
+                .hour(fullDate.toLocalTime())
+                .dateRealization(fullDate)
                 .status(ParcheStatus.ACTIVE)
                 .captainId(captainId)
                 .build();

@@ -31,7 +31,7 @@ public class CreateParcheUseCase implements CreateParcheInputPort {
     @Override
     public ParcheResponse createParche(CreateParcheRequest request, UUID captainId) {
         if (memberRepository.countParchesActivosByStudentId(captainId) >= MAX_ACTIVE_HANGOUTS) {
-            throw new MaxHangoutsReachedException("Student has reached the maximum of 5 active hangouts");
+            throw new MaxHangoutsReachedException();
         }
 
         Parche saved = parcheRepository.save(parcheMapper.toDomain(request, captainId));
