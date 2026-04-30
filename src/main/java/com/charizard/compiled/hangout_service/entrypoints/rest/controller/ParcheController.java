@@ -3,9 +3,12 @@ package com.charizard.compiled.hangout_service.entrypoints.rest.controller;
 import com.charizard.compiled.hangout_service.application.dto.request.CreateParcheRequest;
 import com.charizard.compiled.hangout_service.application.dto.request.UpdateParcheRequest;
 import com.charizard.compiled.hangout_service.application.dto.response.ParcheResponse;
-import com.charizard.compiled.hangout_service.application.service.ParcheService;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
+import com.charizard.compiled.hangout_service.domain.ports.in.CloseParcheInputPort;
+import com.charizard.compiled.hangout_service.domain.ports.in.CreateParcheInputPort;
+import com.charizard.compiled.hangout_service.domain.ports.in.GetParcheInputPort;
+import com.charizard.compiled.hangout_service.domain.ports.in.UpdateParcheInputPort;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -25,19 +28,23 @@ import java.util.UUID;
 @Tag(name = "Parche", description = "Parche Management")
 public class ParcheController {
 
-    private final ParcheService parcheService;
+    private final CreateParcheInputPort createParcheUseCase;
+    private final GetParcheInputPort getParcheUseCase;
+    private final UpdateParcheInputPort updateParcheUseCase;
+    private final CloseParcheInputPort closeParcheUseCase;
 
     @PostMapping
     @Operation(summary = "Create parche")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Parche created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request body")
+            @ApiResponse(responseCode = "400", description = "Invalid request body"),
+            @ApiResponse(responseCode = "409", description = "Student reached max active hangouts")
     })
     public ResponseEntity<ParcheResponse> createParche(
             @Valid @RequestBody CreateParcheRequest req,
             @RequestHeader("X-User-Id") UUID captainId) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(parcheService.createParche(req, captainId));
+                .body(createParcheUseCase.createParche(req, captainId));
     }
 
     @GetMapping
@@ -48,7 +55,7 @@ public class ParcheController {
     public ResponseEntity<List<ParcheResponse>> getParches(
             @RequestParam(required = false) ParcheType tipo,
             @RequestParam(required = false) ParcheStatus estado) {
-        return ResponseEntity.ok(parcheService.getParches(tipo, estado));
+        return ResponseEntity.ok(getParcheUseCase.getParches(tipo, estado));
     }
 
     @GetMapping("/{id}")
@@ -58,7 +65,7 @@ public class ParcheController {
             @ApiResponse(responseCode = "404", description = "Parche not found")
     })
     public ResponseEntity<ParcheResponse> getParcheById(@PathVariable UUID id) {
-        return ResponseEntity.ok(parcheService.getParcheById(id));
+        return ResponseEntity.ok(getParcheUseCase.getParcheById(id));
     }
 
     @PatchMapping("/{id}")
@@ -72,7 +79,7 @@ public class ParcheController {
             @PathVariable UUID id,
             @Valid @RequestBody UpdateParcheRequest req,
             @RequestHeader("X-User-Id") UUID solicitanteId) {
-        return ResponseEntity.ok(parcheService.updateParche(id, req, solicitanteId));
+        return ResponseEntity.ok(updateParcheUseCase.updateParche(id, req, solicitanteId));
     }
 
     @DeleteMapping("/{id}")
@@ -85,7 +92,7 @@ public class ParcheController {
     public ResponseEntity<Void> deleteParche(
             @PathVariable UUID id,
             @RequestHeader("X-User-Id") UUID captainId) {
-        parcheService.deleteParche(id, captainId);
+        closeParcheUseCase.closeParche(id, captainId);
         return ResponseEntity.noContent().build();
     }
 }

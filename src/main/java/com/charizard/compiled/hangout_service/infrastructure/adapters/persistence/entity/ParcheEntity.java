@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +41,12 @@ public class ParcheEntity {
 
     @Enumerated(EnumType.STRING)
     private ParcheType type;
+
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @Column(nullable = false)
+    private LocalTime hour;
 
     @Column(nullable = false)
     @Min(2) @Max(30)

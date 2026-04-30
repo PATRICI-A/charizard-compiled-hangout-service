@@ -10,4 +10,7 @@ public interface ParcheEntityMapper {
 
     @Mapping(target = "members", ignore = true)
     Parche toDomain(ParcheEntity entity);
+
+    @Mapping(target = "members", ignore = true)
+    ParcheEntity toEntity(Parche parche);
 }
