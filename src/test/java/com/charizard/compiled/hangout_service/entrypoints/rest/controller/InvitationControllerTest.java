@@ -1,10 +1,8 @@
 package com.charizard.compiled.hangout_service.entrypoints.rest.controller;
 
-import com.charizard.compiled.hangout_service.application.dto.request.SendInvitationRequest;
-import com.charizard.compiled.hangout_service.application.dto.response.SendInvitationResponse;
-import com.charizard.compiled.hangout_service.application.dto.response.ErrorResponse;
 import com.charizard.compiled.hangout_service.application.dto.response.InvitationResponse;
 import com.charizard.compiled.hangout_service.domain.ports.in.InvitationInputPort;
+import com.charizard.compiled.hangout_service.domain.ports.in.RespondInvitationInputPort;
 import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -35,14 +32,16 @@ class InvitationControllerTest {
     @Mock
     private InvitationInputPort invitationService;
 
+    @Mock
+    private RespondInvitationInputPort respondInvitationService;
+
     @InjectMocks
     private InvitationController invitationController;
 
     private ObjectMapper objectMapper;
     private UUID parcheId;
     private UUID captainId;
-    private UUID student1Id;
-    private UUID student2Id;
+    private UUID studentId;
 
     @BeforeEach
     void setUp() {
@@ -51,119 +50,67 @@ class InvitationControllerTest {
         objectMapper.findAndRegisterModules();
         parcheId = UUID.randomUUID();
         captainId = UUID.randomUUID();
-        student1Id = UUID.randomUUID();
-        student2Id = UUID.randomUUID();
+        studentId = UUID.randomUUID();
     }
 
     @Test
-    void enviar_flujoExitoso_retorna201() throws Exception {
-        InvitationResponse inv1 = InvitationResponse.builder()
+    void sendInvitation_successFlow_returns201() throws Exception {
+        InvitationResponse response = InvitationResponse.builder()
                 .id(UUID.randomUUID())
                 .parcheId(parcheId)
-                .invitedStudentId(student1Id)
+                .invitedStudentId(studentId)
                 .status(InvitationStatus.PENDING)
                 .sentAt(LocalDateTime.now())
                 .build();
 
-        InvitationResponse inv2 = InvitationResponse.builder()
-                .id(UUID.randomUUID())
-                .parcheId(parcheId)
-                .invitedStudentId(student2Id)
-                .status(InvitationStatus.PENDING)
-                .sentAt(LocalDateTime.now())
-                .build();
-
-        SendInvitationResponse response = SendInvitationResponse.builder()
-                .createdInvitations(List.of(inv1, inv2))
-                .errors(List.of())
-                .build();
-
-        when(invitationService.sendInvitation(eq(parcheId), eq(captainId), any()))
+        when(invitationService.sendInvitation(eq(parcheId), eq(captainId), eq(studentId)))
                 .thenReturn(response);
 
-        SendInvitationRequest request = new SendInvitationRequest();
-        request.setStudentIds(List.of(student1Id, student2Id));
-
-        mockMvc.perform(post("/api/v1/parches/{parcheId}/invitations", parcheId)
+        mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", captainId.toString()))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.createdInvitations").isArray())
-                .andExpect(jsonPath("$.createdInvitations.length()").value(2))
-                .andExpect(jsonPath("$.createdInvitations[0].status").value("PENDING"));
+                .andExpect(jsonPath("$.status").value("PENDING"))
+                .andExpect(jsonPath("$.invitedStudentId").value(studentId.toString()));
     }
 
     @Test
-    void enviar_estudianteYaEsMiembro_retorna409() throws Exception {
-        ErrorResponse error = ErrorResponse.builder()
-                .studentId(student1Id)
-                .error("El estudiante ya es miembro del parche")
-                .status(409)
-                .build();
-
-        SendInvitationResponse response = SendInvitationResponse.builder()
-                .createdInvitations(List.of())
-                .errors(List.of(error))
-                .build();
-
-        when(invitationService.sendInvitation(eq(parcheId), eq(captainId), any()))
-                .thenReturn(response);
-
-        SendInvitationRequest request = new SendInvitationRequest();
-        request.setStudentIds(List.of(student1Id));
-
-        mockMvc.perform(post("/api/v1/parches/{parcheId}/invitations", parcheId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .header("X-User-Id", captainId.toString()))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.errors").isArray())
-                .andExpect(jsonPath("$.errors[0].status").value(409));
-    }
-
-    @Test
-    void enviar_invitacionDuplicada_retorna409() throws Exception {
-        ErrorResponse error = ErrorResponse.builder()
-                .studentId(student1Id)
-                .error("Ya existe una invitación pendiente para este estudiante")
-                .status(409)
-                .build();
-
-        SendInvitationResponse response = SendInvitationResponse.builder()
-                .createdInvitations(List.of())
-                .errors(List.of(error))
-                .build();
-
-        when(invitationService.sendInvitation(eq(parcheId), eq(captainId), any()))
-                .thenReturn(response);
-
-        SendInvitationRequest request = new SendInvitationRequest();
-        request.setStudentIds(List.of(student1Id));
-
-        mockMvc.perform(post("/api/v1/parches/{parcheId}/invitations", parcheId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .header("X-User-Id", captainId.toString()))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.errors[0].status").value(409));
-    }
-
-    @Test
-    void enviar_noEsCapitan_retorna403() throws Exception {
-        when(invitationService.sendInvitation(eq(parcheId), eq(captainId), any()))
+    void sendInvitation_notCaptain_returns403() throws Exception {
+        when(invitationService.sendInvitation(eq(parcheId), eq(captainId), eq(studentId)))
                 .thenThrow(new org.springframework.web.server.ResponseStatusException(
                         org.springframework.http.HttpStatus.FORBIDDEN,
-                        "El usuario no es capitán de este parche"
+                        "User is not the captain of this hangout"
                 ));
 
-        SendInvitationRequest request = new SendInvitationRequest();
-        request.setStudentIds(List.of(student1Id));
-
-        mockMvc.perform(post("/api/v1/parches/{parcheId}/invitations", parcheId)
+        mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", captainId.toString()))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void sendInvitation_studentAlreadyMember_returns409() throws Exception {
+        when(invitationService.sendInvitation(any(), any(), any()))
+                .thenThrow(new com.charizard.compiled.hangout_service.domain.exceptions.StudentAlreadyMemberException(
+                        "Student is already a member of this hangout"
+                ));
+
+        mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-User-Id", captainId.toString()))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void sendInvitation_duplicateInvitation_returns409() throws Exception {
+        when(invitationService.sendInvitation(any(), any(), any()))
+                .thenThrow(new com.charizard.compiled.hangout_service.domain.exceptions.DuplicateInvitationException(
+                        "A pending invitation already exists for this student"
+                ));
+
+        mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-User-Id", captainId.toString()))
+                .andExpect(status().isConflict());
     }
 }

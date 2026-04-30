@@ -34,16 +34,21 @@ public class RespondInvitationUseCase implements RespondInvitationInputPort {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public InvitationResponse respondInvitation(UUID invitationId, UUID studentId, InvitationStatus answer) {
-        if (answer == InvitationStatus.PENDING) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Response status cannot be PENDING");
-        }
+    public InvitationResponse acceptInvitation(UUID invitationId, UUID studentId) {
+        return processResponse(invitationId, studentId, InvitationStatus.ACCEPTED);
+    }
 
+    @Override
+    public InvitationResponse rejectInvitation(UUID invitationId, UUID studentId) {
+        return processResponse(invitationId, studentId, InvitationStatus.REJECTED);
+    }
+
+    private InvitationResponse processResponse(UUID invitationId, UUID studentId, InvitationStatus answer) {
         Invitation invitation = invitationRepository.findById(invitationId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitación no encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found"));
 
         if (!invitation.getInvitedStudentId().equals(studentId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No eres el invitado de esta invitación");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the invited student");
         }
 
         if (invitation.getStatus() != InvitationStatus.PENDING) {
@@ -52,11 +57,11 @@ public class RespondInvitationUseCase implements RespondInvitationInputPort {
 
         if (answer == InvitationStatus.ACCEPTED) {
             Parche parche = parcheRepository.findById(invitation.getParcheId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Parche no encontrado"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hangout not found"));
 
             int currentMembers = memberRepository.countByParcheId(invitation.getParcheId());
             if (currentMembers >= parche.getMaximumQuota()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "El parche ya no tiene cupo disponible");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Hangout is already full");
             }
 
             if (memberRepository.countParchesActivosByStudentId(studentId) >= 5) {

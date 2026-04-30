@@ -1,6 +1,5 @@
 package com.charizard.compiled.hangout_service.entrypoints.rest.controller;
 
-import com.charizard.compiled.hangout_service.application.dto.request.RespondInvitationRequest;
 import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
@@ -11,14 +10,12 @@ import com.charizard.compiled.hangout_service.infrastructure.adapters.persistenc
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.InvitationRepository;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.MemberRepository;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.ParcheRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -26,7 +23,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,9 +33,6 @@ class InvitationIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private ParcheRepository parcheRepository;
@@ -61,7 +55,7 @@ class InvitationIntegrationTest {
 
         ParcheEntity parche = ParcheEntity.builder()
                 .name("Parche test")
-                .description("Descripción test")
+                .description("Test description")
                 .type(ParcheType.PRIVATE)
                 .maximumQuota(10)
                 .dateRealization(LocalDateTime.now().plusDays(1))
@@ -94,13 +88,8 @@ class InvitationIntegrationTest {
     }
 
     @Test
-    void aceptar_flujoExitoso_creaMembresia() throws Exception {
-        RespondInvitationRequest request = new RespondInvitationRequest();
-        request.setAnswer(InvitationStatus.ACCEPTED);
-
-        mockMvc.perform(patch("/api/v1/invitations/{id}", invitationId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
+    void accept_successFlow_createsMembership() throws Exception {
+        mockMvc.perform(post("/api/v1/invitaciones/{id}/aceptar", invitationId)
                         .header("X-User-Id", studentId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("ACCEPTED"));
@@ -109,13 +98,8 @@ class InvitationIntegrationTest {
     }
 
     @Test
-    void rechazar_flujoExitoso_noCreaMiembro() throws Exception {
-        RespondInvitationRequest request = new RespondInvitationRequest();
-        request.setAnswer(InvitationStatus.REJECTED);
-
-        mockMvc.perform(patch("/api/v1/invitations/{id}", invitationId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
+    void reject_successFlow_doesNotCreateMember() throws Exception {
+        mockMvc.perform(post("/api/v1/invitaciones/{id}/rechazar", invitationId)
                         .header("X-User-Id", studentId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("REJECTED"));
@@ -124,52 +108,40 @@ class InvitationIntegrationTest {
     }
 
     @Test
-    void responder_invitacionYaRespondida_retorna409() throws Exception {
+    void respond_invitationAlreadyResponded_returns409() throws Exception {
         InvitationEntity alreadyResponded = invitationRepository.findById(invitationId).get();
         alreadyResponded.setStatus(InvitationStatus.ACCEPTED);
         invitationRepository.save(alreadyResponded);
 
-        RespondInvitationRequest request = new RespondInvitationRequest();
-        request.setAnswer(InvitationStatus.REJECTED);
-
-        mockMvc.perform(patch("/api/v1/invitations/{id}", invitationId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
+        mockMvc.perform(post("/api/v1/invitaciones/{id}/rechazar", invitationId)
                         .header("X-User-Id", studentId.toString()))
                 .andExpect(status().isConflict());
     }
 
     @Test
-    void responder_noEsElInvitado_retorna403() throws Exception {
-        RespondInvitationRequest request = new RespondInvitationRequest();
-        request.setAnswer(InvitationStatus.ACCEPTED);
-
+    void respond_notTheInvitedStudent_returns403() throws Exception {
         UUID otherStudent = UUID.randomUUID();
 
-        mockMvc.perform(patch("/api/v1/invitations/{id}", invitationId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
+        mockMvc.perform(post("/api/v1/invitaciones/{id}/aceptar", invitationId)
                         .header("X-User-Id", otherStudent.toString()))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    void aceptar_cupoLleno_retorna409() throws Exception {
-        ParcheEntity parcheConCupoMinimo = ParcheEntity.builder()
-                .name("Parche lleno")
-                .description("Sin cupo")
+    void accept_hangoutFull_returns409() throws Exception {
+        ParcheEntity fullParche = ParcheEntity.builder()
+                .name("Full hangout")
+                .description("No capacity")
                 .type(ParcheType.PRIVATE)
                 .maximumQuota(2)
                 .dateRealization(LocalDateTime.now().plusDays(1))
                 .status(ParcheStatus.ACTIVE)
                 .captainId(captainId)
                 .build();
-        UUID parcheFullId = parcheRepository.save(parcheConCupoMinimo).getId();
+        UUID parcheFullId = parcheRepository.save(fullParche).getId();
 
-        MemberEntity m1 = MemberEntity.builder().parcheId(parcheFullId).studentId(UUID.randomUUID()).memberRole(MemberRole.CAPTAIN).build();
-        MemberEntity m2 = MemberEntity.builder().parcheId(parcheFullId).studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build();
-        memberRepository.save(m1);
-        memberRepository.save(m2);
+        memberRepository.save(MemberEntity.builder().parcheId(parcheFullId).studentId(UUID.randomUUID()).memberRole(MemberRole.CAPTAIN).build());
+        memberRepository.save(MemberEntity.builder().parcheId(parcheFullId).studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build());
 
         UUID otherStudent = UUID.randomUUID();
         InvitationEntity invFull = InvitationEntity.builder()
@@ -180,12 +152,7 @@ class InvitationIntegrationTest {
                 .build();
         UUID invFullId = invitationRepository.save(invFull).getId();
 
-        RespondInvitationRequest request = new RespondInvitationRequest();
-        request.setAnswer(InvitationStatus.ACCEPTED);
-
-        mockMvc.perform(patch("/api/v1/invitations/{id}", invFullId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
+        mockMvc.perform(post("/api/v1/invitaciones/{id}/aceptar", invFullId)
                         .header("X-User-Id", otherStudent.toString()))
                 .andExpect(status().isConflict());
     }
