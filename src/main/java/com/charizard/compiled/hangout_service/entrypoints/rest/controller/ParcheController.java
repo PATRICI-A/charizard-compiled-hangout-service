@@ -6,6 +6,8 @@ import com.charizard.compiled.hangout_service.application.dto.response.ParcheRes
 import com.charizard.compiled.hangout_service.application.service.ParcheService;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,43 +20,49 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/parches")
 @RequiredArgsConstructor
+@Tag(name = "Parche", description = "Parche Management")
 public class ParcheController {
 
     private final ParcheService parcheService;
 
     @PostMapping
-    public ResponseEntity<ParcheResponse> crearParche(
+    @Operation(summary = "Create parche")
+    public ResponseEntity<ParcheResponse> createParche(
             @Valid @RequestBody CreateParcheRequest req,
             @RequestHeader("X-User-Id") UUID captainId) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(parcheService.crearParche(req, captainId));
+                .body(parcheService.createParche(req, captainId));
     }
 
     @GetMapping
-    public ResponseEntity<List<ParcheResponse>> obtenerParches(
+    @Operation(summary = "Get all Parches")
+    public ResponseEntity<List<ParcheResponse>> getParches(
             @RequestParam(required = false) ParcheType tipo,
             @RequestParam(required = false) ParcheStatus estado) {
-        return ResponseEntity.ok(parcheService.obtenerParches(tipo, estado));
+        return ResponseEntity.ok(parcheService.getParches(tipo, estado));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ParcheResponse> obtenerParchePorId(@PathVariable UUID id) {
-        return ResponseEntity.ok(parcheService.obtenerParchePorId(id));
+    @Operation(summary = "Get parches by ID")
+    public ResponseEntity<ParcheResponse> getParcheById(@PathVariable UUID id) {
+        return ResponseEntity.ok(parcheService.getParcheById(id));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ParcheResponse> actualizarParche(
+    @Operation(summary = "Update parche")
+    public ResponseEntity<ParcheResponse> updateParche(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateParcheRequest req,
             @RequestHeader("X-User-Id") UUID solicitanteId) {
-        return ResponseEntity.ok(parcheService.actualizarParche(id, req, solicitanteId));
+        return ResponseEntity.ok(parcheService.updateParche(id, req, solicitanteId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarParche(
+    @Operation(summary = "Delete parche")
+    public ResponseEntity<Void> deleteParche(
             @PathVariable UUID id,
             @RequestHeader("X-User-Id") UUID captainId) {
-        parcheService.eliminarParche(id, captainId);
+        parcheService.deleteParche(id, captainId);
         return ResponseEntity.noContent().build();
     }
 }

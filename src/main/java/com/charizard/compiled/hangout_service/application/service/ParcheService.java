@@ -32,7 +32,7 @@ public class ParcheService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public ParcheResponse crearParche(CreateParcheRequest req, UUID captainId) {
+    public ParcheResponse createParche(CreateParcheRequest req, UUID captainId) {
         ParcheEntity parche = ParcheEntity.builder()
                 .name(req.getName())
                 .description(req.getDescription())
@@ -58,7 +58,7 @@ public class ParcheService {
     }
 
     @Transactional(readOnly = true)
-    public List<ParcheResponse> obtenerParches(ParcheType tipo, ParcheStatus estado) {
+    public List<ParcheResponse> getParches(ParcheType tipo, ParcheStatus estado) {
         List<ParcheEntity> parches;
 
         if (tipo != null && estado != null) {
@@ -77,14 +77,14 @@ public class ParcheService {
     }
 
     @Transactional(readOnly = true)
-    public ParcheResponse obtenerParchePorId(UUID id) {
+    public ParcheResponse getParcheById(UUID id) {
         ParcheEntity parche = parcheRepository.findById(id)
                 .orElseThrow(() -> new ParcheNotFoundException("Parche not found with id: " + id));
         return toResponse(parche, memberRepository.countByParcheId(id));
     }
 
     @Transactional
-    public ParcheResponse actualizarParche(UUID id, UpdateParcheRequest req, UUID solicitanteId) {
+    public ParcheResponse updateParche(UUID id, UpdateParcheRequest req, UUID solicitanteId) {
         ParcheEntity parche = parcheRepository.findById(id)
                 .orElseThrow(() -> new ParcheNotFoundException("Parche not found with id: " + id));
 
@@ -115,7 +115,7 @@ public class ParcheService {
     }
 
     @Transactional
-    public void eliminarParche(UUID id, UUID captainId) {
+    public void deleteParche(UUID id, UUID captainId) {
         ParcheEntity parche = parcheRepository.findById(id)
                 .orElseThrow(() -> new ParcheNotFoundException("Parche not found with id: " + id));
 
