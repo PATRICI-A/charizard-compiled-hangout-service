@@ -25,7 +25,7 @@ public class MemberEntity {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "parche_id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "parche_id", nullable = false)
     private ParcheEntity parche;
 
     @Column(name = "student_id", nullable = false)

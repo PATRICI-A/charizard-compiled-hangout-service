@@ -7,6 +7,8 @@ import com.charizard.compiled.hangout_service.application.service.ParcheService;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,10 @@ public class ParcheController {
 
     @PostMapping
     @Operation(summary = "Create parche")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Parche created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request body")
+    })
     public ResponseEntity<ParcheResponse> createParche(
             @Valid @RequestBody CreateParcheRequest req,
             @RequestHeader("X-User-Id") UUID captainId) {
@@ -36,6 +42,9 @@ public class ParcheController {
 
     @GetMapping
     @Operation(summary = "Get all Parches")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "List of parches returned")
+    })
     public ResponseEntity<List<ParcheResponse>> getParches(
             @RequestParam(required = false) ParcheType tipo,
             @RequestParam(required = false) ParcheStatus estado) {
@@ -43,13 +52,22 @@ public class ParcheController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get parches by ID")
+    @Operation(summary = "Get parche by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Parche found"),
+            @ApiResponse(responseCode = "404", description = "Parche not found")
+    })
     public ResponseEntity<ParcheResponse> getParcheById(@PathVariable UUID id) {
         return ResponseEntity.ok(parcheService.getParcheById(id));
     }
 
     @PatchMapping("/{id}")
     @Operation(summary = "Update parche")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Parche updated"),
+            @ApiResponse(responseCode = "403", description = "Only captain can update"),
+            @ApiResponse(responseCode = "404", description = "Parche not found")
+    })
     public ResponseEntity<ParcheResponse> updateParche(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateParcheRequest req,
@@ -58,7 +76,12 @@ public class ParcheController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete parche")
+    @Operation(summary = "Delete parche (soft delete)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Parche archived"),
+            @ApiResponse(responseCode = "403", description = "Only captain can delete"),
+            @ApiResponse(responseCode = "404", description = "Parche not found")
+    })
     public ResponseEntity<Void> deleteParche(
             @PathVariable UUID id,
             @RequestHeader("X-User-Id") UUID captainId) {
