@@ -7,10 +7,10 @@ import java.util.UUID;
 
 @Getter
 @RequiredArgsConstructor
-public class InvitacionAceptadaEvent {
+public class InvitationAcceptedEvent {
 
-    private final UUID invitacionId;
+    private final UUID invitationId;
     private final UUID parcheId;
-    private final UUID estudianteId;
-    private final UUID capitanId;
+    private final UUID studentId;
+    private final UUID captainId;
 }

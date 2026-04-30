@@ -1,8 +1,8 @@
 package com.charizard.compiled.hangout_service.domain.exceptions;
 
-public class LimiteParchesAlcanzadoException extends RuntimeException {
+public class MaxHangoutsReachedException extends RuntimeException {
 
-    public LimiteParchesAlcanzadoException() {
+    public MaxHangoutsReachedException() {
         super("Student has reached maximum active patches limit (5)");
     }
 }

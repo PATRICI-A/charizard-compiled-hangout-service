@@ -1,8 +1,8 @@
 package com.charizard.compiled.hangout_service.domain.exceptions;
 
-public class InvitacionYaRespondidaException extends RuntimeException {
+public class InvitationAlreadyRespondedException extends RuntimeException {
 
-    public InvitacionYaRespondidaException() {
+    public InvitationAlreadyRespondedException() {
         super("La invitación ya fue respondida");
     }
 }

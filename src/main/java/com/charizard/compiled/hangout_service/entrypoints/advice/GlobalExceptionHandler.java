@@ -1,10 +1,10 @@
 package com.charizard.compiled.hangout_service.entrypoints.advice;
 
 import com.charizard.compiled.hangout_service.domain.exceptions.ConstraintViolationException;
-import com.charizard.compiled.hangout_service.domain.exceptions.EstudianteYaEsMiembroException;
-import com.charizard.compiled.hangout_service.domain.exceptions.InvitacionDuplicadaException;
-import com.charizard.compiled.hangout_service.domain.exceptions.InvitacionYaRespondidaException;
-import com.charizard.compiled.hangout_service.domain.exceptions.LimiteParchesAlcanzadoException;
+import com.charizard.compiled.hangout_service.domain.exceptions.StudentAlreadyMemberException;
+import com.charizard.compiled.hangout_service.domain.exceptions.DuplicateInvitationException;
+import com.charizard.compiled.hangout_service.domain.exceptions.InvitationAlreadyRespondedException;
+import com.charizard.compiled.hangout_service.domain.exceptions.MaxHangoutsReachedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,32 +14,32 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Map;
 
 /**
- * Manejador global de excepciones para el módulo de invitaciones.
- * Convierte excepciones de dominio en códigos HTTP apropiados.
+ * Global exception handler for the invitations module.
+ * Converts domain exceptions into appropriate HTTP status codes.
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(InvitacionYaRespondidaException.class)
-    public ResponseEntity<Map<String, String>> handleInvitacionYaRespondida(InvitacionYaRespondidaException ex) {
+    @ExceptionHandler(InvitationAlreadyRespondedException.class)
+    public ResponseEntity<Map<String, String>> handleInvitationAlreadyResponded(InvitationAlreadyRespondedException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler(LimiteParchesAlcanzadoException.class)
-    public ResponseEntity<Map<String, String>> handleLimiteParchesAlcanzado(LimiteParchesAlcanzadoException ex) {
+    @ExceptionHandler(MaxHangoutsReachedException.class)
+    public ResponseEntity<Map<String, String>> handleMaxHangoutsReached(MaxHangoutsReachedException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler(EstudianteYaEsMiembroException.class)
-    public ResponseEntity<Map<String, String>> handleEstudianteYaEsMiembro(EstudianteYaEsMiembroException ex) {
+    @ExceptionHandler(StudentAlreadyMemberException.class)
+    public ResponseEntity<Map<String, String>> handleStudentAlreadyMember(StudentAlreadyMemberException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler(InvitacionDuplicadaException.class)
-    public ResponseEntity<Map<String, String>> handleInvitacionDuplicada(InvitacionDuplicadaException ex) {
+    @ExceptionHandler(DuplicateInvitationException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateInvitation(DuplicateInvitationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }

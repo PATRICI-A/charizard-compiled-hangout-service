@@ -1,7 +1,7 @@
 package com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity;
 
-import com.charizard.compiled.hangout_service.domain.model.enums.EstadoInvitacion;
-import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.InvitacionRepository;
+import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
+import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.InvitationRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -12,29 +12,29 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-class InvitacionEntityTest {
+class InvitationEntityTest {
 
     @Autowired
-    private InvitacionRepository repository;
+    private InvitationRepository repository;
 
-    private InvitacionEntity buildValidInvitacion(UUID parcheId, UUID estudianteId) {
-        return InvitacionEntity.builder()
+    private InvitationEntity buildValidInvitation(UUID parcheId, UUID studentId) {
+        return InvitationEntity.builder()
                 .parcheId(parcheId)
-                .capitanId(UUID.randomUUID())
-                .estudianteInvitadoId(estudianteId)
-                .estado(EstadoInvitacion.PENDIENTE)
+                .captainId(UUID.randomUUID())
+                .invitedStudentId(studentId)
+                .status(InvitationStatus.PENDING)
                 .build();
     }
 
     @Test
     void shouldFailWhenDuplicateInvitation() {
         UUID parcheId = UUID.randomUUID();
-        UUID estudianteId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
 
-        repository.save(buildValidInvitacion(parcheId, estudianteId));
+        repository.save(buildValidInvitation(parcheId, studentId));
         repository.flush();
 
-        InvitacionEntity duplicate = buildValidInvitacion(parcheId, estudianteId);
+        InvitationEntity duplicate = buildValidInvitation(parcheId, studentId);
 
         assertThrows(DataIntegrityViolationException.class, () -> {
             repository.save(duplicate);

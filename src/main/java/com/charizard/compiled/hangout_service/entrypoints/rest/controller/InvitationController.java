@@ -1,11 +1,11 @@
 package com.charizard.compiled.hangout_service.entrypoints.rest.controller;
 
-import com.charizard.compiled.hangout_service.application.dto.request.EnviarInvitacionRequest;
-import com.charizard.compiled.hangout_service.application.dto.request.ResponderInvitacionRequest;
-import com.charizard.compiled.hangout_service.application.dto.response.EnviarInvitacionResponse;
-import com.charizard.compiled.hangout_service.application.dto.response.InvitacionResponse;
-import com.charizard.compiled.hangout_service.domain.ports.in.InvitacionInputPort;
-import com.charizard.compiled.hangout_service.domain.ports.in.ResponderInvitacionInputPort;
+import com.charizard.compiled.hangout_service.application.dto.request.SendInvitationRequest;
+import com.charizard.compiled.hangout_service.application.dto.request.RespondInvitationRequest;
+import com.charizard.compiled.hangout_service.application.dto.response.SendInvitationResponse;
+import com.charizard.compiled.hangout_service.application.dto.response.InvitationResponse;
+import com.charizard.compiled.hangout_service.domain.ports.in.InvitationInputPort;
+import com.charizard.compiled.hangout_service.domain.ports.in.RespondInvitationInputPort;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,17 +19,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.UUID;
 
 @Tag(name = "Invitaciones", description = "Endpoints para gestionar invitaciones de parches")
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
-public class InvitacionController {
+public class InvitationController {
 
-    private final InvitacionInputPort invitacionService;
-    private final ResponderInvitacionInputPort responderInvitacionService;
+    private final InvitationInputPort invitationService;
+    private final RespondInvitationInputPort respondInvitationService;
 
     @Operation(
         summary = "Enviar invitaciones a un parche privado",
@@ -39,7 +38,7 @@ public class InvitacionController {
         @ApiResponse(
             responseCode = "201",
             description = "Invitaciones procesadas exitosamente",
-            content = @Content(schema = @Schema(implementation = EnviarInvitacionResponse.class))
+            content = @Content(schema = @Schema(implementation = SendInvitationResponse.class))
         ),
         @ApiResponse(
             responseCode = "403",
@@ -50,17 +49,15 @@ public class InvitacionController {
             description = "Conflicto - El estudiante ya es miembro o ya tiene una invitación pendiente"
         )
     })
-    @PostMapping("/parches/{parcheId}/invitaciones")
-    public ResponseEntity<EnviarInvitacionResponse> enviarInvitaciones(
+    @PostMapping("/parches/{parcheId}/invitations")
+    public ResponseEntity<SendInvitationResponse> sendInvitations(
             @Parameter(description = "ID del parche", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID parcheId,
-            @Valid @RequestBody EnviarInvitacionRequest request,
-            Principal principal) {
+            @Valid @RequestBody SendInvitationRequest request,
+            @RequestHeader("X-User-Id") UUID captainId) {
 
-        UUID capitanId = UUID.fromString(principal.getName());
-
-        EnviarInvitacionResponse response = invitacionService.enviarInvitacion(
-                parcheId, capitanId, request.getEstudiantesIds());
+        SendInvitationResponse response = invitationService.sendInvitation(
+                parcheId, captainId, request.getStudentIds());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -68,21 +65,20 @@ public class InvitacionController {
     @Operation(summary = "Responder una invitación", description = "El estudiante acepta o rechaza una invitación a un parche.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Invitación respondida exitosamente",
-            content = @Content(schema = @Schema(implementation = InvitacionResponse.class))),
+            content = @Content(schema = @Schema(implementation = InvitationResponse.class))),
         @ApiResponse(responseCode = "403", description = "No eres el invitado de esta invitación"),
         @ApiResponse(responseCode = "404", description = "Invitación no encontrada"),
         @ApiResponse(responseCode = "409", description = "La invitación ya fue respondida o el parche está lleno")
     })
-    @PatchMapping("/invitaciones/{invitacionId}")
-    public ResponseEntity<InvitacionResponse> responderInvitacion(
+    @PatchMapping("/invitations/{invitationId}")
+    public ResponseEntity<InvitationResponse> respondInvitation(
             @Parameter(description = "ID de la invitación", required = true)
-            @PathVariable UUID invitacionId,
-            @Valid @RequestBody ResponderInvitacionRequest request,
-            Principal principal) {
+            @PathVariable UUID invitationId,
+            @Valid @RequestBody RespondInvitationRequest request,
+            @RequestHeader("X-User-Id") UUID studentId) {
 
-        UUID estudianteId = UUID.fromString(principal.getName());
-        InvitacionResponse response = responderInvitacionService.responderInvitacion(
-                invitacionId, estudianteId, request.getRespuesta());
+        InvitationResponse response = respondInvitationService.respondInvitation(
+                invitationId, studentId, request.getAnswer());
 
         return ResponseEntity.ok(response);
     }
