@@ -6,10 +6,11 @@ import com.charizard.compiled.hangout_service.domain.events.InvitationSentEvent;
 import com.charizard.compiled.hangout_service.domain.exceptions.StudentAlreadyMemberException;
 import com.charizard.compiled.hangout_service.domain.exceptions.DuplicateInvitationException;
 import com.charizard.compiled.hangout_service.domain.model.Invitation;
+import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundException;
 import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.ports.out.InvitationRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -26,14 +27,15 @@ public class InvitationUseCase implements InvitationInputPort {
 
     private final InvitationRepositoryPort invitationRepository;
     private final MemberRepositoryPort memberRepository;
+    private final ParcheRepositoryPort parcheRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public InvitationResponse sendInvitation(UUID parcheId, UUID captainId, UUID studentId) {
-        boolean isCaptain = memberRepository.existsByParcheIdAndStudentIdAndMemberRole(
-                parcheId, captainId, MemberRole.CAPTAIN);
+        var parche = parcheRepository.findById(parcheId)
+                .orElseThrow(() -> new ParcheNotFoundException("Parche not found with id: " + parcheId));
 
-        if (!isCaptain) {
+        if (!parche.getCaptainId().equals(captainId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not the captain of this hangout");
         }
 

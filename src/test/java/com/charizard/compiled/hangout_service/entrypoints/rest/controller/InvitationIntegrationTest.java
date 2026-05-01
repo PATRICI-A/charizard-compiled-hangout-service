@@ -77,7 +77,7 @@ class InvitationIntegrationTest {
         MemberEntity captain = MemberEntity.builder()
                 .parcheId(parcheId)
                 .studentId(captainId)
-                .memberRole(MemberRole.CAPTAIN)
+                .memberRole(MemberRole.STUDENT)
                 .build();
         memberRepository.save(captain);
 
@@ -170,7 +170,7 @@ class InvitationIntegrationTest {
                 .build();
         UUID parcheFullId = parcheRepository.save(fullParche).getId();
 
-        memberRepository.save(MemberEntity.builder().parcheId(parcheFullId).studentId(UUID.randomUUID()).memberRole(MemberRole.CAPTAIN).build());
+        memberRepository.save(MemberEntity.builder().parcheId(parcheFullId).studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build());
         memberRepository.save(MemberEntity.builder().parcheId(parcheFullId).studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build());
 
         UUID otherStudent = UUID.randomUUID();

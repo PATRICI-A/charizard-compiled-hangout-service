@@ -79,7 +79,7 @@ class ParcheServiceTest {
         when(parcheRepository.save(any(ParcheEntity.class))).thenReturn(parcheEntity);
         when(memberRepository.save(any(MemberEntity.class))).thenReturn(MemberEntity.builder()
                 .studentId(captainId)
-                .memberRole(MemberRole.CAPTAIN)
+                .memberRole(MemberRole.STUDENT)
                 .build());
 
         ParcheResponse response = parcheService.createParche(req, captainId);

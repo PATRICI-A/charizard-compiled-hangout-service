@@ -1,7 +1,6 @@
 package com.charizard.compiled.hangout_service.application.usecase;
 
 import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundException;
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.ports.in.LeaveParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
@@ -35,7 +34,7 @@ public class LeaveParcheUseCase implements LeaveParcheInputPort {
             throw new IllegalArgumentException("Cannot leave an archived parche");
         }
 
-        if (memberRepository.existsByParcheIdAndStudentIdAndMemberRole(parcheId, studentId, MemberRole.CAPTAIN)) {
+        if (parche.getCaptainId().equals(studentId)) {
             throw new IllegalArgumentException("Captain cannot leave without transferring leadership first");
         }
 

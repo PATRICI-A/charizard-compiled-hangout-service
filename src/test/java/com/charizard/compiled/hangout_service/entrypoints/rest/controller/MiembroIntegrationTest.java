@@ -7,29 +7,32 @@ import com.charizard.compiled.hangout_service.infrastructure.adapters.persistenc
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.ParcheEntity;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.MemberRepository;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.ParcheRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.*;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @ActiveProfiles("test")
 class MiembroIntegrationTest {
 
-    @LocalServerPort
-    private int port;
-
     @Autowired
-    private TestRestTemplate restTemplate;
+    private WebApplicationContext webApplicationContext;
+
+    private MockMvc mockMvc;
 
     @Autowired
     private ParcheRepository parcheRepository;
@@ -42,6 +45,8 @@ class MiembroIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
         memberRepository.deleteAll();
         parcheRepository.deleteAll();
 
@@ -62,8 +67,14 @@ class MiembroIntegrationTest {
         memberRepository.save(MemberEntity.builder()
                 .parcheId(parcheId)
                 .studentId(captainId)
-                .memberRole(MemberRole.CAPTAIN)
+                .memberRole(MemberRole.STUDENT)
                 .build());
+    }
+
+    @AfterEach
+    void tearDown() {
+        memberRepository.deleteAll();
+        parcheRepository.deleteAll();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -71,17 +82,18 @@ class MiembroIntegrationTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    void unirse_flujoExitoso() {
+    void unirse_flujoExitoso() throws Exception {
         UUID studentId = UUID.randomUUID();
 
-        ResponseEntity<Void> response = doPost(parcheId, studentId);
+        mockMvc.perform(post("/api/v1/parches/{id}/miembros", parcheId)
+                        .header("X-User-Id", studentId))
+                .andExpect(status().isCreated());
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertTrue(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId));
     }
 
     @Test
-    void unirse_cupoLleno_retorna409() {
+    void unirse_cupoLleno_retorna409() throws Exception {
         ParcheEntity fullParche = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Lleno").description("Sin cupo").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(2)
@@ -90,17 +102,17 @@ class MiembroIntegrationTest {
                 .build());
 
         memberRepository.save(MemberEntity.builder().parcheId(fullParche.getId())
-                .studentId(UUID.randomUUID()).memberRole(MemberRole.CAPTAIN).build());
+                .studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build());
         memberRepository.save(MemberEntity.builder().parcheId(fullParche.getId())
                 .studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build());
 
-        ResponseEntity<Void> response = doPost(fullParche.getId(), UUID.randomUUID());
-
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        mockMvc.perform(post("/api/v1/parches/{id}/miembros", fullParche.getId())
+                        .header("X-User-Id", UUID.randomUUID()))
+                .andExpect(status().isConflict());
     }
 
     @Test
-    void unirse_masde5ParachesActivos_retorna409() {
+    void unirse_masde5ParachesActivos_retorna409() throws Exception {
         UUID busyStudent = UUID.randomUUID();
 
         for (int i = 0; i < 5; i++) {
@@ -115,30 +127,33 @@ class MiembroIntegrationTest {
                     .memberRole(MemberRole.STUDENT).build());
         }
 
-        ResponseEntity<Void> response = doPost(parcheId, busyStudent);
-
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        mockMvc.perform(post("/api/v1/parches/{id}/miembros", parcheId)
+                        .header("X-User-Id", busyStudent))
+                .andExpect(status().isConflict());
     }
 
     @Test
-    void unirse_estudianteYaEsMiembro_retorna409() {
+    void unirse_estudianteYaEsMiembro_retorna409() throws Exception {
         UUID studentId = UUID.randomUUID();
-        doPost(parcheId, studentId); // primer intento OK
 
-        ResponseEntity<Void> response = doPost(parcheId, studentId); // segundo intento
+        mockMvc.perform(post("/api/v1/parches/{id}/miembros", parcheId)
+                        .header("X-User-Id", studentId))
+                .andExpect(status().isCreated());
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        mockMvc.perform(post("/api/v1/parches/{id}/miembros", parcheId)
+                        .header("X-User-Id", studentId))
+                .andExpect(status().isConflict());
     }
 
     @Test
-    void unirse_parcheNoExiste_retorna404() {
-        ResponseEntity<Void> response = doPost(UUID.randomUUID(), UUID.randomUUID());
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    void unirse_parcheNoExiste_retorna404() throws Exception {
+        mockMvc.perform(post("/api/v1/parches/{id}/miembros", UUID.randomUUID())
+                        .header("X-User-Id", UUID.randomUUID()))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void unirse_parcheArchivado_retorna400() {
+    void unirse_parcheArchivado_retorna400() throws Exception {
         ParcheEntity archived = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
@@ -146,9 +161,9 @@ class MiembroIntegrationTest {
                 .status(ParcheStatus.FILED).captainId(captainId)
                 .build());
 
-        ResponseEntity<Void> response = doPost(archived.getId(), UUID.randomUUID());
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        mockMvc.perform(post("/api/v1/parches/{id}/miembros", archived.getId())
+                        .header("X-User-Id", UUID.randomUUID()))
+                .andExpect(status().isBadRequest());
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -156,35 +171,37 @@ class MiembroIntegrationTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    void salir_flujoExitoso() {
+    void salir_flujoExitoso() throws Exception {
         UUID studentId = UUID.randomUUID();
         memberRepository.save(MemberEntity.builder()
                 .parcheId(parcheId).studentId(studentId)
                 .memberRole(MemberRole.STUDENT).build());
 
-        ResponseEntity<Void> response = doDelete(parcheId, studentId);
+        mockMvc.perform(delete("/api/v1/parches/{id}/miembros", parcheId)
+                        .header("X-User-Id", studentId))
+                .andExpect(status().isNoContent());
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertFalse(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId));
     }
 
     @Test
-    void salir_capitan_sinTransferencia_retorna400() {
-        ResponseEntity<Void> response = doDelete(parcheId, captainId);
+    void salir_capitan_sinTransferencia_retorna400() throws Exception {
+        mockMvc.perform(delete("/api/v1/parches/{id}/miembros", parcheId)
+                        .header("X-User-Id", captainId))
+                .andExpect(status().isBadRequest());
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertTrue(memberRepository.existsByParcheIdAndStudentId(parcheId, captainId));
     }
 
     @Test
-    void salir_noEsMiembro_retorna404() {
-        ResponseEntity<Void> response = doDelete(parcheId, UUID.randomUUID());
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    void salir_noEsMiembro_retorna404() throws Exception {
+        mockMvc.perform(delete("/api/v1/parches/{id}/miembros", parcheId)
+                        .header("X-User-Id", UUID.randomUUID()))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void salir_parcheArchivado_retorna400() {
+    void salir_parcheArchivado_retorna400() throws Exception {
         ParcheEntity archived = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
@@ -197,38 +214,8 @@ class MiembroIntegrationTest {
                 .parcheId(archived.getId()).studentId(studentId)
                 .memberRole(MemberRole.STUDENT).build());
 
-        ResponseEntity<Void> response = doDelete(archived.getId(), studentId);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────────────────────────────────────
-
-    private ResponseEntity<Void> doPost(UUID parcheId, UUID studentId) {
-        return restTemplate.exchange(
-                url("/api/v1/parches/" + parcheId + "/miembros"),
-                HttpMethod.POST,
-                withUserId(studentId),
-                Void.class);
-    }
-
-    private ResponseEntity<Void> doDelete(UUID parcheId, UUID studentId) {
-        return restTemplate.exchange(
-                url("/api/v1/parches/" + parcheId + "/miembros"),
-                HttpMethod.DELETE,
-                withUserId(studentId),
-                Void.class);
-    }
-
-    private String url(String path) {
-        return "http://localhost:" + port + path;
-    }
-
-    private HttpEntity<Void> withUserId(UUID userId) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-User-Id", userId.toString());
-        return new HttpEntity<>(headers);
+        mockMvc.perform(delete("/api/v1/parches/{id}/miembros", archived.getId())
+                        .header("X-User-Id", studentId))
+                .andExpect(status().isBadRequest());
     }
 }

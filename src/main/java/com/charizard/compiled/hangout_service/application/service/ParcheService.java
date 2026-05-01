@@ -10,6 +10,7 @@ import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.MemberEntity;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.ParcheEntity;
+import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.InvitationRepository;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.MemberRepository;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.ParcheRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class ParcheService {
 
     private final ParcheRepository parcheRepository;
     private final MemberRepository memberRepository;
+    private final InvitationRepository invitationRepository;
 
     @Transactional
     public ParcheResponse createParche(CreateParcheRequest req, UUID captainId) {
@@ -50,7 +52,7 @@ public class ParcheService {
         memberRepository.save(MemberEntity.builder()
                 .parche(saved)
                 .studentId(captainId)
-                .memberRole(MemberRole.CAPTAIN)
+                .memberRole(MemberRole.STUDENT)
                 .build());
 
         log.info("Parche created: {} by captain: {}", saved.getId(), captainId);
@@ -123,6 +125,7 @@ public class ParcheService {
             throw new AccessDeniedException("Only the captain can delete this parche");
         }
 
+        invitationRepository.cancelPendingByParcheId(id);
         parche.setStatus(ParcheStatus.FILED);
         parcheRepository.save(parche);
         log.info("Parche archived (soft-delete): {}", id);
