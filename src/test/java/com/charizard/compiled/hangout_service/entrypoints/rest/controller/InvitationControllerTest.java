@@ -4,6 +4,7 @@ import com.charizard.compiled.hangout_service.application.dto.response.Invitatio
 import com.charizard.compiled.hangout_service.domain.ports.in.InvitationInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.RespondInvitationInputPort;
 import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
+import com.charizard.compiled.hangout_service.entrypoints.advice.GlobalExceptionHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,9 @@ class InvitationControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(invitationController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(invitationController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
         objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
         parcheId = UUID.randomUUID();
