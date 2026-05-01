@@ -1,5 +1,6 @@
 package com.charizard.compiled.hangout_service.application.dto.request;
 
+import com.charizard.compiled.hangout_service.domain.model.enums.ParcheCategory;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
@@ -27,6 +28,9 @@ public class UpdateParcheRequest {
 
     @Schema(example = "Café del edificio Bernardo")
     private String place;
+
+    @Schema(example = "MUSIC", allowableValues = {"MUSIC", "ART", "DANCE"})
+    private ParcheCategory category;
 
     @Schema(example = "2026-05-20", description = "Date in ISO format (yyyy-MM-dd)")
     private LocalDate date;

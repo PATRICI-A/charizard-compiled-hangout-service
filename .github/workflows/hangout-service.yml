@@ -1,0 +1,68 @@
+name: CI/CD — hangout-service
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci-cd:
+    name: Build, Test, Sonar & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout con historial completo (Sonar lo necesita para el blame)
+      - name: Checkout código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Setup JDK 21
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # 3. Cache de dependencias Maven + caché de Sonar
+      - name: Cache Maven
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Cache SonarQube
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      # 4. Build sin tests
+      - name: Build
+        run: mvn package -DskipTests
+
+      # 5. Tests + cobertura JaCoCo
+      #    H2 en memoria, sin servicios externos necesarios.
+      #    JaCoCo genera target/site/jacoco/jacoco.xml automáticamente.
+      - name: Tests y cobertura
+        run: mvn verify
+
+      # 6. Reporte de tests en el summary del PR/run
+      - name: Publicar reporte de tests
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: '**/target/surefire-reports/TEST-*.xml'
+
+      # 8. Subir reporte JaCoCo como artefacto descargable
+      - name: Subir reporte JaCoCo
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+          retention-days: 7
+
