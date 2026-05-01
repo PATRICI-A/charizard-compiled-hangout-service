@@ -52,7 +52,7 @@ public class ParcheService {
         memberRepository.save(MemberEntity.builder()
                 .parche(saved)
                 .studentId(captainId)
-                .memberRole(MemberRole.STUDENT)
+                .memberRole(MemberRole.CAPTAIN)
                 .build());
 
         log.info("Parche created: {} by captain: {}", saved.getId(), captainId);
