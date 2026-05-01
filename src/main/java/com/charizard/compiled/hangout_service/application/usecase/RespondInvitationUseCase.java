@@ -12,6 +12,7 @@ import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.ports.in.RespondInvitationInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.InvitationRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.NotificacionPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,18 +33,20 @@ public class RespondInvitationUseCase implements RespondInvitationInputPort {
     private final ParcheRepositoryPort parcheRepository;
     private final MemberRepositoryPort memberRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final NotificacionPort notificacionPort;
 
     @Override
     public InvitationResponse acceptInvitation(UUID invitationId, UUID studentId) {
-        return processResponse(invitationId, studentId, InvitationStatus.ACCEPTED);
+        return respondInvitation(invitationId, studentId, InvitationStatus.ACCEPTED);
     }
 
     @Override
     public InvitationResponse rejectInvitation(UUID invitationId, UUID studentId) {
-        return processResponse(invitationId, studentId, InvitationStatus.REJECTED);
+        return respondInvitation(invitationId, studentId, InvitationStatus.REJECTED);
     }
 
-    private InvitationResponse processResponse(UUID invitationId, UUID studentId, InvitationStatus answer) {
+    @Override
+    public InvitationResponse respondInvitation(UUID invitationId, UUID studentId, InvitationStatus answer) {
         Invitation invitation = invitationRepository.findById(invitationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found"));
 
@@ -74,6 +77,8 @@ public class RespondInvitationUseCase implements RespondInvitationInputPort {
                     .memberRole(MemberRole.STUDENT)
                     .build();
             memberRepository.save(newMember);
+
+            notificacionPort.notificarNuevoMiembro(invitation.getCaptainId(), studentId, parche.getName());
 
             eventPublisher.publishEvent(new InvitationAcceptedEvent(
                     invitationId, invitation.getParcheId(), studentId, invitation.getCaptainId()));

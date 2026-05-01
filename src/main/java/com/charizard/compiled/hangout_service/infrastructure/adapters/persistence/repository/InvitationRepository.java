@@ -3,12 +3,15 @@ package com.charizard.compiled.hangout_service.infrastructure.adapters.persisten
 import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.InvitationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import org.springframework.stereotype.Repository;
 
 @Repository
 public interface InvitationRepository extends JpaRepository<InvitationEntity, UUID> {
@@ -18,4 +21,15 @@ public interface InvitationRepository extends JpaRepository<InvitationEntity, UU
     List<InvitationEntity> findByInvitedStudentIdAndStatus(UUID studentId, InvitationStatus status);
 
     List<InvitationEntity> findByParcheId(UUID parcheId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE InvitationEntity i SET i.status = :rejected WHERE i.parcheId = :parcheId AND i.status = :pending")
+    void cancelPendingByParcheId(@Param("parcheId") UUID parcheId,
+                                 @Param("pending") InvitationStatus pending,
+                                 @Param("rejected") InvitationStatus rejected);
+
+    default void cancelPendingByParcheId(UUID parcheId) {
+        cancelPendingByParcheId(parcheId, InvitationStatus.PENDING, InvitationStatus.REJECTED);
+    }
 }

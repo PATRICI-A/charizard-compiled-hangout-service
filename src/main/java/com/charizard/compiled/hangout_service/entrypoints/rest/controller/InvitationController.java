@@ -1,5 +1,6 @@
 package com.charizard.compiled.hangout_service.entrypoints.rest.controller;
 
+import com.charizard.compiled.hangout_service.application.dto.request.RespondInvitationRequest;
 import com.charizard.compiled.hangout_service.application.dto.response.InvitationResponse;
 import com.charizard.compiled.hangout_service.domain.ports.in.InvitationInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.RespondInvitationInputPort;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +29,12 @@ public class InvitationController {
     private final RespondInvitationInputPort respondInvitationService;
 
     @Operation(
-        summary = "Enviar invitaciones a un parche privado",
-        description = "Envía invitaciones a estudiantes para un parche privado. Solo el capitán puede enviar invitaciones."
+        summary = "Send invitation to a private hangout",
+        description = "Sends an invitation to a student for a private hangout. Only the captain can send invitations."
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "201",
-            description = "Invitation sent successfully",
-            content = @Content(schema = @Schema(implementation = InvitationResponse.class))
-        ),
+        @ApiResponse(responseCode = "201", description = "Invitation sent successfully",
+            content = @Content(schema = @Schema(implementation = InvitationResponse.class))),
         @ApiResponse(responseCode = "403", description = "User is not the captain of this hangout"),
         @ApiResponse(responseCode = "409", description = "Student is already a member or has a pending invitation")
     })
@@ -49,6 +48,28 @@ public class InvitationController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(invitationService.sendInvitation(parcheId, captainId, studentId));
+    }
+
+    @Operation(
+        summary = "Respond to an invitation",
+        description = "The student accepts or rejects an invitation to join a hangout."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Invitation responded successfully",
+            content = @Content(schema = @Schema(implementation = InvitationResponse.class))),
+        @ApiResponse(responseCode = "403", description = "You are not the invited student"),
+        @ApiResponse(responseCode = "404", description = "Invitation not found"),
+        @ApiResponse(responseCode = "409", description = "Invitation already responded or hangout is full")
+    })
+    @PatchMapping("/invitaciones/{invitationId}")
+    public ResponseEntity<InvitationResponse> respondInvitation(
+            @Parameter(description = "Invitation ID", required = true)
+            @PathVariable UUID invitationId,
+            @Valid @RequestBody RespondInvitationRequest request,
+            @RequestHeader("X-User-Id") UUID studentId) {
+
+        return ResponseEntity.ok(
+                respondInvitationService.respondInvitation(invitationId, studentId, request.getAnswer()));
     }
 
     @Operation(summary = "Accept an invitation", description = "The student accepts an invitation to join a hangout.")

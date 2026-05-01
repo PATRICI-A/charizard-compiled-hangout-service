@@ -4,9 +4,11 @@ import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.MemberEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -26,4 +28,9 @@ public interface MemberRepository extends JpaRepository<MemberEntity, UUID> {
     int countParchesActivosByStudentIdAndStatus(@Param("studentId") UUID studentId,
                                                 @Param("status") ParcheStatus status);
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM MemberEntity m WHERE m.parcheId = :parcheId AND m.studentId = :studentId")
+    void deleteByParcheIdAndStudentId(@Param("parcheId") UUID parcheId,
+                                      @Param("studentId") UUID studentId);
 }
