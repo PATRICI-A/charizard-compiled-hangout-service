@@ -11,9 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.charizard.compiled.hangout_service.TestcontainersConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -27,7 +25,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@Import(TestcontainersConfiguration.class)
 class MiembroIntegrationTest {
 
     @Autowired
@@ -53,13 +50,16 @@ class MiembroIntegrationTest {
 
         captainId = UUID.randomUUID();
 
+        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
         ParcheEntity parche = ParcheEntity.builder()
                 .name("Parche Base")
                 .description("Parche para tests de integración")
                 .place("Campus universitario")
                 .type(ParcheType.PUBLIC)
                 .maximumQuota(10)
-                .dateRealization(LocalDateTime.now().plusDays(1))
+                .date(dateRealization.toLocalDate())
+                .hour(dateRealization.toLocalTime())
+                .dateRealization(dateRealization)
                 .status(ParcheStatus.ACTIVE)
                 .captainId(captainId)
                 .build();
@@ -95,10 +95,12 @@ class MiembroIntegrationTest {
 
     @Test
     void unirse_cupoLleno_retorna409() throws Exception {
+        LocalDateTime fullDate = LocalDateTime.now().plusDays(1);
         ParcheEntity fullParche = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Lleno").description("Sin cupo").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(2)
-                .dateRealization(LocalDateTime.now().plusDays(1))
+                .date(fullDate.toLocalDate()).hour(fullDate.toLocalTime())
+                .dateRealization(fullDate)
                 .status(ParcheStatus.ACTIVE).captainId(captainId)
                 .build());
 
@@ -117,10 +119,12 @@ class MiembroIntegrationTest {
         UUID busyStudent = UUID.randomUUID();
 
         for (int i = 0; i < 5; i++) {
+            LocalDateTime extraDate = LocalDateTime.now().plusDays(1);
             ParcheEntity other = parcheRepository.save(ParcheEntity.builder()
                     .name("Parche extra " + i).description("Desc").place("Lugar")
                     .type(ParcheType.PUBLIC).maximumQuota(10)
-                    .dateRealization(LocalDateTime.now().plusDays(1))
+                    .date(extraDate.toLocalDate()).hour(extraDate.toLocalTime())
+                    .dateRealization(extraDate)
                     .status(ParcheStatus.ACTIVE).captainId(UUID.randomUUID())
                     .build());
             memberRepository.save(MemberEntity.builder()
@@ -155,10 +159,12 @@ class MiembroIntegrationTest {
 
     @Test
     void unirse_parcheArchivado_retorna400() throws Exception {
+        LocalDateTime archivedDate1 = LocalDateTime.now().plusDays(1);
         ParcheEntity archived = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
-                .dateRealization(LocalDateTime.now().plusDays(1))
+                .date(archivedDate1.toLocalDate()).hour(archivedDate1.toLocalTime())
+                .dateRealization(archivedDate1)
                 .status(ParcheStatus.FILED).captainId(captainId)
                 .build());
 
@@ -203,10 +209,12 @@ class MiembroIntegrationTest {
 
     @Test
     void salir_parcheArchivado_retorna400() throws Exception {
+        LocalDateTime archivedDate2 = LocalDateTime.now().plusDays(1);
         ParcheEntity archived = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
-                .dateRealization(LocalDateTime.now().plusDays(1))
+                .date(archivedDate2.toLocalDate()).hour(archivedDate2.toLocalTime())
+                .dateRealization(archivedDate2)
                 .status(ParcheStatus.FILED).captainId(captainId)
                 .build());
 

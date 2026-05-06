@@ -1,6 +1,6 @@
 package com.charizard.compiled.hangout_service.application.usecase;
 
-import com.charizard.compiled.hangout_service.domain.events.NuevoMiembroEvent;
+import com.charizard.compiled.hangout_service.domain.events.InvitationAcceptedEvent;
 import com.charizard.compiled.hangout_service.domain.model.Invitation;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
@@ -89,7 +89,7 @@ class NotificacionEventListenerTest {
 
         useCase.respondInvitation(invitationId, studentId, InvitationStatus.ACCEPTED);
 
-        verify(eventPublisher, times(1)).publishEvent(any(NuevoMiembroEvent.class));
+        verify(eventPublisher, times(1)).publishEvent(any(InvitationAcceptedEvent.class));
     }
 
     @Test
@@ -102,6 +102,6 @@ class NotificacionEventListenerTest {
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("full");
 
-        verify(eventPublisher, never()).publishEvent(any(NuevoMiembroEvent.class));
+        verify(eventPublisher, never()).publishEvent(any(InvitationAcceptedEvent.class));
     }
 }
