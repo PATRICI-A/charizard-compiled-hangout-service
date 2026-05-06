@@ -1,5 +1,6 @@
 package com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity;
 
+import com.charizard.compiled.hangout_service.domain.model.enums.ParcheCategory;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import jakarta.validation.ConstraintViolation;
@@ -29,6 +30,8 @@ class ParcheEntityTest {
         return ParcheEntity.builder()
                 .name("Parche del barrio")
                 .description("Un parche cualquiera")
+                .place("Escuela")
+                .category(ParcheCategory.CINEMA)
                 .type(ParcheType.PUBLIC)
                 .maximumQuota(10)
                 .dateRealization(LocalDateTime.now().plusDays(1))
