@@ -41,7 +41,6 @@ class InvitationIntegrationTest {
 
     private MockMvc mockMvc;
 
-    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -61,6 +60,8 @@ class InvitationIntegrationTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
 
         captainId = UUID.randomUUID();
         studentId = UUID.randomUUID();
