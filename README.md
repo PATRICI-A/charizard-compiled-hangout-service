@@ -1452,7 +1452,7 @@ void accept_successFlow_createsMembership() throws Exception {
 
 2. **Reporte JaCoCo con cobertura de código**
 
-    ![Evidencia reporte JaCoCo](./docs/images/jacoco.png)
+    ![Evidencia reporte JaCoCo](./docs/images/CoberturaJaCoCo.png)
 
 ---
 

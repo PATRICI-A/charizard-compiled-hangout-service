@@ -41,7 +41,7 @@ public class ParcheRepositoryAdapter implements ParcheRepositoryPort {
 
     @Override
     public List<Parche> findByFilters(ParcheType type, ParcheStatus status, String nombre, LocalDate fecha) {
-        Specification<ParcheEntity> spec = Specification.where((Specification<ParcheEntity>) null);
+        Specification<ParcheEntity> spec = (root, query, cb) -> cb.conjunction();
 
         if (type != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("type"), type));
