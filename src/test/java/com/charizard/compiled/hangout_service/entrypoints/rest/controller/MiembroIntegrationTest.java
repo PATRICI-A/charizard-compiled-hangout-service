@@ -52,13 +52,16 @@ class MiembroIntegrationTest {
 
         captainId = UUID.randomUUID();
 
+        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
         ParcheEntity parche = ParcheEntity.builder()
                 .name("Parche Base")
                 .description("Parche para tests de integración")
                 .place("Campus universitario")
                 .type(ParcheType.PUBLIC)
                 .maximumQuota(10)
-                .dateRealization(LocalDateTime.now().plusDays(1))
+                .date(dateRealization.toLocalDate())
+                .hour(dateRealization.toLocalTime())
+                .dateRealization(dateRealization)
                 .status(ParcheStatus.ACTIVE)
                 .captainId(captainId)
                 .build();
@@ -94,10 +97,12 @@ class MiembroIntegrationTest {
 
     @Test
     void unirse_cupoLleno_retorna409() throws Exception {
+        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
         ParcheEntity fullParche = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Lleno").description("Sin cupo").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(2)
-                .dateRealization(LocalDateTime.now().plusDays(1))
+                .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
+                .dateRealization(dateRealization)
                 .status(ParcheStatus.ACTIVE).captainId(captainId)
                 .build());
 
@@ -114,12 +119,14 @@ class MiembroIntegrationTest {
     @Test
     void unirse_masde5ParachesActivos_retorna409() throws Exception {
         UUID busyStudent = UUID.randomUUID();
+        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
 
         for (int i = 0; i < 5; i++) {
             ParcheEntity other = parcheRepository.save(ParcheEntity.builder()
                     .name("Parche extra " + i).description("Desc").place("Lugar")
                     .type(ParcheType.PUBLIC).maximumQuota(10)
-                    .dateRealization(LocalDateTime.now().plusDays(1))
+                    .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
+                    .dateRealization(dateRealization)
                     .status(ParcheStatus.ACTIVE).captainId(UUID.randomUUID())
                     .build());
             memberRepository.save(MemberEntity.builder()
@@ -154,10 +161,12 @@ class MiembroIntegrationTest {
 
     @Test
     void unirse_parcheArchivado_retorna400() throws Exception {
+        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
         ParcheEntity archived = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
-                .dateRealization(LocalDateTime.now().plusDays(1))
+                .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
+                .dateRealization(dateRealization)
                 .status(ParcheStatus.FILED).captainId(captainId)
                 .build());
 
@@ -202,10 +211,12 @@ class MiembroIntegrationTest {
 
     @Test
     void salir_parcheArchivado_retorna400() throws Exception {
+        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
         ParcheEntity archived = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
-                .dateRealization(LocalDateTime.now().plusDays(1))
+                .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
+                .dateRealization(dateRealization)
                 .status(ParcheStatus.FILED).captainId(captainId)
                 .build());
 

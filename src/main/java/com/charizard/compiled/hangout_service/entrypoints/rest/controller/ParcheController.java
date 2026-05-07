@@ -59,8 +59,8 @@ public class ParcheController {
             @Parameter(description = "Filter by parche type") @RequestParam(required = false) ParcheType tipo,
             @Parameter(description = "Filter by parche status") @RequestParam(required = false) ParcheStatus estado,
             @Parameter(description = "Filter by name (partial match, case-insensitive)") @RequestParam(required = false) String nombre,
-            @Parameter(description = "Filter by date (yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
-            @Parameter(description = "true = has space, false = full") @RequestParam(required = false) Boolean cupoDisponible) {
+            @Parameter(description = "Filter by date (format: yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+            @Parameter(description = "Filter by available spots (true = has space, false = full)") @RequestParam(required = false) Boolean cupoDisponible) {
         return ResponseEntity.ok(getParcheUseCase.getParches(tipo, estado, nombre, fecha, cupoDisponible));
     }
 

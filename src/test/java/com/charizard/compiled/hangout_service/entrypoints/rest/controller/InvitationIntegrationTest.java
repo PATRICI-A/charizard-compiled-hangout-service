@@ -43,8 +43,7 @@ class InvitationIntegrationTest {
 
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     private ParcheRepository parcheRepository;

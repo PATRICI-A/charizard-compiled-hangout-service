@@ -1,5 +1,6 @@
 package com.charizard.compiled.hangout_service.infrastructure.adapters.scheduler;
 
+import com.charizard.compiled.hangout_service.domain.model.enums.ParcheCategory;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.ParcheEntity;
@@ -54,6 +55,7 @@ class ParcheArchivoSchedulerTest {
         return ParcheEntity.builder()
                 .name("Parche test")
                 .place("Parque")
+                .category(ParcheCategory.CINEMA)
                 .type(ParcheType.PUBLIC)
                 .date(dateRealization.toLocalDate())
                 .hour(dateRealization.toLocalTime())

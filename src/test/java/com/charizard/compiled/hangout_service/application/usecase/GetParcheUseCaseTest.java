@@ -108,9 +108,8 @@ class GetParcheUseCaseTest {
     @Test
     @DisplayName("getParches con cupoDisponible=true incluye solo parches con espacio")
     void getParches_cupoDisponibleTrue_soloParchesConEspacio() {
-        UUID idLleno = UUID.randomUUID();
         Parche parcheLleno = Parche.builder()
-                .id(idLleno)
+                .id(UUID.randomUUID())
                 .name("Parche lleno")
                 .maximumQuota(2)
                 .status(ParcheStatus.ACTIVE)
@@ -118,8 +117,8 @@ class GetParcheUseCaseTest {
 
         when(parcheRepository.findByFilters(null, null, null, null))
                 .thenReturn(List.of(parche, parcheLleno));
-        when(memberRepository.countByParcheId(parcheId)).thenReturn(3);  // 3/10 → hay espacio
-        when(memberRepository.countByParcheId(idLleno)).thenReturn(2);   // 2/2 → lleno
+        when(memberRepository.countByParcheId(parche.getId())).thenReturn(3);      // 3/10 → hay espacio
+        when(memberRepository.countByParcheId(parcheLleno.getId())).thenReturn(2); // 2/2 → lleno
         when(parcheMapper.toResponse(eq(parche), anyInt())).thenReturn(parcheResponse);
 
         List<ParcheResponse> result = useCase.getParches(null, null, null, null, true);
@@ -130,7 +129,7 @@ class GetParcheUseCaseTest {
 
     @Test
     @DisplayName("getParches con cupoDisponible=false incluye solo parches llenos")
-    void getParches_cupoDisponibleFalse_soloParchesLlenos() {
+    void getParches_cupoDisponibleFalse_soloParches_llenos() {
         UUID idLleno = UUID.randomUUID();
         Parche parcheLleno = Parche.builder()
                 .id(idLleno)
@@ -143,8 +142,8 @@ class GetParcheUseCaseTest {
 
         when(parcheRepository.findByFilters(null, null, null, null))
                 .thenReturn(List.of(parche, parcheLleno));
-        when(memberRepository.countByParcheId(parcheId)).thenReturn(3);  // 3/10 → hay espacio
-        when(memberRepository.countByParcheId(idLleno)).thenReturn(2);   // 2/2 → lleno
+        when(memberRepository.countByParcheId(parche.getId())).thenReturn(3);      // 3/10 → hay espacio
+        when(memberRepository.countByParcheId(parcheLleno.getId())).thenReturn(2); // 2/2 → lleno
         when(parcheMapper.toResponse(eq(parcheLleno), anyInt())).thenReturn(responseLleno);
 
         List<ParcheResponse> result = useCase.getParches(null, null, null, null, false);
@@ -155,16 +154,16 @@ class GetParcheUseCaseTest {
 
     @Test
     @DisplayName("getParches con cupoDisponible=null retorna todos sin filtrar por cupo")
-    void getParches_cupoDisponibleNull_retornaTodos() {
-        UUID idLleno = UUID.randomUUID();
+    void getParches_cupoDisponibleNull_retornaTodosSinFiltrar() {
         Parche parcheLleno = Parche.builder()
-                .id(idLleno).name("Parche lleno").maximumQuota(2).build();
-        ParcheResponse responseLleno = ParcheResponse.builder().id(idLleno).build();
+                .id(UUID.randomUUID()).name("Parche lleno").maximumQuota(2).build();
+        ParcheResponse responseLleno = ParcheResponse.builder()
+                .id(parcheLleno.getId()).build();
 
         when(parcheRepository.findByFilters(null, null, null, null))
                 .thenReturn(List.of(parche, parcheLleno));
-        when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
-        when(memberRepository.countByParcheId(idLleno)).thenReturn(2);
+        when(memberRepository.countByParcheId(parche.getId())).thenReturn(3);
+        when(memberRepository.countByParcheId(parcheLleno.getId())).thenReturn(2);
         when(parcheMapper.toResponse(eq(parche), anyInt())).thenReturn(parcheResponse);
         when(parcheMapper.toResponse(eq(parcheLleno), anyInt())).thenReturn(responseLleno);
 

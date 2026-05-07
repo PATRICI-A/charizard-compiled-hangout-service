@@ -16,8 +16,8 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "invitaciones", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"parche_id", "estudiante_invitado_id"})
+@Table(name = "invitations", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"parche_id", "invited_student_id"})
 })
 public class InvitationEntity {
 
@@ -28,10 +28,10 @@ public class InvitationEntity {
     @Column(name = "parche_id", nullable = false)
     private UUID parcheId;
 
-    @Column(name = "capitan_id", nullable = false)
+    @Column(name = "captain_id", nullable = false)
     private UUID captainId;
 
-    @Column(name = "estudiante_invitado_id", nullable = false)
+    @Column(name = "invited_student_id", nullable = false)
     private UUID invitedStudentId;
 
     @Enumerated(EnumType.STRING)
@@ -39,10 +39,9 @@ public class InvitationEntity {
     @Builder.Default
     private InvitationStatus status = InvitationStatus.PENDING;
 
-    @Column(name = "fecha_envio", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime sentAt;
 
-    @Column(name = "fecha_respuesta")
     private LocalDateTime respondedAt;
 
     @PrePersist

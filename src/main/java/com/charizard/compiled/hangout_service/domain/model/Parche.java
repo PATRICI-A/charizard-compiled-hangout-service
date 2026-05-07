@@ -1,5 +1,6 @@
 package com.charizard.compiled.hangout_service.domain.model;
 
+import com.charizard.compiled.hangout_service.domain.model.enums.ParcheCategory;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ public class Parche {
     private String name;
     private String description;
     private String place;
+    private ParcheCategory category;
     private ParcheType type;
     private LocalDate date;
     private LocalTime hour;
