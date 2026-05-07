@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class MiembroIntegrationTest {
 
     @Autowired
@@ -99,8 +101,7 @@ class MiembroIntegrationTest {
         ParcheEntity fullParche = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Lleno").description("Sin cupo").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(2)
-                .date(dateRealization.toLocalDate())
-                .hour(dateRealization.toLocalTime())
+                .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
                 .dateRealization(dateRealization)
                 .status(ParcheStatus.ACTIVE).captainId(captainId)
                 .build());
@@ -118,14 +119,13 @@ class MiembroIntegrationTest {
     @Test
     void unirse_masde5ParachesActivos_retorna409() throws Exception {
         UUID busyStudent = UUID.randomUUID();
+        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
 
         for (int i = 0; i < 5; i++) {
-            LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
             ParcheEntity other = parcheRepository.save(ParcheEntity.builder()
                     .name("Parche extra " + i).description("Desc").place("Lugar")
                     .type(ParcheType.PUBLIC).maximumQuota(10)
-                    .date(dateRealization.toLocalDate())
-                    .hour(dateRealization.toLocalTime())
+                    .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
                     .dateRealization(dateRealization)
                     .status(ParcheStatus.ACTIVE).captainId(UUID.randomUUID())
                     .build());
@@ -165,8 +165,7 @@ class MiembroIntegrationTest {
         ParcheEntity archived = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
-                .date(dateRealization.toLocalDate())
-                .hour(dateRealization.toLocalTime())
+                .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
                 .dateRealization(dateRealization)
                 .status(ParcheStatus.FILED).captainId(captainId)
                 .build());
@@ -216,8 +215,7 @@ class MiembroIntegrationTest {
         ParcheEntity archived = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
-                .date(dateRealization.toLocalDate())
-                .hour(dateRealization.toLocalTime())
+                .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
                 .dateRealization(dateRealization)
                 .status(ParcheStatus.FILED).captainId(captainId)
                 .build());
