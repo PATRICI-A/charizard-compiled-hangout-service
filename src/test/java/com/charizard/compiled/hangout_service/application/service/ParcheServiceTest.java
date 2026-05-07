@@ -10,6 +10,7 @@ import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.MemberEntity;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.ParcheEntity;
+import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.InvitationRepository;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.MemberRepository;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.ParcheRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,9 @@ class ParcheServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private InvitationRepository invitationRepository;
 
     @InjectMocks
     private ParcheService parcheService;

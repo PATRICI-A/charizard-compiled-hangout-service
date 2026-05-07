@@ -4,6 +4,7 @@ import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.ParcheEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ParcheRepository extends JpaRepository<ParcheEntity, UUID> {
+public interface ParcheRepository extends JpaRepository<ParcheEntity, UUID>, JpaSpecificationExecutor<ParcheEntity> {
 
     List<ParcheEntity> findByStatus(ParcheStatus status);
 
