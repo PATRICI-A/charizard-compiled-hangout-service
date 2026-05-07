@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,8 +27,13 @@ public class GetParcheUseCase implements GetParcheInputPort {
     private final ParcheMapper parcheMapper;
 
     @Override
-    public List<ParcheResponse> getParches(ParcheType tipo, ParcheStatus estado) {
-        return parcheRepository.findByFilters(tipo, estado).stream()
+    public List<ParcheResponse> getParches(ParcheType tipo, ParcheStatus estado, String nombre, LocalDate fecha, Boolean cupoDisponible) {
+        return parcheRepository.findByFilters(tipo, estado, nombre, fecha).stream()
+                .filter(p -> {
+                    if (cupoDisponible == null) return true;
+                    boolean hayEspacio = memberRepository.countByParcheId(p.getId()) < p.getMaximumQuota();
+                    return cupoDisponible ? hayEspacio : !hayEspacio;
+                })
                 .map(p -> parcheMapper.toResponse(p, memberRepository.countByParcheId(p.getId())))
                 .toList();
     }

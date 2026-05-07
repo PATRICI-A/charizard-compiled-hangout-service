@@ -10,15 +10,18 @@ import com.charizard.compiled.hangout_service.domain.ports.in.CreateParcheInputP
 import com.charizard.compiled.hangout_service.domain.ports.in.GetParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.UpdateParcheInputPort;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,14 +51,17 @@ public class ParcheController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all Parches")
+    @Operation(summary = "Search parches with optional filters")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "List of parches returned")
     })
     public ResponseEntity<List<ParcheResponse>> getParches(
-            @RequestParam(required = false) ParcheType tipo,
-            @RequestParam(required = false) ParcheStatus estado) {
-        return ResponseEntity.ok(getParcheUseCase.getParches(tipo, estado));
+            @Parameter(description = "Filter by parche type") @RequestParam(required = false) ParcheType tipo,
+            @Parameter(description = "Filter by parche status") @RequestParam(required = false) ParcheStatus estado,
+            @Parameter(description = "Filter by name (partial match, case-insensitive)") @RequestParam(required = false) String nombre,
+            @Parameter(description = "Filter by date (yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+            @Parameter(description = "true = has space, false = full") @RequestParam(required = false) Boolean cupoDisponible) {
+        return ResponseEntity.ok(getParcheUseCase.getParches(tipo, estado, nombre, fecha, cupoDisponible));
     }
 
     @GetMapping("/{id}")

@@ -4,10 +4,11 @@ import com.charizard.compiled.hangout_service.application.dto.response.ParcheRes
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 public interface GetParcheInputPort {
-    List<ParcheResponse> getParches(ParcheType tipo, ParcheStatus estado);
+    List<ParcheResponse> getParches(ParcheType tipo, ParcheStatus estado, String nombre, LocalDate fecha, Boolean cupoDisponible);
     ParcheResponse getParcheById(UUID id);
 }
