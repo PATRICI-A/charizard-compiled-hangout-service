@@ -50,8 +50,10 @@
 
 ## 1. 👤 Integrantes:
 
-- Juan Esteban Cárdenas
-- _(Añadir demás integrantes del equipo Charizard Compiled)_
+- David Shadday Correa Gonzalez
+- Juan Camilo Melo Cupitra
+- Juan Esteban Tellez Valencia
+- Stiven Esneider Pardo Gutierrez
 
 ## 2. 🎯 Objetivo del microservicio
 
@@ -145,18 +147,17 @@ El microservicio de Parches tiene como objetivo gestionar los encuentros sociale
 #### `feature/*`
 **Formato:**
 ```
-feature/[nombre-funcionalidad]-DOSW_[codigo-jira]
+feature/[nombre-funcionalidad]
 ```
 
 **Ejemplos:**
-- `feature/gestion-parches-DOSW-10`
-- `feature/sistema-invitaciones-DOSW-15`
+- `feature/gestionParches`
+- `feature/sistemaInvitaciones`
 
 **Reglas de nomenclatura:**
-- Usar **kebab-case** (palabras separadas por guiones)
+- Usar **PascalCase** (palabras separadas por mayúscula)
 - Máximo 50 caracteres en total
 - Descripción clara y específica de la funcionalidad
-- Código de Jira obligatorio para trazabilidad
 
 #### `release/*`
 **Formato:**
@@ -171,8 +172,8 @@ release/[version]
 hotfix/[descripcion-breve-del-fix]
 ```
 **Ejemplos:**
-- `hotfix/corregir-archivo-automatico`
-- `hotfix/fix-validacion-cupo`
+- `hotfix/corregirArchivoAutomatico`
+- `hotfix/fixValidacionCupo`
 
 ---
 
@@ -180,7 +181,7 @@ hotfix/[descripcion-breve-del-fix]
 
 #### **Formato:**
 ```
-[codigo-jira] [tipo]: [descripción específica de la acción]
+[tipo]: [descripción específica de la acción]
 ```
 
 #### **Tipos de commit:**
@@ -1686,7 +1687,7 @@ El flujo de trabajo en `.github/workflows/ci-cd.yml` ejecuta los siguientes paso
 **Railway — Aplicación en ejecución**
 
 <div align="center">
-  <img src="docs/images/RailwayDeploy.png" alt="Evidencia Railway Deploy" width="80%" />
+  <img src="docs\uml\DiagramaDespliegue.png" alt="Evidencia Railway Deploy" width="80%" />
 </div>
 
 ---
@@ -1721,7 +1722,7 @@ Compromiso, Coraje, Enfoque, Apertura y Respeto fueron los pilares para afrontar
 
 ![Team](https://img.shields.io/badge/Team-Charizard_Compiled-blueviolet?style=for-the-badge&logo=github&logoColor=white)
 ![Course](https://img.shields.io/badge/Course-DOSW-orange?style=for-the-badge)
-![Year](https://img.shields.io/badge/Year-2025--2-blue?style=for-the-badge)
+![Year](https://img.shields.io/badge/Year-2026--1-blue?style=for-the-badge)
 
 > 💡 **DOSW Hangout Service** es un proyecto académico, pero su arquitectura y calidad están pensadas para ser escalables y adaptables a escenarios reales en instituciones educativas.
 
