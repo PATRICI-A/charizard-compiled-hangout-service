@@ -1,5 +1,6 @@
 package com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity;
 
+import com.charizard.compiled.hangout_service.domain.model.enums.ParcheCategory;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import jakarta.persistence.*;
@@ -38,6 +39,9 @@ public class ParcheEntity {
 
     @Column(nullable = false)
     private String place;
+
+    @Enumerated(EnumType.STRING)
+    private ParcheCategory category;
 
     @Enumerated(EnumType.STRING)
     private ParcheType type;
