@@ -1047,7 +1047,7 @@ El microservicio se integra con otros sistemas del ecosistema DOSW.
 ### 📊 Diagrama de base de datos
 
 <div align="center">
-<img src="docs/images/parches_db.png" alt="Diagrama de base de datos" width="600"/>
+<img src="docs\uml\DiagramaEntidadRelacion.png" alt="Diagrama de base de datos" width="600"/>
 </div>
 
 El microservicio de Parches utiliza **PostgreSQL 18** como motor de base de datos relacional. Contiene tres tablas principales: `parches`, `members` e `invitations`.
