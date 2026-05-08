@@ -322,7 +322,7 @@ Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Crear Parche](docs/images/crearParche.png)
+![Diagrama de Secuencia Crear Parche](docs/uml/CrearParche.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -974,7 +974,7 @@ Esta sección muestra los diagramas clave del microservicio de parches, ilustran
 
 ### 🏗️ Diagrama de Componentes — Vista General
 <div align="center">
-<img src="docs/images/componentesGeneral.png" alt="Diagrama de Componentes General" width="600"/>
+<img src="docs\uml\DiagramaComponentesGeneral.png" alt="Diagrama de Componentes General" width="600"/>
 </div>
 
 
@@ -983,7 +983,7 @@ Esta sección muestra los diagramas clave del microservicio de parches, ilustran
 ### 🔍 Diagrama de Componentes — Vista Específica
 
 <div align="center">
-<img src="docs/images/componentesParches.png" alt="Diagrama de Componentes Específico" width="600"/>
+<img src="docs\uml\DiagramaComponentesEspecifico.png" alt="Diagrama de Componentes Específico" width="600"/>
 </div>
 
 **Arquitectura Hexagonal:**  
@@ -1110,7 +1110,7 @@ El microservicio de Parches utiliza **PostgreSQL 18** como motor de base de dato
 ### 📦 Diagrama de Clases del Dominio
 
 <div align="center">
-<img src="docs/images/clasesParches.png" alt="Diagrama de Clases" width="600"/>
+<img src="docs\uml\DiagramaDeClases.png" alt="Diagrama de Clases" width="600"/>
 </div>
 
 **Resumen del diseño de dominio:**
