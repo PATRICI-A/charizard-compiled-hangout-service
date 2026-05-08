@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -43,10 +42,6 @@ public class UpdateParcheUseCase implements UpdateParcheInputPort {
         if (req.getEventId() != null)      parche.setEventId(req.getEventId());
         if (req.getDate() != null)         parche.setDate(req.getDate());
         if (req.getHour() != null)         parche.setHour(req.getHour());
-
-        if (parche.getDate() != null && parche.getHour() != null) {
-            parche.setDateRealization(LocalDateTime.of(parche.getDate(), parche.getHour()));
-        }
 
         Parche updated = parcheRepository.save(parche);
         return parcheMapper.toResponse(updated, memberRepository.countByParcheId(id));

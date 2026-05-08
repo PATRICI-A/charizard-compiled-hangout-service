@@ -45,7 +45,6 @@ class InvitationEntityTest {
                 .date(date.toLocalDate())
                 .hour(date.toLocalTime())
                 .maximumQuota(10)
-                .dateRealization(date)
                 .status(ParcheStatus.ACTIVE)
                 .captainId(UUID.randomUUID())
                 .build();

@@ -19,7 +19,6 @@ public interface ParcheMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", expression = "java(ParcheStatus.ACTIVE)")
     @Mapping(target = "creationDate", ignore = true)
-    @Mapping(target = "dateRealization", expression = "java(java.time.LocalDateTime.of(request.getDate(), request.getHour()))")
     @Mapping(target = "members", ignore = true)
     Parche toDomain(CreateParcheRequest request, UUID captainId);
 }

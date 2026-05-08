@@ -63,7 +63,6 @@ class ParcheArchivoSchedulerTest {
                 .date(dateRealization.toLocalDate())
                 .hour(dateRealization.toLocalTime())
                 .maximumQuota(10)
-                .dateRealization(dateRealization)
                 .status(ParcheStatus.ACTIVE)
                 .captainId(UUID.randomUUID())
                 .build();

@@ -63,7 +63,6 @@ class MiembroIntegrationTest {
                 .maximumQuota(10)
                 .date(dateRealization.toLocalDate())
                 .hour(dateRealization.toLocalTime())
-                .dateRealization(dateRealization)
                 .status(ParcheStatus.ACTIVE)
                 .captainId(captainId)
                 .build();
@@ -104,7 +103,6 @@ class MiembroIntegrationTest {
                 .name("Parche Lleno").description("Sin cupo").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(2)
                 .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
-                .dateRealization(dateRealization)
                 .status(ParcheStatus.ACTIVE).captainId(captainId)
                 .build());
 
@@ -128,8 +126,7 @@ class MiembroIntegrationTest {
                     .name("Parche extra " + i).description("Desc").place("Lugar")
                     .type(ParcheType.PUBLIC).maximumQuota(10)
                     .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
-                    .dateRealization(dateRealization)
-                    .status(ParcheStatus.ACTIVE).captainId(UUID.randomUUID())
+                        .status(ParcheStatus.ACTIVE).captainId(UUID.randomUUID())
                     .build());
             memberRepository.save(MemberEntity.builder()
                     .parcheId(other.getId()).studentId(busyStudent)
@@ -168,7 +165,6 @@ class MiembroIntegrationTest {
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
                 .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
-                .dateRealization(dateRealization)
                 .status(ParcheStatus.FILED).captainId(captainId)
                 .build());
 
@@ -218,7 +214,6 @@ class MiembroIntegrationTest {
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
                 .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
-                .dateRealization(dateRealization)
                 .status(ParcheStatus.FILED).captainId(captainId)
                 .build());
 

@@ -77,7 +77,6 @@ class InvitationIntegrationTest {
                 .maximumQuota(10)
                 .date(dateRealization.toLocalDate())
                 .hour(dateRealization.toLocalTime())
-                .dateRealization(dateRealization)
                 .status(ParcheStatus.ACTIVE)
                 .captainId(captainId)
                 .build();
@@ -177,7 +176,6 @@ class InvitationIntegrationTest {
                 .maximumQuota(2)
                 .date(fullDate.toLocalDate())
                 .hour(fullDate.toLocalTime())
-                .dateRealization(fullDate)
                 .status(ParcheStatus.ACTIVE)
                 .captainId(captainId)
                 .build();

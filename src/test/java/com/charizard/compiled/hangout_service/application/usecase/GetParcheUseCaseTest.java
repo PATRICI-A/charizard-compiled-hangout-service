@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,7 +50,7 @@ class GetParcheUseCaseTest {
                 .status(ParcheStatus.ACTIVE)
                 .maximumQuota(10)
                 .date(LocalDate.of(2026, 6, 15))
-                .dateRealization(LocalDateTime.of(2026, 6, 15, 15, 30))
+                .hour(LocalTime.of(15, 30))
                 .captainId(UUID.randomUUID())
                 .build();
 

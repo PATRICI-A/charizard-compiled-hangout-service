@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,8 +35,9 @@ public class ParcheRepositoryAdapter implements ParcheRepositoryPort {
     }
 
     @Override
-    public List<Parche> findArchivables(ParcheStatus status, LocalDateTime threshold) {
-        return parcheRepository.findArchivables(status, threshold).stream().map(mapper::toDomain).toList();
+    public List<Parche> findArchivables(ParcheStatus status, LocalDate thresholdDate, LocalTime thresholdTime) {
+        return parcheRepository.findArchivables(status, thresholdDate, thresholdTime)
+                .stream().map(mapper::toDomain).toList();
     }
 
     @Override

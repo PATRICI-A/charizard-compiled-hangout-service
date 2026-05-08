@@ -28,7 +28,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -74,7 +73,8 @@ class ParcheControllerTest {
                 .maximumQuota(10)
                 .actualMembers(3)
                 .captainId(UUID.randomUUID())
-                .dateRealization(LocalDateTime.of(2026, 6, 15, 15, 30))
+                .date(LocalDate.of(2026, 6, 15))
+                .hour(LocalTime.of(15, 30))
                 .build();
     }
 
