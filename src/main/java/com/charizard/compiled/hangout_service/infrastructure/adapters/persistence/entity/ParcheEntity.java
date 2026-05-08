@@ -56,9 +56,6 @@ public class ParcheEntity {
     @Min(2) @Max(30)
     private int maximumQuota;
 
-    @Column(nullable = false)
-    private LocalDateTime dateRealization;
-
     @Enumerated(EnumType.STRING)
     private ParcheStatus status;
 
@@ -78,5 +75,4 @@ public class ParcheEntity {
     public void prePersist() {
         this.creationDate = LocalDateTime.now();
     }
-
 }

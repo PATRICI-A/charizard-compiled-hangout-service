@@ -10,7 +10,8 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,7 +35,8 @@ class ParcheEntityTest {
                 .category(ParcheCategory.CINEMA)
                 .type(ParcheType.PUBLIC)
                 .maximumQuota(10)
-                .dateRealization(LocalDateTime.now().plusDays(1))
+                .date(LocalDate.now().plusDays(1))
+                .hour(LocalTime.of(15, 0))
                 .status(ParcheStatus.ACTIVE)
                 .captainId(UUID.randomUUID())
                 .build();

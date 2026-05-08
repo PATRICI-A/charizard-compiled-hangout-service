@@ -11,7 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -37,21 +38,23 @@ class ArchiveParcheUseCaseTest {
                 .id(UUID.randomUUID())
                 .name("Parche 1")
                 .status(ParcheStatus.ACTIVE)
-                .dateRealization(LocalDateTime.now().minusHours(25))
+                .date(LocalDate.now().minusDays(2))
+                .hour(LocalTime.of(10, 0))
                 .build();
 
         parche2 = Parche.builder()
                 .id(UUID.randomUUID())
                 .name("Parche 2")
                 .status(ParcheStatus.ACTIVE)
-                .dateRealization(LocalDateTime.now().minusHours(30))
+                .date(LocalDate.now().minusDays(3))
+                .hour(LocalTime.of(8, 0))
                 .build();
     }
 
     @Test
     @DisplayName("archiveExpired archiva todos los parches expirados y retorna count")
     void archiveExpired_conParchesExpirados_archivaTodos() {
-        when(parcheRepository.findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDateTime.class)))
+        when(parcheRepository.findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDate.class), any(LocalTime.class)))
                 .thenReturn(List.of(parche1, parche2));
 
         int count = useCase.archiveExpired();
@@ -65,7 +68,7 @@ class ArchiveParcheUseCaseTest {
     @Test
     @DisplayName("archiveExpired retorna 0 cuando no hay parches expirados")
     void archiveExpired_sinParchesExpirados_retornaCero() {
-        when(parcheRepository.findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDateTime.class)))
+        when(parcheRepository.findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDate.class), any(LocalTime.class)))
                 .thenReturn(Collections.emptyList());
 
         int count = useCase.archiveExpired();
@@ -77,7 +80,7 @@ class ArchiveParcheUseCaseTest {
     @Test
     @DisplayName("archiveExpired archiva exactamente 1 parche")
     void archiveExpired_conUnParche_archiva1() {
-        when(parcheRepository.findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDateTime.class)))
+        when(parcheRepository.findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDate.class), any(LocalTime.class)))
                 .thenReturn(List.of(parche1));
 
         int count = useCase.archiveExpired();

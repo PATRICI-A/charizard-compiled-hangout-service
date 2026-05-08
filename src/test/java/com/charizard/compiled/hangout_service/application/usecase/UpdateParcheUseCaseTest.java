@@ -94,8 +94,8 @@ class UpdateParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("updateParche actualiza dateRealization cuando date y hour se proveen")
-    void updateParche_conDateYHour_actualizaDateRealization() {
+    @DisplayName("updateParche actualiza date y hour cuando se proveen")
+    void updateParche_conDateYHour_actualizaDateYHour() {
         LocalDate date = LocalDate.of(2026, 8, 1);
         LocalTime hour = LocalTime.of(15, 0);
         UpdateParcheRequest req = UpdateParcheRequest.builder().date(date).hour(hour).build();
@@ -108,9 +108,8 @@ class UpdateParcheUseCaseTest {
 
         useCase.updateParche(parcheId, req, captainId);
 
-        assertThat(parche.getDateRealization()).isNotNull();
-        assertThat(parche.getDateRealization().toLocalDate()).isEqualTo(date);
-        assertThat(parche.getDateRealization().toLocalTime()).isEqualTo(hour);
+        assertThat(parche.getDate()).isEqualTo(date);
+        assertThat(parche.getHour()).isEqualTo(hour);
     }
 
     @Test

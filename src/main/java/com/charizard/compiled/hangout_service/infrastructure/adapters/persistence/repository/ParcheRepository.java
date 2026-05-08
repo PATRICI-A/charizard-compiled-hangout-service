@@ -9,7 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +25,9 @@ public interface ParcheRepository extends JpaRepository<ParcheEntity, UUID>, Jpa
 
     List<ParcheEntity> findByTypeAndStatus(ParcheType type, ParcheStatus status);
 
-    @Query("SELECT p FROM ParcheEntity p WHERE p.status = :status AND p.dateRealization < :threshold")
-    List<ParcheEntity> findArchivables(@Param("status") ParcheStatus status, @Param("threshold") LocalDateTime threshold);
+    @Query("SELECT p FROM ParcheEntity p WHERE p.status = :status " +
+           "AND (p.date < :thresholdDate OR (p.date = :thresholdDate AND p.hour < :thresholdTime))")
+    List<ParcheEntity> findArchivables(@Param("status") ParcheStatus status,
+                                       @Param("thresholdDate") LocalDate thresholdDate,
+                                       @Param("thresholdTime") LocalTime thresholdTime);
 }

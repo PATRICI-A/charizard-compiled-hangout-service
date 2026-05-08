@@ -16,15 +16,13 @@ import java.util.UUID;
 public interface MemberRepository extends JpaRepository<MemberEntity, UUID> {
 
     int countByParcheId(UUID parcheId);
-    @Query("SELECT COUNT(m) > 0 FROM MemberEntity m WHERE m.parche.id = :parcheId AND m.studentId = :studentId")
-    boolean existsByParcheIdAndStudentId(@Param("parcheId") UUID parcheId, @Param("studentId") UUID studentId);
 
-    @Query("SELECT COUNT(m) > 0 FROM MemberEntity m WHERE m.parche.id = :parcheId AND m.studentId = :studentId AND m.memberRole = :role")
-    boolean existsByParcheIdAndStudentIdAndMemberRole(@Param("parcheId") UUID parcheId,
-                                                       @Param("studentId") UUID studentId,
-                                                       @Param("role") MemberRole role);
+    boolean existsByParcheIdAndStudentId(UUID parcheId, UUID studentId);
 
-    @Query("SELECT COUNT(m) FROM MemberEntity m WHERE m.studentId = :studentId AND m.parche.status = :status")
+    boolean existsByParcheIdAndStudentIdAndMemberRole(UUID parcheId, UUID studentId, MemberRole memberRole);
+
+    @Query("SELECT COUNT(m) FROM MemberEntity m WHERE m.studentId = :studentId " +
+           "AND EXISTS (SELECT p FROM ParcheEntity p WHERE p.id = m.parcheId AND p.status = :status)")
     int countParchesActivosByStudentIdAndStatus(@Param("studentId") UUID studentId,
                                                 @Param("status") ParcheStatus status);
 

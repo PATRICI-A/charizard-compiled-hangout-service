@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -21,7 +23,8 @@ public class ArchiveParcheUseCase implements ArchiveParcheInputPort {
     @Override
     public int archiveExpired() {
         LocalDateTime threshold = LocalDateTime.now().minusHours(24);
-        List<Parche> expired = parcheRepository.findArchivables(ParcheStatus.ACTIVE, threshold);
+        List<Parche> expired = parcheRepository.findArchivables(
+                ParcheStatus.ACTIVE, threshold.toLocalDate(), threshold.toLocalTime());
 
         expired.forEach(parche -> {
             parche.setStatus(ParcheStatus.FILED);

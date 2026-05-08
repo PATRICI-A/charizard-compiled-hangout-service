@@ -8,7 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Data
@@ -27,6 +28,6 @@ public class ParcheResponse {
     private int maximumQuota;
     private int actualMembers;
     private UUID captainId;
-    private LocalDateTime dateRealization;
-
+    private LocalDate date;
+    private LocalTime hour;
 }
