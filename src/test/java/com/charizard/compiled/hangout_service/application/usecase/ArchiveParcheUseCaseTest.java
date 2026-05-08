@@ -36,7 +36,7 @@ class ArchiveParcheUseCaseTest {
     void setUp() {
         parche1 = Parche.builder()
                 .id(UUID.randomUUID())
-                .name("Parche 1")
+                .name("Parche Vencido 1")
                 .status(ParcheStatus.ACTIVE)
                 .date(LocalDate.now().minusDays(2))
                 .hour(LocalTime.of(10, 0))
@@ -44,7 +44,7 @@ class ArchiveParcheUseCaseTest {
 
         parche2 = Parche.builder()
                 .id(UUID.randomUUID())
-                .name("Parche 2")
+                .name("Parche Vencido 2")
                 .status(ParcheStatus.ACTIVE)
                 .date(LocalDate.now().minusDays(3))
                 .hour(LocalTime.of(8, 0))
@@ -52,8 +52,8 @@ class ArchiveParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("archiveExpired archiva todos los parches expirados y retorna count")
-    void archiveExpired_conParchesExpirados_archivaTodos() {
+    @DisplayName("archiveExpired archiva todos los parches expirados y retorna el conteo correcto")
+    void archiveExpired_conDosParches_archivaTodosYRetornaConteo() {
         when(parcheRepository.findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDate.class), any(LocalTime.class)))
                 .thenReturn(List.of(parche1, parche2));
 
@@ -66,8 +66,8 @@ class ArchiveParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("archiveExpired retorna 0 cuando no hay parches expirados")
-    void archiveExpired_sinParchesExpirados_retornaCero() {
+    @DisplayName("archiveExpired retorna 0 y no guarda nada cuando no hay parches expirados")
+    void archiveExpired_sinParches_retornaCeroSinGuardar() {
         when(parcheRepository.findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDate.class), any(LocalTime.class)))
                 .thenReturn(Collections.emptyList());
 
@@ -78,7 +78,7 @@ class ArchiveParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("archiveExpired archiva exactamente 1 parche")
+    @DisplayName("archiveExpired archiva exactamente 1 parche cuando solo hay uno expirado")
     void archiveExpired_conUnParche_archiva1() {
         when(parcheRepository.findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDate.class), any(LocalTime.class)))
                 .thenReturn(List.of(parche1));
@@ -88,5 +88,28 @@ class ArchiveParcheUseCaseTest {
         assertThat(count).isEqualTo(1);
         assertThat(parche1.getStatus()).isEqualTo(ParcheStatus.FILED);
         verify(parcheRepository, times(1)).save(parche1);
+    }
+
+    @Test
+    @DisplayName("archiveExpired consulta con status ACTIVE y threshold calculado como now()-24h")
+    void archiveExpired_consultaConStatusActiveYThresholdCorrecto() {
+        when(parcheRepository.findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDate.class), any(LocalTime.class)))
+                .thenReturn(Collections.emptyList());
+
+        useCase.archiveExpired();
+
+        verify(parcheRepository).findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDate.class), any(LocalTime.class));
+    }
+
+    @Test
+    @DisplayName("archiveExpired cambia el status de ACTIVE a FILED en cada parche")
+    void archiveExpired_cambiaStatusAFiled() {
+        when(parcheRepository.findArchivables(eq(ParcheStatus.ACTIVE), any(LocalDate.class), any(LocalTime.class)))
+                .thenReturn(List.of(parche1, parche2));
+
+        useCase.archiveExpired();
+
+        verify(parcheRepository).save(argThat(p -> p.getStatus() == ParcheStatus.FILED && p.getId().equals(parche1.getId())));
+        verify(parcheRepository).save(argThat(p -> p.getStatus() == ParcheStatus.FILED && p.getId().equals(parche2.getId())));
     }
 }

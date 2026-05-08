@@ -1,20 +1,26 @@
 package com.charizard.compiled.hangout_service.entrypoints.rest.controller;
 
 import com.charizard.compiled.hangout_service.application.dto.response.InvitationResponse;
+import com.charizard.compiled.hangout_service.domain.exceptions.DuplicateInvitationException;
+import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundException;
+import com.charizard.compiled.hangout_service.domain.exceptions.StudentAlreadyMemberException;
+import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
 import com.charizard.compiled.hangout_service.domain.ports.in.InvitationInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.RespondInvitationInputPort;
-import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
 import com.charizard.compiled.hangout_service.entrypoints.advice.GlobalExceptionHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,18 +34,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class InvitationControllerTest {
 
-    private MockMvc mockMvc;
+    @Mock InvitationInputPort invitationService;
+    @Mock RespondInvitationInputPort respondInvitationService;
 
-    @Mock
-    private InvitationInputPort invitationService;
+    @InjectMocks InvitationController invitationController;
 
-    @Mock
-    private RespondInvitationInputPort respondInvitationService;
+    MockMvc mockMvc;
+    ObjectMapper objectMapper;
 
-    @InjectMocks
-    private InvitationController invitationController;
-
-    private ObjectMapper objectMapper;
     private UUID parcheId;
     private UUID captainId;
     private UUID studentId;
@@ -57,7 +59,8 @@ class InvitationControllerTest {
     }
 
     @Test
-    void sendInvitation_successFlow_returns201() throws Exception {
+    @DisplayName("POST /parches/{id}/invitaciones/{studentId} retorna 201 con invitación PENDING")
+    void sendInvitation_valido_retorna201ConInvitacionPending() throws Exception {
         InvitationResponse response = InvitationResponse.builder()
                 .id(UUID.randomUUID())
                 .parcheId(parcheId)
@@ -78,12 +81,22 @@ class InvitationControllerTest {
     }
 
     @Test
-    void sendInvitation_notCaptain_returns403() throws Exception {
+    @DisplayName("POST /parches/{id}/invitaciones/{studentId} retorna 404 cuando el parche no existe")
+    void sendInvitation_parcheNoExiste_retorna404() throws Exception {
         when(invitationService.sendInvitation(eq(parcheId), eq(captainId), eq(studentId)))
-                .thenThrow(new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.FORBIDDEN,
-                        "User is not the captain of this hangout"
-                ));
+                .thenThrow(new ParcheNotFoundException("Parche not found with id: " + parcheId));
+
+        mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-User-Id", captainId.toString()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("POST /parches/{id}/invitaciones/{studentId} retorna 403 cuando el solicitante no es el capitán")
+    void sendInvitation_noEsCaptain_retorna403() throws Exception {
+        when(invitationService.sendInvitation(eq(parcheId), eq(captainId), eq(studentId)))
+                .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not the captain of this hangout"));
 
         mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,11 +105,10 @@ class InvitationControllerTest {
     }
 
     @Test
-    void sendInvitation_studentAlreadyMember_returns409() throws Exception {
+    @DisplayName("POST /parches/{id}/invitaciones/{studentId} retorna 409 cuando el estudiante ya es miembro")
+    void sendInvitation_estudianteYaMiembro_retorna409() throws Exception {
         when(invitationService.sendInvitation(any(), any(), any()))
-                .thenThrow(new com.charizard.compiled.hangout_service.domain.exceptions.StudentAlreadyMemberException(
-                        "Student is already a member of this hangout"
-                ));
+                .thenThrow(new StudentAlreadyMemberException("Student is already a member of this hangout"));
 
         mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -105,11 +117,10 @@ class InvitationControllerTest {
     }
 
     @Test
-    void sendInvitation_duplicateInvitation_returns409() throws Exception {
+    @DisplayName("POST /parches/{id}/invitaciones/{studentId} retorna 409 cuando ya hay una invitación PENDING")
+    void sendInvitation_invitacionDuplicada_retorna409() throws Exception {
         when(invitationService.sendInvitation(any(), any(), any()))
-                .thenThrow(new com.charizard.compiled.hangout_service.domain.exceptions.DuplicateInvitationException(
-                        "A pending invitation already exists for this student"
-                ));
+                .thenThrow(new DuplicateInvitationException("A pending invitation already exists for this student"));
 
         mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
                         .contentType(MediaType.APPLICATION_JSON)

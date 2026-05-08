@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -48,8 +49,8 @@ class LeaveParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("salirDeParche lanza ParcheNotFoundException cuando no existe")
-    void salirDeParche_noExiste_lanzaExcepcion() {
+    @DisplayName("salirDeParche lanza ParcheNotFoundException cuando el parche no existe")
+    void salirDeParche_parcheNoExiste_lanzaExcepcion() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.salirDeParche(parcheId, studentId))
@@ -59,19 +60,23 @@ class LeaveParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("salirDeParche lanza ResponseStatusException cuando student no es miembro")
-    void salirDeParche_noEsMiembro_lanzaExcepcion() {
+    @DisplayName("salirDeParche lanza ResponseStatusException 404 cuando el student no es miembro")
+    void salirDeParche_noEsMiembro_lanza404() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
 
         assertThatThrownBy(() -> useCase.salirDeParche(parcheId, studentId))
                 .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode())
+                        .isEqualTo(HttpStatus.NOT_FOUND))
                 .hasMessageContaining("not a member");
+
+        verify(memberRepository, never()).deleteByParcheIdAndStudentId(any(), any());
     }
 
     @Test
-    @DisplayName("salirDeParche lanza IllegalArgumentException cuando parche está archivado")
-    void salirDeParche_archivado_lanzaIllegalArgument() {
+    @DisplayName("salirDeParche lanza IllegalArgumentException cuando el parche está archivado")
+    void salirDeParche_parcheArchivado_lanzaIllegalArgument() {
         parche.setStatus(ParcheStatus.FILED);
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(true);
@@ -79,21 +84,25 @@ class LeaveParcheUseCaseTest {
         assertThatThrownBy(() -> useCase.salirDeParche(parcheId, studentId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("archived");
+
+        verify(memberRepository, never()).deleteByParcheIdAndStudentId(any(), any());
     }
 
     @Test
-    @DisplayName("salirDeParche lanza IllegalArgumentException cuando student es captain")
-    void salirDeParche_esCaptain_lanzaIllegalArgument() {
+    @DisplayName("salirDeParche lanza IllegalArgumentException cuando el student es el capitán")
+    void salirDeParche_estudianteEsCaptain_lanzaIllegalArgument() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, captainId)).thenReturn(true);
 
         assertThatThrownBy(() -> useCase.salirDeParche(parcheId, captainId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Captain cannot leave");
+
+        verify(memberRepository, never()).deleteByParcheIdAndStudentId(any(), any());
     }
 
     @Test
-    @DisplayName("salirDeParche elimina member cuando todo es válido")
+    @DisplayName("salirDeParche elimina el member cuando todas las validaciones pasan")
     void salirDeParche_valido_eliminaMember() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(true);
@@ -101,5 +110,16 @@ class LeaveParcheUseCaseTest {
         useCase.salirDeParche(parcheId, studentId);
 
         verify(memberRepository).deleteByParcheIdAndStudentId(parcheId, studentId);
+    }
+
+    @Test
+    @DisplayName("salirDeParche no elimina el member cuando el parche no existe")
+    void salirDeParche_parcheNoExiste_noEliminaMember() {
+        when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> useCase.salirDeParche(parcheId, studentId))
+                .isInstanceOf(ParcheNotFoundException.class);
+
+        verifyNoInteractions(memberRepository);
     }
 }

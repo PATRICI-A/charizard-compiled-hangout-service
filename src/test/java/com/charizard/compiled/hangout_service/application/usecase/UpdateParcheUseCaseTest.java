@@ -24,8 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,6 +48,8 @@ class UpdateParcheUseCaseTest {
         parche = Parche.builder()
                 .id(parcheId)
                 .name("Original")
+                .description("Descripción original")
+                .place("Lugar original")
                 .maximumQuota(10)
                 .status(ParcheStatus.ACTIVE)
                 .type(ParcheType.PUBLIC)
@@ -57,8 +58,8 @@ class UpdateParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("updateParche lanza ParcheNotFoundException cuando no existe")
-    void updateParche_noExiste_lanzaExcepcion() {
+    @DisplayName("updateParche lanza ParcheNotFoundException cuando el parche no existe")
+    void updateParche_parcheNoExiste_lanzaExcepcion() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.updateParche(parcheId, UpdateParcheRequest.builder().build(), captainId))
@@ -67,17 +68,19 @@ class UpdateParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("updateParche lanza AccessDeniedException cuando solicitante no es captain")
+    @DisplayName("updateParche lanza AccessDeniedException cuando el solicitante no es el capitán")
     void updateParche_noEsCaptain_lanzaAccessDenied() {
         UUID otroCaptain = UUID.randomUUID();
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
 
         assertThatThrownBy(() -> useCase.updateParche(parcheId, UpdateParcheRequest.builder().build(), otroCaptain))
                 .isInstanceOf(AccessDeniedException.class);
+
+        verify(parcheRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("updateParche actualiza nombre cuando se provee")
+    @DisplayName("updateParche actualiza el nombre cuando se provee en el request")
     void updateParche_conNombre_actualizaNombre() {
         UpdateParcheRequest req = UpdateParcheRequest.builder().name("Nuevo Nombre").build();
         ParcheResponse response = ParcheResponse.builder().id(parcheId).name("Nuevo Nombre").build();
@@ -95,62 +98,60 @@ class UpdateParcheUseCaseTest {
 
     @Test
     @DisplayName("updateParche actualiza date y hour cuando se proveen")
-    void updateParche_conDateYHour_actualizaDateYHour() {
-        LocalDate date = LocalDate.of(2026, 8, 1);
-        LocalTime hour = LocalTime.of(15, 0);
-        UpdateParcheRequest req = UpdateParcheRequest.builder().date(date).hour(hour).build();
-        ParcheResponse response = ParcheResponse.builder().id(parcheId).build();
+    void updateParche_conDateYHour_actualizaAmbos() {
+        LocalDate fecha = LocalDate.of(2026, 8, 1);
+        LocalTime hora = LocalTime.of(15, 0);
+        UpdateParcheRequest req = UpdateParcheRequest.builder().date(fecha).hour(hora).build();
 
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(parcheRepository.save(parche)).thenReturn(parche);
         when(memberRepository.countByParcheId(parcheId)).thenReturn(1);
-        when(parcheMapper.toResponse(any(), anyInt())).thenReturn(response);
+        when(parcheMapper.toResponse(any(), anyInt())).thenReturn(ParcheResponse.builder().id(parcheId).build());
 
         useCase.updateParche(parcheId, req, captainId);
 
-        assertThat(parche.getDate()).isEqualTo(date);
-        assertThat(parche.getHour()).isEqualTo(hour);
+        assertThat(parche.getDate()).isEqualTo(fecha);
+        assertThat(parche.getHour()).isEqualTo(hora);
     }
 
     @Test
-    @DisplayName("updateParche no modifica campos nulos")
+    @DisplayName("updateParche no modifica campos que llegan nulos en el request")
     void updateParche_camposNulos_noModificaValoresOriginales() {
         UpdateParcheRequest req = UpdateParcheRequest.builder().build();
-        ParcheResponse response = ParcheResponse.builder().id(parcheId).name("Original").build();
 
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(parcheRepository.save(parche)).thenReturn(parche);
         when(memberRepository.countByParcheId(parcheId)).thenReturn(1);
-        when(parcheMapper.toResponse(any(), anyInt())).thenReturn(response);
+        when(parcheMapper.toResponse(any(), anyInt())).thenReturn(ParcheResponse.builder().id(parcheId).build());
 
         useCase.updateParche(parcheId, req, captainId);
 
         assertThat(parche.getName()).isEqualTo("Original");
         assertThat(parche.getMaximumQuota()).isEqualTo(10);
+        assertThat(parche.getType()).isEqualTo(ParcheType.PUBLIC);
     }
 
     @Test
-    @DisplayName("updateParche actualiza todos los campos cuando se proveen")
+    @DisplayName("updateParche actualiza todos los campos cuando se proveen en el request")
     void updateParche_conTodosLosCampos_actualizaTodo() {
         UpdateParcheRequest req = UpdateParcheRequest.builder()
                 .name("Nuevo")
-                .description("Desc")
-                .place("Lugar")
+                .description("Nueva desc")
+                .place("Nuevo lugar")
                 .maximumQuota(20)
                 .type(ParcheType.PRIVATE)
                 .build();
-        ParcheResponse response = ParcheResponse.builder().id(parcheId).build();
 
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(parcheRepository.save(parche)).thenReturn(parche);
         when(memberRepository.countByParcheId(parcheId)).thenReturn(2);
-        when(parcheMapper.toResponse(any(), anyInt())).thenReturn(response);
+        when(parcheMapper.toResponse(any(), anyInt())).thenReturn(ParcheResponse.builder().id(parcheId).build());
 
         useCase.updateParche(parcheId, req, captainId);
 
         assertThat(parche.getName()).isEqualTo("Nuevo");
-        assertThat(parche.getDescription()).isEqualTo("Desc");
-        assertThat(parche.getPlace()).isEqualTo("Lugar");
+        assertThat(parche.getDescription()).isEqualTo("Nueva desc");
+        assertThat(parche.getPlace()).isEqualTo("Nuevo lugar");
         assertThat(parche.getMaximumQuota()).isEqualTo(20);
         assertThat(parche.getType()).isEqualTo(ParcheType.PRIVATE);
     }

@@ -6,6 +6,8 @@ import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.InvitationRepository;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.ParcheRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,24 +17,19 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Tag;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("integration")
 @SpringBootTest
 @ActiveProfiles("test")
 class InvitationEntityTest {
 
-    @Autowired
-    private InvitationRepository repository;
-
-    @Autowired
-    private ParcheRepository parcheRepository;
+    @Autowired InvitationRepository invitationRepository;
+    @Autowired ParcheRepository parcheRepository;
 
     @AfterEach
     void cleanup() {
-        repository.deleteAll();
+        invitationRepository.deleteAll();
         parcheRepository.deleteAll();
     }
 
@@ -50,7 +47,7 @@ class InvitationEntityTest {
                 .build();
     }
 
-    private InvitationEntity buildValidInvitation(UUID parcheId, UUID studentId) {
+    private InvitationEntity buildInvitation(UUID parcheId, UUID studentId) {
         return InvitationEntity.builder()
                 .parcheId(parcheId)
                 .captainId(UUID.randomUUID())
@@ -60,18 +57,17 @@ class InvitationEntityTest {
     }
 
     @Test
-    void shouldFailWhenDuplicateInvitation() {
+    @DisplayName("Guardar dos invitaciones al mismo estudiante en el mismo parche viola la constraint de unicidad")
+    void guardarInvitacionDuplicada_violaConstraintUnicidad() {
         UUID parcheId = parcheRepository.save(buildParche()).getId();
         UUID studentId = UUID.randomUUID();
 
-        repository.save(buildValidInvitation(parcheId, studentId));
-        repository.flush();
-
-        InvitationEntity duplicate = buildValidInvitation(parcheId, studentId);
+        invitationRepository.save(buildInvitation(parcheId, studentId));
+        invitationRepository.flush();
 
         assertThrows(DataIntegrityViolationException.class, () -> {
-            repository.save(duplicate);
-            repository.flush();
+            invitationRepository.save(buildInvitation(parcheId, studentId));
+            invitationRepository.flush();
         });
     }
 }

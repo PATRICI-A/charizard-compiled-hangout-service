@@ -55,8 +55,8 @@ class JoinParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("unirseAParche lanza ParcheNotFoundException cuando no existe")
-    void unirseAParche_noExiste_lanzaExcepcion() {
+    @DisplayName("unirseAParche lanza ParcheNotFoundException cuando el parche no existe")
+    void unirseAParche_parcheNoExiste_lanzaExcepcion() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.unirseAParche(parcheId, studentId))
@@ -66,40 +66,46 @@ class JoinParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("unirseAParche lanza IllegalArgumentException cuando parche está archivado")
-    void unirseAParche_archivado_lanzaIllegalArgument() {
+    @DisplayName("unirseAParche lanza IllegalArgumentException cuando el parche está archivado")
+    void unirseAParche_parcheArchivado_lanzaIllegalArgument() {
         parche.setStatus(ParcheStatus.FILED);
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
 
         assertThatThrownBy(() -> useCase.unirseAParche(parcheId, studentId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("archived");
+
+        verify(memberRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("unirseAParche lanza StudentAlreadyMemberException cuando ya es miembro")
+    @DisplayName("unirseAParche lanza StudentAlreadyMemberException cuando el student ya es miembro")
     void unirseAParche_yaMiembro_lanzaExcepcion() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(true);
 
         assertThatThrownBy(() -> useCase.unirseAParche(parcheId, studentId))
                 .isInstanceOf(StudentAlreadyMemberException.class);
+
+        verify(memberRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("unirseAParche lanza MaximumCapacityReachedException cuando parche está lleno")
-    void unirseAParche_lleno_lanzaExcepcion() {
+    @DisplayName("unirseAParche lanza MaximumCapacityReachedException cuando el cupo está lleno")
+    void unirseAParche_cupoLleno_lanzaExcepcion() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
         when(memberRepository.countByParcheId(parcheId)).thenReturn(10);
 
         assertThatThrownBy(() -> useCase.unirseAParche(parcheId, studentId))
                 .isInstanceOf(MaximumCapacityReachedException.class);
+
+        verify(memberRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("unirseAParche lanza MaxHangoutsReachedException cuando student tiene 5 activos")
-    void unirseAParche_5Activos_lanzaExcepcion() {
+    @DisplayName("unirseAParche lanza MaxHangoutsReachedException cuando el student tiene 5 parches activos")
+    void unirseAParche_estudianteCon5Activos_lanzaExcepcion() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
         when(memberRepository.countByParcheId(parcheId)).thenReturn(5);
@@ -107,14 +113,15 @@ class JoinParcheUseCaseTest {
 
         assertThatThrownBy(() -> useCase.unirseAParche(parcheId, studentId))
                 .isInstanceOf(MaxHangoutsReachedException.class);
+
+        verify(memberRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("unirseAParche guarda member con rol STUDENT cuando todo es válido")
+    @DisplayName("unirseAParche guarda member con rol STUDENT cuando todas las validaciones pasan")
     void unirseAParche_valido_guardaMemberConRolStudent() {
-        UUID savedId = UUID.randomUUID();
         Member savedMember = Member.builder()
-                .id(savedId)
+                .id(UUID.randomUUID())
                 .parcheId(parcheId)
                 .studentId(studentId)
                 .memberRole(MemberRole.STUDENT)
@@ -132,5 +139,22 @@ class JoinParcheUseCaseTest {
         assertThat(result.getParcheId()).isEqualTo(parcheId);
         assertThat(result.getStudentId()).isEqualTo(studentId);
         assertThat(result.getMemberRole()).isEqualTo(MemberRole.STUDENT);
+    }
+
+    @Test
+    @DisplayName("unirseAParche permite unirse cuando el student tiene exactamente 4 activos")
+    void unirseAParche_estudianteCon4Activos_permiteUnirse() {
+        Member savedMember = Member.builder()
+                .id(UUID.randomUUID()).parcheId(parcheId).studentId(studentId)
+                .memberRole(MemberRole.STUDENT).build();
+
+        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
+        when(memberRepository.countByParcheId(parcheId)).thenReturn(1);
+        when(memberRepository.countParchesActivosByStudentId(studentId)).thenReturn(4);
+        when(memberRepository.save(any())).thenReturn(savedMember);
+
+        assertThatCode(() -> useCase.unirseAParche(parcheId, studentId))
+                .doesNotThrowAnyException();
     }
 }

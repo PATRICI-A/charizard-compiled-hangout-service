@@ -49,9 +49,11 @@ class MemberControllerTest {
         studentId = UUID.randomUUID();
     }
 
+    // ─── POST /parches/{id}/miembros ──────────────────────────────────────
+
     @Test
-    @DisplayName("POST /parches/{id}/miembros retorna 201 cuando student se une")
-    void unirseAParche_valido_retorna201() throws Exception {
+    @DisplayName("POST /parches/{id}/miembros retorna 201 cuando el student se une exitosamente")
+    void unirseAParche_valido_retorna201ConMember() throws Exception {
         MemberResponse response = MemberResponse.builder()
                 .id(UUID.randomUUID())
                 .parcheId(parcheId)
@@ -69,7 +71,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("POST /parches/{id}/miembros retorna 404 cuando parche no existe")
+    @DisplayName("POST /parches/{id}/miembros retorna 404 cuando el parche no existe")
     void unirseAParche_parcheNoExiste_retorna404() throws Exception {
         when(joinParcheService.unirseAParche(parcheId, studentId))
                 .thenThrow(new ParcheNotFoundException("Parche not found with id: " + parcheId));
@@ -80,7 +82,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("POST /parches/{id}/miembros retorna 409 cuando ya es miembro")
+    @DisplayName("POST /parches/{id}/miembros retorna 409 cuando el student ya es miembro")
     void unirseAParche_yaMiembro_retorna409() throws Exception {
         when(joinParcheService.unirseAParche(parcheId, studentId))
                 .thenThrow(new StudentAlreadyMemberException("Student is already a member of this parche"));
@@ -91,8 +93,8 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("POST /parches/{id}/miembros retorna 409 cuando parche está lleno")
-    void unirseAParche_lleno_retorna409() throws Exception {
+    @DisplayName("POST /parches/{id}/miembros retorna 409 cuando el parche está lleno")
+    void unirseAParche_cupoLleno_retorna409() throws Exception {
         when(joinParcheService.unirseAParche(parcheId, studentId))
                 .thenThrow(new MaximumCapacityReachedException("Parche is already full"));
 
@@ -102,8 +104,8 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("POST /parches/{id}/miembros retorna 409 cuando student tiene 5 activos")
-    void unirseAParche_5Activos_retorna409() throws Exception {
+    @DisplayName("POST /parches/{id}/miembros retorna 409 cuando el student tiene 5 parches activos")
+    void unirseAParche_limiteParches_retorna409() throws Exception {
         when(joinParcheService.unirseAParche(parcheId, studentId))
                 .thenThrow(new MaxHangoutsReachedException());
 
@@ -112,8 +114,10 @@ class MemberControllerTest {
                 .andExpect(status().isConflict());
     }
 
+    // ─── DELETE /parches/{id}/miembros ────────────────────────────────────
+
     @Test
-    @DisplayName("DELETE /parches/{id}/miembros retorna 204 cuando student sale")
+    @DisplayName("DELETE /parches/{id}/miembros retorna 204 cuando el student sale exitosamente")
     void salirDeParche_valido_retorna204() throws Exception {
         doNothing().when(leaveParcheService).salirDeParche(parcheId, studentId);
 
@@ -125,7 +129,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /parches/{id}/miembros retorna 404 cuando parche no existe")
+    @DisplayName("DELETE /parches/{id}/miembros retorna 404 cuando el parche no existe")
     void salirDeParche_parcheNoExiste_retorna404() throws Exception {
         doThrow(new ParcheNotFoundException("Parche not found with id: " + parcheId))
                 .when(leaveParcheService).salirDeParche(parcheId, studentId);
@@ -136,7 +140,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /parches/{id}/miembros retorna 400 cuando student es captain")
+    @DisplayName("DELETE /parches/{id}/miembros retorna 400 cuando el student es el capitán")
     void salirDeParche_esCaptain_retorna400() throws Exception {
         doThrow(new IllegalArgumentException("Captain cannot leave without transferring leadership first"))
                 .when(leaveParcheService).salirDeParche(parcheId, studentId);

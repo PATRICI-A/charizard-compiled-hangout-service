@@ -8,6 +8,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -15,7 +16,7 @@ import java.time.LocalTime;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 class ParcheEntityTest {
 
@@ -43,30 +44,47 @@ class ParcheEntityTest {
     }
 
     @Test
-    void shouldFailWhenMaximumQuotaIsLessThanTwo() {
+    @DisplayName("entidad válida no genera violaciones de constraints")
+    void entidadValida_sinViolaciones() {
+        ParcheEntity parche = buildValidParche();
+
+        Set<ConstraintViolation<ParcheEntity>> violations = validator.validate(parche);
+
+        assertThat(violations).isEmpty();
+    }
+
+    @Test
+    @DisplayName("maximumQuota menor a 2 genera violación de constraint")
+    void maximumQuota_menorDos_violaConstraint() {
         ParcheEntity parche = buildValidParche();
         parche.setMaximumQuota(1);
 
         Set<ConstraintViolation<ParcheEntity>> violations = validator.validate(parche);
 
-        assertFalse(violations.isEmpty(), "Debe haber al menos una violación");
-        assertTrue(
-                violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("maximumQuota")),
-                "La violación debe ser en el campo maximumQuota"
-        );
+        assertThat(violations).isNotEmpty();
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("maximumQuota"));
     }
 
     @Test
-    void shouldFailWhenNameIsNull() {
+    @DisplayName("name nulo genera violación de constraint")
+    void name_nulo_violaConstraint() {
         ParcheEntity parche = buildValidParche();
         parche.setName(null);
 
         Set<ConstraintViolation<ParcheEntity>> violations = validator.validate(parche);
 
-        assertFalse(violations.isEmpty(), "Debe haber al menos una violación");
-        assertTrue(
-                violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")),
-                "La violación debe ser en el campo name"
-        );
+        assertThat(violations).isNotEmpty();
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("name"));
+    }
+
+    @Test
+    @DisplayName("maximumQuota igual a 2 es válido")
+    void maximumQuota_igualDos_esValido() {
+        ParcheEntity parche = buildValidParche();
+        parche.setMaximumQuota(2);
+
+        Set<ConstraintViolation<ParcheEntity>> violations = validator.validate(parche);
+
+        assertThat(violations).noneMatch(v -> v.getPropertyPath().toString().equals("maximumQuota"));
     }
 }

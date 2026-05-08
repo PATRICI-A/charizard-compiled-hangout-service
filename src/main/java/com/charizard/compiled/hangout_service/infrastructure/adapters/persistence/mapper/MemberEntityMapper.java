@@ -10,6 +10,5 @@ public interface MemberEntityMapper {
 
     Member toDomain(MemberEntity entity);
 
-    @Mapping(target = "parche", ignore = true)
     MemberEntity toEntity(Member domain);
 }

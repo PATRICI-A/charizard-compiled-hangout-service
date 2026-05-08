@@ -49,8 +49,8 @@ class InvitationRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("save persiste y retorna dominio")
-    void save_persisteYRetornaDominio() {
+    @DisplayName("save convierte a entidad, persiste y retorna el dominio mapeado")
+    void save_persisteEntidadYRetornaDominio() {
         when(mapper.toEntity(invitation)).thenReturn(invitationEntity);
         when(invitationRepository.save(invitationEntity)).thenReturn(invitationEntity);
         when(mapper.toDomain(invitationEntity)).thenReturn(invitation);
@@ -58,12 +58,14 @@ class InvitationRepositoryAdapterTest {
         Invitation result = adapter.save(invitation);
 
         assertThat(result).isEqualTo(invitation);
+        verify(mapper).toEntity(invitation);
         verify(invitationRepository).save(invitationEntity);
+        verify(mapper).toDomain(invitationEntity);
     }
 
     @Test
-    @DisplayName("findById retorna invitación cuando existe")
-    void findById_existe_retornaInvitacion() {
+    @DisplayName("findById retorna la invitación mapeada cuando existe")
+    void findById_existe_retornaInvitacionMapeada() {
         when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(invitationEntity));
         when(mapper.toDomain(invitationEntity)).thenReturn(invitation);
 
@@ -74,13 +76,14 @@ class InvitationRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("findById retorna vacío cuando no existe")
+    @DisplayName("findById retorna Optional vacío cuando no existe")
     void findById_noExiste_retornaVacio() {
         when(invitationRepository.findById(invitationId)).thenReturn(Optional.empty());
 
         Optional<Invitation> result = adapter.findById(invitationId);
 
         assertThat(result).isEmpty();
+        verify(mapper, never()).toDomain(any(InvitationEntity.class));
     }
 
     @Test
@@ -96,7 +99,18 @@ class InvitationRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("findByInvitedStudentIdAndStatus retorna lista de invitaciones")
+    @DisplayName("findByParcheIdAndInvitedStudentId retorna vacío cuando no existe")
+    void findByParcheIdAndInvitedStudentId_noExiste_retornaVacio() {
+        when(invitationRepository.findByParcheIdAndInvitedStudentId(parcheId, studentId))
+                .thenReturn(Optional.empty());
+
+        Optional<Invitation> result = adapter.findByParcheIdAndInvitedStudentId(parcheId, studentId);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("findByInvitedStudentIdAndStatus retorna la lista de invitaciones filtrada")
     void findByInvitedStudentIdAndStatus_retornaLista() {
         when(invitationRepository.findByInvitedStudentIdAndStatus(studentId, InvitationStatus.PENDING))
                 .thenReturn(List.of(invitationEntity));
@@ -105,16 +119,18 @@ class InvitationRepositoryAdapterTest {
         List<Invitation> result = adapter.findByInvitedStudentIdAndStatus(studentId, InvitationStatus.PENDING);
 
         assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStatus()).isEqualTo(InvitationStatus.PENDING);
     }
 
     @Test
     @DisplayName("findByParcheId retorna todas las invitaciones del parche")
-    void findByParcheId_retornaLista() {
+    void findByParcheId_retornaTodasLasInvitaciones() {
         when(invitationRepository.findByParcheId(parcheId)).thenReturn(List.of(invitationEntity));
         when(mapper.toDomain(invitationEntity)).thenReturn(invitation);
 
         List<Invitation> result = adapter.findByParcheId(parcheId);
 
         assertThat(result).hasSize(1);
+        assertThat(result.get(0).getParcheId()).isEqualTo(parcheId);
     }
 }

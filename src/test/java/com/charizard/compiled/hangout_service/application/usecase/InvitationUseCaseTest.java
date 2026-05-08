@@ -61,7 +61,7 @@ class InvitationUseCaseTest {
     }
 
     @Test
-    @DisplayName("sendInvitation lanza ParcheNotFoundException cuando no existe")
+    @DisplayName("sendInvitation lanza ParcheNotFoundException cuando el parche no existe")
     void sendInvitation_parcheNoExiste_lanzaExcepcion() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
 
@@ -72,7 +72,7 @@ class InvitationUseCaseTest {
     }
 
     @Test
-    @DisplayName("sendInvitation lanza ResponseStatusException 403 cuando no es captain")
+    @DisplayName("sendInvitation lanza ResponseStatusException 403 cuando el solicitante no es el capitán")
     void sendInvitation_noEsCaptain_lanzaForbidden() {
         UUID otroUsuario = UUID.randomUUID();
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
@@ -80,21 +80,25 @@ class InvitationUseCaseTest {
         assertThatThrownBy(() -> useCase.sendInvitation(parcheId, otroUsuario, studentId))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("captain");
+
+        verify(invitationRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("sendInvitation lanza StudentAlreadyMemberException cuando ya es miembro")
-    void sendInvitation_yaMiembro_lanzaExcepcion() {
+    @DisplayName("sendInvitation lanza StudentAlreadyMemberException cuando el invitado ya es miembro")
+    void sendInvitation_estudianteYaMiembro_lanzaExcepcion() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(true);
 
         assertThatThrownBy(() -> useCase.sendInvitation(parcheId, captainId, studentId))
                 .isInstanceOf(StudentAlreadyMemberException.class);
+
+        verify(invitationRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("sendInvitation lanza DuplicateInvitationException cuando ya hay invitación pendiente")
-    void sendInvitation_invitacionPendiente_lanzaExcepcion() {
+    @DisplayName("sendInvitation lanza DuplicateInvitationException cuando ya hay una invitación PENDING")
+    void sendInvitation_invitacionPendienteExistente_lanzaExcepcion() {
         Invitation pending = Invitation.builder()
                 .id(UUID.randomUUID())
                 .parcheId(parcheId)
@@ -109,10 +113,12 @@ class InvitationUseCaseTest {
 
         assertThatThrownBy(() -> useCase.sendInvitation(parcheId, captainId, studentId))
                 .isInstanceOf(DuplicateInvitationException.class);
+
+        verify(invitationRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("sendInvitation guarda invitación y publica evento cuando todo es válido")
+    @DisplayName("sendInvitation guarda la invitación PENDING y publica InvitationSentEvent cuando todo es válido")
     void sendInvitation_valido_guardaYPublicaEvento() {
         Invitation saved = Invitation.builder()
                 .id(UUID.randomUUID())
@@ -133,11 +139,12 @@ class InvitationUseCaseTest {
         assertThat(result).isNotNull();
         assertThat(result.getStatus()).isEqualTo(InvitationStatus.PENDING);
         assertThat(result.getInvitedStudentId()).isEqualTo(studentId);
+        verify(invitationRepository).save(any(Invitation.class));
         verify(eventPublisher).publishEvent(any(InvitationSentEvent.class));
     }
 
     @Test
-    @DisplayName("sendInvitation permite reenviar cuando invitación previa fue rechazada")
+    @DisplayName("sendInvitation permite reenviar invitación cuando la anterior fue REJECTED")
     void sendInvitation_invitacionRechazadaPrevia_permiteReenviar() {
         Invitation rejected = Invitation.builder()
                 .id(UUID.randomUUID())
@@ -161,7 +168,17 @@ class InvitationUseCaseTest {
 
         InvitationResponse result = useCase.sendInvitation(parcheId, captainId, studentId);
 
-        assertThat(result).isNotNull();
         assertThat(result.getStatus()).isEqualTo(InvitationStatus.PENDING);
+    }
+
+    @Test
+    @DisplayName("sendInvitation no publica evento cuando el parche no existe")
+    void sendInvitation_parcheNoExiste_noPublicaEvento() {
+        when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> useCase.sendInvitation(parcheId, captainId, studentId))
+                .isInstanceOf(ParcheNotFoundException.class);
+
+        verify(eventPublisher, never()).publishEvent(any());
     }
 }

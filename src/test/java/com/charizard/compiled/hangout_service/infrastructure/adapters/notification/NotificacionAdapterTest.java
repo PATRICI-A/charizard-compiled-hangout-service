@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,13 +23,30 @@ class NotificacionAdapterTest {
     @InjectMocks NotificacionAdapter adapter;
 
     @Test
-    @DisplayName("notificarNuevoMiembro publica NuevoMiembroEvent")
-    void notificarNuevoMiembro_publicaEvento() {
+    @DisplayName("notificarNuevoMiembro publica un NuevoMiembroEvent")
+    void notificarNuevoMiembro_publicaNuevoMiembroEvent() {
         UUID capitanId = UUID.randomUUID();
         UUID estudianteId = UUID.randomUUID();
 
         adapter.notificarNuevoMiembro(capitanId, estudianteId, "Parche Fútbol");
 
         verify(eventPublisher).publishEvent(any(NuevoMiembroEvent.class));
+    }
+
+    @Test
+    @DisplayName("notificarNuevoMiembro publica evento con los IDs y nombre de parche correctos")
+    void notificarNuevoMiembro_publicaEventoConDatosCorrectos() {
+        UUID capitanId = UUID.randomUUID();
+        UUID estudianteId = UUID.randomUUID();
+        String nombreParche = "Parche Estudio";
+
+        adapter.notificarNuevoMiembro(capitanId, estudianteId, nombreParche);
+
+        verify(eventPublisher).publishEvent(argThat((Object event) -> {
+            if (!(event instanceof NuevoMiembroEvent e)) return false;
+            return e.capitanId().equals(capitanId) &&
+                   e.estudianteId().equals(estudianteId) &&
+                   e.nombreParche().equals(nombreParche);
+        }));
     }
 }

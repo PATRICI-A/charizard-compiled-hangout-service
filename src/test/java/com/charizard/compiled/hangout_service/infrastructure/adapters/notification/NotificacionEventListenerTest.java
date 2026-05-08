@@ -25,4 +25,17 @@ class NotificacionEventListenerTest {
 
         assertThatCode(() -> listener.handle(event)).doesNotThrowAnyException();
     }
+
+    @Test
+    @DisplayName("handle acepta eventos con nombre de parche vacío sin lanzar excepción")
+    void handle_nombreParche_vacio_sinExcepcion() {
+        NuevoMiembroEvent event = new NuevoMiembroEvent(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "",
+                LocalDateTime.now()
+        );
+
+        assertThatCode(() -> listener.handle(event)).doesNotThrowAnyException();
+    }
 }

@@ -15,7 +15,6 @@ import jakarta.validation.constraints.Min;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -64,9 +63,6 @@ public class ParcheEntity {
 
     @Column(nullable = false)
     private LocalDateTime creationDate;
-
-    @OneToMany(mappedBy = "parche", cascade = CascadeType.ALL)
-    private List<MemberEntity> members;
 
     @Column(nullable = true)
     private UUID eventId;

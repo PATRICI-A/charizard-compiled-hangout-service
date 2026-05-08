@@ -46,7 +46,7 @@ class MemberRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("existsByParcheIdAndStudentId retorna true cuando existe")
+    @DisplayName("existsByParcheIdAndStudentId retorna true cuando el member existe")
     void existsByParcheIdAndStudentId_existe_retornaTrue() {
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(true);
 
@@ -54,7 +54,7 @@ class MemberRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("existsByParcheIdAndStudentId retorna false cuando no existe")
+    @DisplayName("existsByParcheIdAndStudentId retorna false cuando el member no existe")
     void existsByParcheIdAndStudentId_noExiste_retornaFalse() {
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
 
@@ -62,16 +62,17 @@ class MemberRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("existsByParcheIdAndStudentIdAndMemberRole delega en repositorio")
+    @DisplayName("existsByParcheIdAndStudentIdAndMemberRole delega correctamente en el repositorio")
     void existsByParcheIdAndStudentIdAndMemberRole_delegaEnRepositorio() {
         when(memberRepository.existsByParcheIdAndStudentIdAndMemberRole(parcheId, studentId, MemberRole.CAPTAIN))
                 .thenReturn(true);
 
         assertThat(adapter.existsByParcheIdAndStudentIdAndMemberRole(parcheId, studentId, MemberRole.CAPTAIN)).isTrue();
+        verify(memberRepository).existsByParcheIdAndStudentIdAndMemberRole(parcheId, studentId, MemberRole.CAPTAIN);
     }
 
     @Test
-    @DisplayName("countParchesActivosByStudentId delega en repositorio con status ACTIVE")
+    @DisplayName("countParchesActivosByStudentId delega al repositorio con status ACTIVE")
     void countParchesActivosByStudentId_delegaConStatusActive() {
         when(memberRepository.countParchesActivosByStudentIdAndStatus(studentId, ParcheStatus.ACTIVE)).thenReturn(3);
 
@@ -80,16 +81,16 @@ class MemberRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("countByParcheId retorna cuenta correcta")
-    void countByParcheId_retornaCuenta() {
+    @DisplayName("countByParcheId retorna la cantidad correcta de miembros")
+    void countByParcheId_retornaCuentaCorrecta() {
         when(memberRepository.countByParcheId(parcheId)).thenReturn(5);
 
         assertThat(adapter.countByParcheId(parcheId)).isEqualTo(5);
     }
 
     @Test
-    @DisplayName("save persiste y retorna dominio")
-    void save_persisteYRetornaDominio() {
+    @DisplayName("save convierte a entidad, persiste y retorna el dominio mapeado")
+    void save_persisteEntidadYRetornaDominio() {
         when(mapper.toEntity(member)).thenReturn(memberEntity);
         when(memberRepository.save(memberEntity)).thenReturn(memberEntity);
         when(mapper.toDomain(memberEntity)).thenReturn(member);
@@ -97,12 +98,14 @@ class MemberRepositoryAdapterTest {
         Member result = adapter.save(member);
 
         assertThat(result).isEqualTo(member);
+        verify(mapper).toEntity(member);
         verify(memberRepository).save(memberEntity);
+        verify(mapper).toDomain(memberEntity);
     }
 
     @Test
-    @DisplayName("deleteByParcheIdAndStudentId delega en repositorio")
-    void deleteByParcheIdAndStudentId_delegaEnRepositorio() {
+    @DisplayName("deleteByParcheIdAndStudentId delega la eliminación al repositorio")
+    void deleteByParcheIdAndStudentId_delegaEliminar() {
         adapter.deleteByParcheIdAndStudentId(parcheId, studentId);
 
         verify(memberRepository).deleteByParcheIdAndStudentId(parcheId, studentId);

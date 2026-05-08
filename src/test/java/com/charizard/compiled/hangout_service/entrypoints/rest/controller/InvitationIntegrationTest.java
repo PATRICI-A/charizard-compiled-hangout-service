@@ -14,47 +14,36 @@ import com.charizard.compiled.hangout_service.infrastructure.adapters.persistenc
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import java.time.LocalDate;
-import java.time.LocalTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Tag("integration")
 @SpringBootTest
 @ActiveProfiles("test")
 class InvitationIntegrationTest {
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
+    @Autowired WebApplicationContext webApplicationContext;
+    @Autowired ParcheRepository parcheRepository;
+    @Autowired MemberRepository memberRepository;
+    @Autowired InvitationRepository invitationRepository;
 
-    private MockMvc mockMvc;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Autowired
-    private ParcheRepository parcheRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private InvitationRepository invitationRepository;
+    MockMvc mockMvc;
+    ObjectMapper objectMapper = new ObjectMapper();
 
     private UUID parcheId;
     private UUID captainId;
@@ -64,38 +53,27 @@ class InvitationIntegrationTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        objectMapper.findAndRegisterModules();
 
         captainId = UUID.randomUUID();
         studentId = UUID.randomUUID();
 
-        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
-        ParcheEntity parche = ParcheEntity.builder()
-                .name("Parche test")
-                .description("Test description")
-                .place("Test place")
-                .type(ParcheType.PRIVATE)
-                .maximumQuota(10)
-                .date(dateRealization.toLocalDate())
-                .hour(dateRealization.toLocalTime())
-                .status(ParcheStatus.ACTIVE)
-                .captainId(captainId)
-                .build();
-        parcheId = parcheRepository.save(parche).getId();
+        LocalDateTime date = LocalDateTime.now().plusDays(1);
+        parcheId = parcheRepository.save(ParcheEntity.builder()
+                .name("Parche test").description("Test").place("Test place")
+                .type(ParcheType.PRIVATE).maximumQuota(10)
+                .date(date.toLocalDate()).hour(date.toLocalTime())
+                .status(ParcheStatus.ACTIVE).captainId(captainId)
+                .build()).getId();
 
-        MemberEntity captain = MemberEntity.builder()
-                .parcheId(parcheId)
-                .studentId(captainId)
-                .memberRole(MemberRole.STUDENT)
-                .build();
-        memberRepository.save(captain);
+        memberRepository.save(MemberEntity.builder()
+                .parcheId(parcheId).studentId(captainId)
+                .memberRole(MemberRole.CAPTAIN).build());
 
-        InvitationEntity invitation = InvitationEntity.builder()
-                .parcheId(parcheId)
-                .captainId(captainId)
-                .invitedStudentId(studentId)
-                .status(InvitationStatus.PENDING)
-                .build();
-        invitationId = invitationRepository.save(invitation).getId();
+        invitationId = invitationRepository.save(InvitationEntity.builder()
+                .parcheId(parcheId).captainId(captainId)
+                .invitedStudentId(studentId).status(InvitationStatus.PENDING)
+                .build()).getId();
     }
 
     @AfterEach
@@ -106,7 +84,8 @@ class InvitationIntegrationTest {
     }
 
     @Test
-    void accept_successFlow_createsMembership() throws Exception {
+    @DisplayName("PATCH /invitaciones/{id} ACCEPTED crea membership y retorna 200")
+    void acceptInvitation_flujoExitoso_creaMembershipYRetorna200() throws Exception {
         RespondInvitationRequest request = new RespondInvitationRequest();
         request.setAnswer(InvitationStatus.ACCEPTED);
 
@@ -121,7 +100,8 @@ class InvitationIntegrationTest {
     }
 
     @Test
-    void reject_successFlow_doesNotCreateMember() throws Exception {
+    @DisplayName("PATCH /invitaciones/{id} REJECTED no crea membership y retorna 200")
+    void rejectInvitation_flujoExitoso_noCreaMembershipYRetorna200() throws Exception {
         RespondInvitationRequest request = new RespondInvitationRequest();
         request.setAnswer(InvitationStatus.REJECTED);
 
@@ -132,14 +112,15 @@ class InvitationIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("REJECTED"));
 
-        assertEquals(1, memberRepository.countByParcheId(parcheId));
+        assertEquals(1, memberRepository.countByParcheId(parcheId)); // solo el capitán
     }
 
     @Test
-    void respond_alreadyResponded_returns409() throws Exception {
-        InvitationEntity alreadyResponded = invitationRepository.findById(invitationId).get();
-        alreadyResponded.setStatus(InvitationStatus.ACCEPTED);
-        invitationRepository.save(alreadyResponded);
+    @DisplayName("PATCH /invitaciones/{id} retorna 409 cuando la invitación ya fue respondida")
+    void respondInvitation_yaRespondida_retorna409() throws Exception {
+        InvitationEntity inv = invitationRepository.findById(invitationId).orElseThrow();
+        inv.setStatus(InvitationStatus.ACCEPTED);
+        invitationRepository.save(inv);
 
         RespondInvitationRequest request = new RespondInvitationRequest();
         request.setAnswer(InvitationStatus.REJECTED);
@@ -152,46 +133,39 @@ class InvitationIntegrationTest {
     }
 
     @Test
-    void respond_notTheInvitedStudent_returns403() throws Exception {
+    @DisplayName("PATCH /invitaciones/{id} retorna 403 cuando no es el estudiante invitado")
+    void respondInvitation_noEsElInvitado_retorna403() throws Exception {
         RespondInvitationRequest request = new RespondInvitationRequest();
         request.setAnswer(InvitationStatus.ACCEPTED);
-
-        UUID otherStudent = UUID.randomUUID();
 
         mockMvc.perform(patch("/api/v1/invitaciones/{id}", invitationId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
-                        .header("X-User-Id", otherStudent.toString()))
+                        .header("X-User-Id", UUID.randomUUID().toString()))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    void accept_hangoutFull_returns409() throws Exception {
-        LocalDateTime fullDate = LocalDateTime.now().plusDays(1);
-        ParcheEntity fullParche = ParcheEntity.builder()
-                .name("Full hangout")
-                .description("No capacity")
-                .place("Full place")
-                .type(ParcheType.PRIVATE)
-                .maximumQuota(2)
-                .date(fullDate.toLocalDate())
-                .hour(fullDate.toLocalTime())
-                .status(ParcheStatus.ACTIVE)
-                .captainId(captainId)
-                .build();
-        UUID parcheFullId = parcheRepository.save(fullParche).getId();
+    @DisplayName("PATCH /invitaciones/{id} ACCEPTED retorna 409 cuando el parche está lleno")
+    void acceptInvitation_parcheCompleto_retorna409() throws Exception {
+        LocalDateTime date = LocalDateTime.now().plusDays(1);
+        UUID fullParcheId = parcheRepository.save(ParcheEntity.builder()
+                .name("Parche lleno").description("Sin cupo").place("Lugar")
+                .type(ParcheType.PRIVATE).maximumQuota(2)
+                .date(date.toLocalDate()).hour(date.toLocalTime())
+                .status(ParcheStatus.ACTIVE).captainId(captainId)
+                .build()).getId();
 
-        memberRepository.save(MemberEntity.builder().parcheId(parcheFullId).studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build());
-        memberRepository.save(MemberEntity.builder().parcheId(parcheFullId).studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build());
+        memberRepository.save(MemberEntity.builder().parcheId(fullParcheId)
+                .studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build());
+        memberRepository.save(MemberEntity.builder().parcheId(fullParcheId)
+                .studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build());
 
-        UUID otherStudent = UUID.randomUUID();
-        InvitationEntity invFull = InvitationEntity.builder()
-                .parcheId(parcheFullId)
-                .captainId(captainId)
-                .invitedStudentId(otherStudent)
-                .status(InvitationStatus.PENDING)
-                .build();
-        UUID invFullId = invitationRepository.save(invFull).getId();
+        UUID otroEstudiante = UUID.randomUUID();
+        UUID invFullId = invitationRepository.save(InvitationEntity.builder()
+                .parcheId(fullParcheId).captainId(captainId)
+                .invitedStudentId(otroEstudiante).status(InvitationStatus.PENDING)
+                .build()).getId();
 
         RespondInvitationRequest request = new RespondInvitationRequest();
         request.setAnswer(InvitationStatus.ACCEPTED);
@@ -199,7 +173,7 @@ class InvitationIntegrationTest {
         mockMvc.perform(patch("/api/v1/invitaciones/{id}", invFullId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
-                        .header("X-User-Id", otherStudent.toString()))
+                        .header("X-User-Id", otroEstudiante.toString()))
                 .andExpect(status().isConflict());
     }
 }

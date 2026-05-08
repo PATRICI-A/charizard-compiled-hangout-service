@@ -9,6 +9,7 @@ import com.charizard.compiled.hangout_service.infrastructure.adapters.persistenc
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository.ParcheRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,25 +23,19 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Tag("integration")
 @SpringBootTest
 @ActiveProfiles("test")
 class MiembroIntegrationTest {
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
+    @Autowired WebApplicationContext webApplicationContext;
+    @Autowired ParcheRepository parcheRepository;
+    @Autowired MemberRepository memberRepository;
 
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ParcheRepository parcheRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
+    MockMvc mockMvc;
 
     private UUID captainId;
     private UUID parcheId;
@@ -54,25 +49,17 @@ class MiembroIntegrationTest {
 
         captainId = UUID.randomUUID();
 
-        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
-        ParcheEntity parche = ParcheEntity.builder()
-                .name("Parche Base")
-                .description("Parche para tests de integración")
-                .place("Campus universitario")
-                .type(ParcheType.PUBLIC)
-                .maximumQuota(10)
-                .date(dateRealization.toLocalDate())
-                .hour(dateRealization.toLocalTime())
-                .status(ParcheStatus.ACTIVE)
-                .captainId(captainId)
-                .build();
-        parcheId = parcheRepository.save(parche).getId();
+        LocalDateTime date = LocalDateTime.now().plusDays(1);
+        parcheId = parcheRepository.save(ParcheEntity.builder()
+                .name("Parche Base").description("Parche para tests de integración")
+                .place("Campus universitario").type(ParcheType.PUBLIC).maximumQuota(10)
+                .date(date.toLocalDate()).hour(date.toLocalTime())
+                .status(ParcheStatus.ACTIVE).captainId(captainId)
+                .build()).getId();
 
         memberRepository.save(MemberEntity.builder()
-                .parcheId(parcheId)
-                .studentId(captainId)
-                .memberRole(MemberRole.STUDENT)
-                .build());
+                .parcheId(parcheId).studentId(captainId)
+                .memberRole(MemberRole.CAPTAIN).build());
     }
 
     @AfterEach
@@ -81,12 +68,11 @@ class MiembroIntegrationTest {
         parcheRepository.deleteAll();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Flujo: Unirse a parche público
-    // ─────────────────────────────────────────────────────────────────────────
+    // ─── Unirse a parche ──────────────────────────────────────────────────
 
     @Test
-    void unirse_flujoExitoso() throws Exception {
+    @DisplayName("POST /parches/{id}/miembros flujo exitoso crea membership")
+    void unirse_flujoExitoso_creaMembership() throws Exception {
         UUID studentId = UUID.randomUUID();
 
         mockMvc.perform(post("/api/v1/parches/{id}/miembros", parcheId)
@@ -97,39 +83,41 @@ class MiembroIntegrationTest {
     }
 
     @Test
+    @DisplayName("POST /parches/{id}/miembros retorna 409 cuando el cupo está lleno")
     void unirse_cupoLleno_retorna409() throws Exception {
-        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
-        ParcheEntity fullParche = parcheRepository.save(ParcheEntity.builder()
+        LocalDateTime date = LocalDateTime.now().plusDays(1);
+        UUID fullParcheId = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Lleno").description("Sin cupo").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(2)
-                .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
+                .date(date.toLocalDate()).hour(date.toLocalTime())
                 .status(ParcheStatus.ACTIVE).captainId(captainId)
-                .build());
+                .build()).getId();
 
-        memberRepository.save(MemberEntity.builder().parcheId(fullParche.getId())
+        memberRepository.save(MemberEntity.builder().parcheId(fullParcheId)
                 .studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build());
-        memberRepository.save(MemberEntity.builder().parcheId(fullParche.getId())
+        memberRepository.save(MemberEntity.builder().parcheId(fullParcheId)
                 .studentId(UUID.randomUUID()).memberRole(MemberRole.STUDENT).build());
 
-        mockMvc.perform(post("/api/v1/parches/{id}/miembros", fullParche.getId())
+        mockMvc.perform(post("/api/v1/parches/{id}/miembros", fullParcheId)
                         .header("X-User-Id", UUID.randomUUID()))
                 .andExpect(status().isConflict());
     }
 
     @Test
-    void unirse_masde5ParachesActivos_retorna409() throws Exception {
+    @DisplayName("POST /parches/{id}/miembros retorna 409 cuando el student tiene 5 parches activos")
+    void unirse_estudianteConLimiteAlcanzado_retorna409() throws Exception {
         UUID busyStudent = UUID.randomUUID();
-        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
+        LocalDateTime date = LocalDateTime.now().plusDays(1);
 
         for (int i = 0; i < 5; i++) {
-            ParcheEntity other = parcheRepository.save(ParcheEntity.builder()
+            UUID otherParcheId = parcheRepository.save(ParcheEntity.builder()
                     .name("Parche extra " + i).description("Desc").place("Lugar")
                     .type(ParcheType.PUBLIC).maximumQuota(10)
-                    .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
-                        .status(ParcheStatus.ACTIVE).captainId(UUID.randomUUID())
-                    .build());
+                    .date(date.toLocalDate()).hour(date.toLocalTime())
+                    .status(ParcheStatus.ACTIVE).captainId(UUID.randomUUID())
+                    .build()).getId();
             memberRepository.save(MemberEntity.builder()
-                    .parcheId(other.getId()).studentId(busyStudent)
+                    .parcheId(otherParcheId).studentId(busyStudent)
                     .memberRole(MemberRole.STUDENT).build());
         }
 
@@ -139,7 +127,8 @@ class MiembroIntegrationTest {
     }
 
     @Test
-    void unirse_estudianteYaEsMiembro_retorna409() throws Exception {
+    @DisplayName("POST /parches/{id}/miembros retorna 409 cuando el student ya es miembro")
+    void unirse_estudianteYaMiembro_retorna409() throws Exception {
         UUID studentId = UUID.randomUUID();
 
         mockMvc.perform(post("/api/v1/parches/{id}/miembros", parcheId)
@@ -152,6 +141,7 @@ class MiembroIntegrationTest {
     }
 
     @Test
+    @DisplayName("POST /parches/{id}/miembros retorna 404 cuando el parche no existe")
     void unirse_parcheNoExiste_retorna404() throws Exception {
         mockMvc.perform(post("/api/v1/parches/{id}/miembros", UUID.randomUUID())
                         .header("X-User-Id", UUID.randomUUID()))
@@ -159,26 +149,26 @@ class MiembroIntegrationTest {
     }
 
     @Test
+    @DisplayName("POST /parches/{id}/miembros retorna 400 cuando el parche está archivado")
     void unirse_parcheArchivado_retorna400() throws Exception {
-        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
-        ParcheEntity archived = parcheRepository.save(ParcheEntity.builder()
+        LocalDateTime date = LocalDateTime.now().plusDays(1);
+        UUID archivedId = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
-                .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
+                .date(date.toLocalDate()).hour(date.toLocalTime())
                 .status(ParcheStatus.FILED).captainId(captainId)
-                .build());
+                .build()).getId();
 
-        mockMvc.perform(post("/api/v1/parches/{id}/miembros", archived.getId())
+        mockMvc.perform(post("/api/v1/parches/{id}/miembros", archivedId)
                         .header("X-User-Id", UUID.randomUUID()))
                 .andExpect(status().isBadRequest());
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Flujo: Salir del parche
-    // ─────────────────────────────────────────────────────────────────────────
+    // ─── Salir del parche ─────────────────────────────────────────────────
 
     @Test
-    void salir_flujoExitoso() throws Exception {
+    @DisplayName("DELETE /parches/{id}/miembros flujo exitoso elimina membership")
+    void salir_flujoExitoso_eliminaMembership() throws Exception {
         UUID studentId = UUID.randomUUID();
         memberRepository.save(MemberEntity.builder()
                 .parcheId(parcheId).studentId(studentId)
@@ -192,7 +182,8 @@ class MiembroIntegrationTest {
     }
 
     @Test
-    void salir_capitan_sinTransferencia_retorna400() throws Exception {
+    @DisplayName("DELETE /parches/{id}/miembros retorna 400 cuando el capitán intenta salir")
+    void salir_captain_retorna400() throws Exception {
         mockMvc.perform(delete("/api/v1/parches/{id}/miembros", parcheId)
                         .header("X-User-Id", captainId))
                 .andExpect(status().isBadRequest());
@@ -201,6 +192,7 @@ class MiembroIntegrationTest {
     }
 
     @Test
+    @DisplayName("DELETE /parches/{id}/miembros retorna 404 cuando el student no es miembro")
     void salir_noEsMiembro_retorna404() throws Exception {
         mockMvc.perform(delete("/api/v1/parches/{id}/miembros", parcheId)
                         .header("X-User-Id", UUID.randomUUID()))
@@ -208,21 +200,22 @@ class MiembroIntegrationTest {
     }
 
     @Test
+    @DisplayName("DELETE /parches/{id}/miembros retorna 400 cuando el parche está archivado")
     void salir_parcheArchivado_retorna400() throws Exception {
-        LocalDateTime dateRealization = LocalDateTime.now().plusDays(1);
-        ParcheEntity archived = parcheRepository.save(ParcheEntity.builder()
+        LocalDateTime date = LocalDateTime.now().plusDays(1);
+        UUID archivedId = parcheRepository.save(ParcheEntity.builder()
                 .name("Parche Archivado").description("Archivado").place("Lugar")
                 .type(ParcheType.PUBLIC).maximumQuota(10)
-                .date(dateRealization.toLocalDate()).hour(dateRealization.toLocalTime())
+                .date(date.toLocalDate()).hour(date.toLocalTime())
                 .status(ParcheStatus.FILED).captainId(captainId)
-                .build());
+                .build()).getId();
 
         UUID studentId = UUID.randomUUID();
         memberRepository.save(MemberEntity.builder()
-                .parcheId(archived.getId()).studentId(studentId)
+                .parcheId(archivedId).studentId(studentId)
                 .memberRole(MemberRole.STUDENT).build());
 
-        mockMvc.perform(delete("/api/v1/parches/{id}/miembros", archived.getId())
+        mockMvc.perform(delete("/api/v1/parches/{id}/miembros", archivedId)
                         .header("X-User-Id", studentId))
                 .andExpect(status().isBadRequest());
     }

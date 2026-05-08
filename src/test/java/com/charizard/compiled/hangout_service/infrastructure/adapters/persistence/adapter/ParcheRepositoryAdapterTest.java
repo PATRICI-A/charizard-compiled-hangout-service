@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,8 +45,8 @@ class ParcheRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("findById retorna parche cuando existe")
-    void findById_existe_retornaParche() {
+    @DisplayName("findById retorna el parche mapeado cuando existe en el repositorio")
+    void findById_existe_retornaParcheMapeado() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parcheEntity));
         when(mapper.toDomain(parcheEntity)).thenReturn(parche);
 
@@ -57,18 +57,19 @@ class ParcheRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("findById retorna vacío cuando no existe")
+    @DisplayName("findById retorna Optional vacío cuando no existe en el repositorio")
     void findById_noExiste_retornaVacio() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
 
         Optional<Parche> result = adapter.findById(parcheId);
 
         assertThat(result).isEmpty();
+        verify(mapper, never()).toDomain(any(ParcheEntity.class));
     }
 
     @Test
-    @DisplayName("save convierte a entidad, persiste y retorna dominio")
-    void save_persisteYRetornaDominio() {
+    @DisplayName("save convierte a entidad, persiste y retorna el dominio mapeado")
+    void save_persisteEntidadYRetornaDominio() {
         when(mapper.toEntity(parche)).thenReturn(parcheEntity);
         when(parcheRepository.save(parcheEntity)).thenReturn(parcheEntity);
         when(mapper.toDomain(parcheEntity)).thenReturn(parche);
@@ -76,26 +77,46 @@ class ParcheRepositoryAdapterTest {
         Parche result = adapter.save(parche);
 
         assertThat(result).isEqualTo(parche);
+        verify(mapper).toEntity(parche);
         verify(parcheRepository).save(parcheEntity);
+        verify(mapper).toDomain(parcheEntity);
     }
 
     @Test
-    @DisplayName("findArchivables delega en repositorio y mapea resultados")
-    void findArchivables_delegaYMapea() {
-        LocalDateTime threshold = LocalDateTime.now().minusHours(24);
-        when(parcheRepository.findArchivables(ParcheStatus.ACTIVE, threshold)).thenReturn(List.of(parcheEntity));
+    @DisplayName("findArchivables delega con LocalDate y LocalTime correctos y mapea resultados")
+    void findArchivables_delegaConFechaYHoraYMapea() {
+        LocalDate thresholdDate = LocalDate.now().minusDays(1);
+        LocalTime thresholdTime = LocalTime.of(10, 0);
+
+        when(parcheRepository.findArchivables(ParcheStatus.ACTIVE, thresholdDate, thresholdTime))
+                .thenReturn(List.of(parcheEntity));
         when(mapper.toDomain(parcheEntity)).thenReturn(parche);
 
-        List<Parche> result = adapter.findArchivables(ParcheStatus.ACTIVE, threshold);
+        List<Parche> result = adapter.findArchivables(ParcheStatus.ACTIVE, thresholdDate, thresholdTime);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0)).isEqualTo(parche);
+        verify(parcheRepository).findArchivables(ParcheStatus.ACTIVE, thresholdDate, thresholdTime);
     }
 
     @Test
-    @DisplayName("findByFilters sin filtros llama findAll con spec")
+    @DisplayName("findArchivables retorna lista vacía cuando no hay parches archivables")
+    void findArchivables_sinResultados_retornaListaVacia() {
+        LocalDate thresholdDate = LocalDate.now().minusDays(1);
+        LocalTime thresholdTime = LocalTime.now();
+
+        when(parcheRepository.findArchivables(ParcheStatus.ACTIVE, thresholdDate, thresholdTime))
+                .thenReturn(List.of());
+
+        List<Parche> result = adapter.findArchivables(ParcheStatus.ACTIVE, thresholdDate, thresholdTime);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("findByFilters sin filtros invoca findAll con Specification y mapea resultados")
     @SuppressWarnings("unchecked")
-    void findByFilters_sinFiltros_llamaFindAll() {
+    void findByFilters_sinFiltros_llamaFindAllYMapea() {
         when(parcheRepository.findAll(any(Specification.class))).thenReturn(List.of(parcheEntity));
         when(mapper.toDomain(parcheEntity)).thenReturn(parche);
 
@@ -106,7 +127,7 @@ class ParcheRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("findByFilters con todos los filtros llama findAll")
+    @DisplayName("findByFilters con todos los filtros invoca findAll")
     @SuppressWarnings("unchecked")
     void findByFilters_conTodosLosFiltros_llamaFindAll() {
         when(parcheRepository.findAll(any(Specification.class))).thenReturn(List.of(parcheEntity));
@@ -124,7 +145,7 @@ class ParcheRepositoryAdapterTest {
     void findByFilters_nombreEnBlanco_noAplicaFiltroNombre() {
         when(parcheRepository.findAll(any(Specification.class))).thenReturn(List.of());
 
-        List<Parche> result = adapter.findByFilters(null, null, "  ", null);
+        List<Parche> result = adapter.findByFilters(null, null, "   ", null);
 
         assertThat(result).isEmpty();
         verify(parcheRepository).findAll(any(Specification.class));

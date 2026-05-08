@@ -36,12 +36,13 @@ class CreateParcheUseCaseTest {
 
     private UUID captainId;
     private CreateParcheRequest request;
-    private Parche savedParche;
+    private Parche domainParche;
     private ParcheResponse parcheResponse;
 
     @BeforeEach
     void setUp() {
         captainId = UUID.randomUUID();
+
         request = CreateParcheRequest.builder()
                 .name("Parche de estudio")
                 .place("Biblioteca")
@@ -49,7 +50,7 @@ class CreateParcheUseCaseTest {
                 .type(ParcheType.PUBLIC)
                 .build();
 
-        savedParche = Parche.builder()
+        domainParche = Parche.builder()
                 .id(UUID.randomUUID())
                 .name("Parche de estudio")
                 .maximumQuota(10)
@@ -58,31 +59,43 @@ class CreateParcheUseCaseTest {
                 .build();
 
         parcheResponse = ParcheResponse.builder()
-                .id(savedParche.getId())
+                .id(domainParche.getId())
                 .name("Parche de estudio")
                 .actualMembers(1)
                 .build();
     }
 
     @Test
-    @DisplayName("createParche con menos de 5 activos crea parche y member captain")
-    void createParche_conMenosDe5Activos_creaParche() {
+    @DisplayName("createParche con menos de 5 activos crea parche y retorna respuesta")
+    void createParche_menosDe5Activos_creaYRetorna() {
         when(memberRepository.countParchesActivosByStudentId(captainId)).thenReturn(4);
-        when(parcheMapper.toDomain(request, captainId)).thenReturn(savedParche);
-        when(parcheRepository.save(savedParche)).thenReturn(savedParche);
-        when(parcheMapper.toResponse(savedParche, 1)).thenReturn(parcheResponse);
+        when(parcheMapper.toDomain(request, captainId)).thenReturn(domainParche);
+        when(parcheRepository.save(domainParche)).thenReturn(domainParche);
+        when(parcheMapper.toResponse(domainParche, 1)).thenReturn(parcheResponse);
 
         ParcheResponse result = useCase.createParche(request, captainId);
 
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(savedParche.getId());
-        verify(memberRepository).save(any(Member.class));
-        verify(parcheRepository).save(savedParche);
+        assertThat(result.getId()).isEqualTo(domainParche.getId());
+        assertThat(result.getName()).isEqualTo("Parche de estudio");
     }
 
     @Test
-    @DisplayName("createParche con 5 activos lanza MaxHangoutsReachedException")
-    void createParche_con5Activos_lanzaExcepcion() {
+    @DisplayName("createParche con 0 activos permite crear")
+    void createParche_ceroActivos_permiteCrear() {
+        when(memberRepository.countParchesActivosByStudentId(captainId)).thenReturn(0);
+        when(parcheMapper.toDomain(request, captainId)).thenReturn(domainParche);
+        when(parcheRepository.save(any())).thenReturn(domainParche);
+        when(parcheMapper.toResponse(domainParche, 1)).thenReturn(parcheResponse);
+
+        ParcheResponse result = useCase.createParche(request, captainId);
+
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    @DisplayName("createParche con 5 activos lanza MaxHangoutsReachedException y no persiste")
+    void createParche_con5Activos_lanzaExcepcionSinPersistir() {
         when(memberRepository.countParchesActivosByStudentId(captainId)).thenReturn(5);
 
         assertThatThrownBy(() -> useCase.createParche(request, captainId))
@@ -93,32 +106,34 @@ class CreateParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("createParche guarda member con rol CAPTAIN y studentId correcto")
-    void createParche_guardaMemberConRolCaptain() {
+    @DisplayName("createParche guarda member con rol CAPTAIN, studentId y parcheId correctos")
+    void createParche_guardaMemberCaptainConDatosCorrectos() {
         when(memberRepository.countParchesActivosByStudentId(captainId)).thenReturn(0);
-        when(parcheMapper.toDomain(request, captainId)).thenReturn(savedParche);
-        when(parcheRepository.save(savedParche)).thenReturn(savedParche);
-        when(parcheMapper.toResponse(savedParche, 1)).thenReturn(parcheResponse);
+        when(parcheMapper.toDomain(request, captainId)).thenReturn(domainParche);
+        when(parcheRepository.save(domainParche)).thenReturn(domainParche);
+        when(parcheMapper.toResponse(domainParche, 1)).thenReturn(parcheResponse);
 
         useCase.createParche(request, captainId);
 
         verify(memberRepository).save(argThat(m ->
                 m.getMemberRole() == MemberRole.CAPTAIN &&
                 m.getStudentId().equals(captainId) &&
-                m.getParcheId().equals(savedParche.getId())
+                m.getParcheId().equals(domainParche.getId())
         ));
     }
 
     @Test
-    @DisplayName("createParche con 0 activos permite crear")
-    void createParche_con0Activos_permiteCrear() {
+    @DisplayName("createParche guarda el parche antes de guardar el member")
+    void createParche_guardaParcheAntesQueElMember() {
         when(memberRepository.countParchesActivosByStudentId(captainId)).thenReturn(0);
-        when(parcheMapper.toDomain(request, captainId)).thenReturn(savedParche);
-        when(parcheRepository.save(any())).thenReturn(savedParche);
-        when(parcheMapper.toResponse(savedParche, 1)).thenReturn(parcheResponse);
+        when(parcheMapper.toDomain(request, captainId)).thenReturn(domainParche);
+        when(parcheRepository.save(domainParche)).thenReturn(domainParche);
+        when(parcheMapper.toResponse(domainParche, 1)).thenReturn(parcheResponse);
 
-        ParcheResponse result = useCase.createParche(request, captainId);
+        useCase.createParche(request, captainId);
 
-        assertThat(result).isNotNull();
+        var inOrder = inOrder(parcheRepository, memberRepository);
+        inOrder.verify(parcheRepository).save(domainParche);
+        inOrder.verify(memberRepository).save(any(Member.class));
     }
 }

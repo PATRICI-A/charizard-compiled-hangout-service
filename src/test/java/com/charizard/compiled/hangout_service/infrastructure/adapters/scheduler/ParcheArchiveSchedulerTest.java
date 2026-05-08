@@ -11,15 +11,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ParcheArchiveSchedulerUnitTest {
+class ParcheArchiveSchedulerTest {
 
     @Mock ArchiveParcheInputPort archiveParcheUseCase;
 
     @InjectMocks ParcheArchiveScheduler scheduler;
 
     @Test
-    @DisplayName("archiveExpiredParches delega en el use case y registra resultado")
-    void archiveExpiredParches_delegaEnUseCase() {
+    @DisplayName("archiveExpiredParches delega en el use case y registra el resultado")
+    void archiveExpiredParches_delegaEnUseCaseYRegistra() {
         when(archiveParcheUseCase.archiveExpired()).thenReturn(3);
 
         scheduler.archiveExpiredParches();
@@ -28,12 +28,23 @@ class ParcheArchiveSchedulerUnitTest {
     }
 
     @Test
-    @DisplayName("archiveExpiredParches maneja correctamente cuando no hay parches expirados")
+    @DisplayName("archiveExpiredParches maneja correctamente el caso con 0 parches expirados")
     void archiveExpiredParches_sinExpirados_delegaEnUseCase() {
         when(archiveParcheUseCase.archiveExpired()).thenReturn(0);
 
         scheduler.archiveExpiredParches();
 
-        verify(archiveParcheUseCase).archiveExpired();
+        verify(archiveParcheUseCase, times(1)).archiveExpired();
+    }
+
+    @Test
+    @DisplayName("archiveExpiredParches llama al use case exactamente una vez por ejecución")
+    void archiveExpiredParches_llamaUseCaseExactamenteUnaVez() {
+        when(archiveParcheUseCase.archiveExpired()).thenReturn(5);
+
+        scheduler.archiveExpiredParches();
+
+        verify(archiveParcheUseCase, times(1)).archiveExpired();
+        verifyNoMoreInteractions(archiveParcheUseCase);
     }
 }

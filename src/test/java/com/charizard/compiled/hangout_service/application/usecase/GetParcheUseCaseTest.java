@@ -64,9 +64,11 @@ class GetParcheUseCaseTest {
                 .build();
     }
 
+    // ─── getParches ───────────────────────────────────────────────────────
+
     @Test
-    @DisplayName("getParches sin filtros retorna todos los parches")
-    void getParches_sinFiltros_retornaTodos() {
+    @DisplayName("getParches sin filtros pasa todos los filtros como null al repositorio")
+    void getParches_sinFiltros_pasaNullsAlRepositorio() {
         when(parcheRepository.findByFilters(null, null, null, null)).thenReturn(List.of(parche));
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
         when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
@@ -79,8 +81,8 @@ class GetParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("getParches con nombre pasa el filtro al repositorio")
-    void getParches_conNombre_pasaFiltroAlRepositorio() {
+    @DisplayName("getParches con nombre pasa el filtro de nombre al repositorio")
+    void getParches_conNombre_pasaNombreAlRepositorio() {
         when(parcheRepository.findByFilters(null, null, "fútbol", null)).thenReturn(List.of(parche));
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
         when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
@@ -92,8 +94,22 @@ class GetParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("getParches con fecha pasa el filtro al repositorio")
-    void getParches_conFecha_pasaFiltroAlRepositorio() {
+    @DisplayName("getParches con tipo PUBLIC y estado ACTIVE pasa ambos filtros")
+    void getParches_conTipoYEstado_pasaAmbosAlRepositorio() {
+        when(parcheRepository.findByFilters(ParcheType.PUBLIC, ParcheStatus.ACTIVE, null, null))
+                .thenReturn(List.of(parche));
+        when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
+        when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
+
+        List<ParcheResponse> result = useCase.getParches(ParcheType.PUBLIC, ParcheStatus.ACTIVE, null, null, null);
+
+        assertThat(result).hasSize(1);
+        verify(parcheRepository).findByFilters(ParcheType.PUBLIC, ParcheStatus.ACTIVE, null, null);
+    }
+
+    @Test
+    @DisplayName("getParches con fecha pasa el filtro de fecha al repositorio")
+    void getParches_conFecha_pasaFechaAlRepositorio() {
         LocalDate fecha = LocalDate.of(2026, 6, 15);
         when(parcheRepository.findByFilters(null, null, null, fecha)).thenReturn(List.of(parche));
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
@@ -106,18 +122,14 @@ class GetParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("getParches con cupoDisponible=true incluye solo parches con espacio")
-    void getParches_cupoDisponibleTrue_soloParchesConEspacio() {
-        Parche parcheLleno = Parche.builder()
-                .id(UUID.randomUUID())
-                .name("Parche lleno")
-                .maximumQuota(2)
-                .status(ParcheStatus.ACTIVE)
-                .build();
+    @DisplayName("getParches con cupoDisponible=true incluye solo parches con espacio disponible")
+    void getParches_cupoDisponibleTrue_incluyeSoloParchesConEspacio() {
+        UUID idLleno = UUID.randomUUID();
+        Parche parcheLleno = Parche.builder().id(idLleno).name("Parche lleno").maximumQuota(2).build();
 
         when(parcheRepository.findByFilters(null, null, null, null))
                 .thenReturn(List.of(parche, parcheLleno));
-        when(memberRepository.countByParcheId(parche.getId())).thenReturn(3);      // 3/10 → hay espacio
+        when(memberRepository.countByParcheId(parche.getId())).thenReturn(3);   // 3/10 → hay espacio
         when(memberRepository.countByParcheId(parcheLleno.getId())).thenReturn(2); // 2/2 → lleno
         when(parcheMapper.toResponse(eq(parche), anyInt())).thenReturn(parcheResponse);
 
@@ -129,16 +141,10 @@ class GetParcheUseCaseTest {
 
     @Test
     @DisplayName("getParches con cupoDisponible=false incluye solo parches llenos")
-    void getParches_cupoDisponibleFalse_soloParches_llenos() {
+    void getParches_cupoDisponibleFalse_incluyeSoloParchesLlenos() {
         UUID idLleno = UUID.randomUUID();
-        Parche parcheLleno = Parche.builder()
-                .id(idLleno)
-                .name("Parche lleno")
-                .maximumQuota(2)
-                .status(ParcheStatus.ACTIVE)
-                .build();
-        ParcheResponse responseLleno = ParcheResponse.builder()
-                .id(idLleno).name("Parche lleno").maximumQuota(2).actualMembers(2).build();
+        Parche parcheLleno = Parche.builder().id(idLleno).name("Parche lleno").maximumQuota(2).build();
+        ParcheResponse responseLleno = ParcheResponse.builder().id(idLleno).maximumQuota(2).actualMembers(2).build();
 
         when(parcheRepository.findByFilters(null, null, null, null))
                 .thenReturn(List.of(parche, parcheLleno));
@@ -155,10 +161,9 @@ class GetParcheUseCaseTest {
     @Test
     @DisplayName("getParches con cupoDisponible=null retorna todos sin filtrar por cupo")
     void getParches_cupoDisponibleNull_retornaTodosSinFiltrar() {
-        Parche parcheLleno = Parche.builder()
-                .id(UUID.randomUUID()).name("Parche lleno").maximumQuota(2).build();
-        ParcheResponse responseLleno = ParcheResponse.builder()
-                .id(parcheLleno.getId()).build();
+        UUID idLleno = UUID.randomUUID();
+        Parche parcheLleno = Parche.builder().id(idLleno).name("Parche lleno").maximumQuota(2).build();
+        ParcheResponse responseLleno = ParcheResponse.builder().id(idLleno).build();
 
         when(parcheRepository.findByFilters(null, null, null, null))
                 .thenReturn(List.of(parche, parcheLleno));
@@ -172,23 +177,11 @@ class GetParcheUseCaseTest {
         assertThat(result).hasSize(2);
     }
 
-    @Test
-    @DisplayName("getParches con tipo y estado pasa ambos filtros al repositorio")
-    void getParches_conTipoYEstado_pasaAmbosAlRepositorio() {
-        when(parcheRepository.findByFilters(ParcheType.PUBLIC, ParcheStatus.ACTIVE, null, null))
-                .thenReturn(List.of(parche));
-        when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
-        when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
-
-        List<ParcheResponse> result = useCase.getParches(ParcheType.PUBLIC, ParcheStatus.ACTIVE, null, null, null);
-
-        assertThat(result).hasSize(1);
-        verify(parcheRepository).findByFilters(ParcheType.PUBLIC, ParcheStatus.ACTIVE, null, null);
-    }
+    // ─── getParcheById ────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("getParcheById retorna el parche cuando existe")
-    void getParcheById_retornaParche_cuandoExiste() {
+    @DisplayName("getParcheById retorna el parche con memberCount cuando existe")
+    void getParcheById_parcheExiste_retornaConMemberCount() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
         when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
@@ -197,11 +190,12 @@ class GetParcheUseCaseTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(parcheId);
+        assertThat(result.getActualMembers()).isEqualTo(3);
     }
 
     @Test
     @DisplayName("getParcheById lanza ParcheNotFoundException cuando no existe")
-    void getParcheById_lanzaExcepcion_cuandoNoExiste() {
+    void getParcheById_parcheNoExiste_lanzaExcepcion() {
         UUID inexistente = UUID.randomUUID();
         when(parcheRepository.findById(inexistente)).thenReturn(Optional.empty());
 

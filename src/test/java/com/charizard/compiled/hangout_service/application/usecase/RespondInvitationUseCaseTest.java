@@ -2,9 +2,12 @@ package com.charizard.compiled.hangout_service.application.usecase;
 
 import com.charizard.compiled.hangout_service.domain.exceptions.InvitationAlreadyRespondedException;
 import com.charizard.compiled.hangout_service.domain.exceptions.MaxHangoutsReachedException;
+import com.charizard.compiled.hangout_service.domain.events.InvitationAcceptedEvent;
 import com.charizard.compiled.hangout_service.domain.model.Invitation;
+import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
+import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.domain.ports.out.InvitationRepositoryPort;
@@ -12,6 +15,7 @@ import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryP
 import com.charizard.compiled.hangout_service.domain.ports.out.NotificacionPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,30 +27,20 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RespondInvitationUseCaseTest {
 
-    @Mock
-    private InvitationRepositoryPort invitationRepository;
+    @Mock InvitationRepositoryPort invitationRepository;
+    @Mock ParcheRepositoryPort parcheRepository;
+    @Mock MemberRepositoryPort memberRepository;
+    @Mock ApplicationEventPublisher eventPublisher;
+    @Mock NotificacionPort notificacionPort;
 
-    @Mock
-    private ParcheRepositoryPort parcheRepository;
-
-    @Mock
-    private MemberRepositoryPort memberRepository;
-
-    @Mock
-    private ApplicationEventPublisher eventPublisher;
-
-    @Mock
-    private NotificacionPort notificacionPort;
-
-    @InjectMocks
-    private RespondInvitationUseCase useCase;
+    @InjectMocks RespondInvitationUseCase useCase;
 
     private UUID invitationId;
     private UUID studentId;
@@ -77,45 +71,39 @@ class RespondInvitationUseCaseTest {
                 .build();
     }
 
-    @Test
-    void accept_shouldThrowWhenStudentHas5ActiveHangouts() {
-        when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(pendingInvitation));
-        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
-        when(memberRepository.countByParcheId(parcheId)).thenReturn(1);
-        when(memberRepository.countParchesActivosByStudentId(studentId)).thenReturn(5);
+    // ─── Validaciones comunes ──────────────────────────────────────────────
 
-        assertThatThrownBy(() -> useCase.respondInvitation(invitationId, studentId, InvitationStatus.ACCEPTED))
-                .isInstanceOf(MaxHangoutsReachedException.class)
-                .hasMessageContaining("maximum active patches limit (5)");
+    @Test
+    @DisplayName("respondInvitation lanza ResponseStatusException cuando el respondedor no es el estudiante invitado")
+    void respondInvitation_noEsElEstudianteInvitado_lanzaForbidden() {
+        UUID otroEstudiante = UUID.randomUUID();
+        when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(pendingInvitation));
+
+        assertThatThrownBy(() -> useCase.respondInvitation(invitationId, otroEstudiante, InvitationStatus.ACCEPTED))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("not the invited student");
 
         verify(memberRepository, never()).save(any());
     }
 
     @Test
-    void accept_shouldAllowWhenStudentHas4ActiveHangouts() {
-        Invitation savedInvitation = Invitation.builder()
-                .id(invitationId)
-                .parcheId(parcheId)
-                .captainId(pendingInvitation.getCaptainId())
-                .invitedStudentId(studentId)
-                .status(InvitationStatus.ACCEPTED)
+    @DisplayName("respondInvitation lanza InvitationAlreadyRespondedException cuando la invitación ya fue respondida")
+    void respondInvitation_invitacionYaRespondida_lanzaExcepcion() {
+        Invitation accepted = Invitation.builder()
+                .id(invitationId).parcheId(parcheId)
+                .invitedStudentId(studentId).status(InvitationStatus.ACCEPTED)
                 .build();
+        when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(accepted));
 
-        when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(pendingInvitation));
-        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
-        when(memberRepository.countByParcheId(parcheId)).thenReturn(1);
-        when(memberRepository.countParchesActivosByStudentId(studentId)).thenReturn(4);
-        when(memberRepository.save(any())).thenReturn(null);
-        when(invitationRepository.save(any())).thenReturn(savedInvitation);
-
-        var response = useCase.respondInvitation(invitationId, studentId, InvitationStatus.ACCEPTED);
-
-        verify(memberRepository, times(1)).save(any());
-        assert response.getStatus() == InvitationStatus.ACCEPTED;
+        assertThatThrownBy(() -> useCase.respondInvitation(invitationId, studentId, InvitationStatus.REJECTED))
+                .isInstanceOf(InvitationAlreadyRespondedException.class);
     }
 
+    // ─── Flujo ACCEPTED ───────────────────────────────────────────────────
+
     @Test
-    void accept_shouldThrowWhenHangoutIsFull() {
+    @DisplayName("respondInvitation ACCEPTED lanza ResponseStatusException cuando el parche está lleno")
+    void respondInvitation_accepted_parcheCompleto_lanzaExcepcion() {
         when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(pendingInvitation));
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.countByParcheId(parcheId)).thenReturn(10);
@@ -128,48 +116,99 @@ class RespondInvitationUseCaseTest {
     }
 
     @Test
-    void respond_shouldThrowWhenInvitationAlreadyResponded() {
-        Invitation alreadyAccepted = Invitation.builder()
-                .id(invitationId)
-                .parcheId(parcheId)
-                .invitedStudentId(studentId)
-                .status(InvitationStatus.ACCEPTED)
+    @DisplayName("respondInvitation ACCEPTED lanza MaxHangoutsReachedException cuando el student tiene 5 activos")
+    void respondInvitation_accepted_estudianteCon5Activos_lanzaExcepcion() {
+        when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(pendingInvitation));
+        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.countByParcheId(parcheId)).thenReturn(1);
+        when(memberRepository.countParchesActivosByStudentId(studentId)).thenReturn(5);
+
+        assertThatThrownBy(() -> useCase.respondInvitation(invitationId, studentId, InvitationStatus.ACCEPTED))
+                .isInstanceOf(MaxHangoutsReachedException.class);
+
+        verify(memberRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("respondInvitation ACCEPTED crea member STUDENT, notifica y publica InvitationAcceptedEvent")
+    void respondInvitation_accepted_valido_creaMemberYPublicaEvento() {
+        Invitation savedInvitation = Invitation.builder()
+                .id(invitationId).parcheId(parcheId)
+                .captainId(pendingInvitation.getCaptainId())
+                .invitedStudentId(studentId).status(InvitationStatus.ACCEPTED)
                 .build();
 
-        when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(alreadyAccepted));
+        when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(pendingInvitation));
+        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.countByParcheId(parcheId)).thenReturn(1);
+        when(memberRepository.countParchesActivosByStudentId(studentId)).thenReturn(4);
+        when(memberRepository.save(any())).thenReturn(null);
+        when(invitationRepository.save(any())).thenReturn(savedInvitation);
 
-        assertThatThrownBy(() -> useCase.respondInvitation(invitationId, studentId, InvitationStatus.REJECTED))
-                .isInstanceOf(InvitationAlreadyRespondedException.class);
+        var result = useCase.respondInvitation(invitationId, studentId, InvitationStatus.ACCEPTED);
+
+        assertThat(result.getStatus()).isEqualTo(InvitationStatus.ACCEPTED);
+        verify(memberRepository).save(argThat(m ->
+                m.getMemberRole() == MemberRole.STUDENT &&
+                m.getStudentId().equals(studentId)
+        ));
+        verify(notificacionPort).notificarNuevoMiembro(any(), eq(studentId), anyString());
+        verify(eventPublisher).publishEvent(any(InvitationAcceptedEvent.class));
     }
 
     @Test
-    void respond_shouldThrowWhenNotTheInvitedStudent() {
-        UUID otherStudent = UUID.randomUUID();
+    @DisplayName("respondInvitation ACCEPTED publica InvitationAcceptedEvent exactamente una vez")
+    void respondInvitation_accepted_publicaEventoExactamenteUnaVez() {
+        Invitation savedInvitation = Invitation.builder()
+                .id(invitationId).parcheId(parcheId)
+                .captainId(pendingInvitation.getCaptainId())
+                .invitedStudentId(studentId).status(InvitationStatus.ACCEPTED)
+                .build();
 
         when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(pendingInvitation));
+        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.countByParcheId(parcheId)).thenReturn(1);
+        when(memberRepository.countParchesActivosByStudentId(studentId)).thenReturn(0);
+        when(memberRepository.save(any())).thenReturn(null);
+        when(invitationRepository.save(any())).thenReturn(savedInvitation);
 
-        assertThatThrownBy(() -> useCase.respondInvitation(invitationId, otherStudent, InvitationStatus.ACCEPTED))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("not the invited student");
+        useCase.respondInvitation(invitationId, studentId, InvitationStatus.ACCEPTED);
+
+        verify(eventPublisher, times(1)).publishEvent(any(InvitationAcceptedEvent.class));
     }
 
     @Test
-    void reject_shouldNotCreateMembershipAndSaveRejectedStatus() {
+    @DisplayName("respondInvitation ACCEPTED no publica evento cuando el parche está lleno")
+    void respondInvitation_accepted_parcheCompleto_noPublicaEvento() {
+        when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(pendingInvitation));
+        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.countByParcheId(parcheId)).thenReturn(10);
+
+        assertThatThrownBy(() -> useCase.respondInvitation(invitationId, studentId, InvitationStatus.ACCEPTED))
+                .isInstanceOf(ResponseStatusException.class);
+
+        verify(eventPublisher, never()).publishEvent(any(InvitationAcceptedEvent.class));
+    }
+
+    // ─── Flujo REJECTED ───────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("respondInvitation REJECTED no crea member y guarda invitación con status REJECTED")
+    void respondInvitation_rejected_noCreaMemberYGuardaRejected() {
         Invitation savedInvitation = Invitation.builder()
-                .id(invitationId)
-                .parcheId(parcheId)
+                .id(invitationId).parcheId(parcheId)
                 .captainId(pendingInvitation.getCaptainId())
-                .invitedStudentId(studentId)
-                .status(InvitationStatus.REJECTED)
+                .invitedStudentId(studentId).status(InvitationStatus.REJECTED)
                 .build();
 
         when(invitationRepository.findById(invitationId)).thenReturn(Optional.of(pendingInvitation));
         when(invitationRepository.save(any())).thenReturn(savedInvitation);
 
-        var response = useCase.respondInvitation(invitationId, studentId, InvitationStatus.REJECTED);
+        var result = useCase.respondInvitation(invitationId, studentId, InvitationStatus.REJECTED);
 
+        assertThat(result.getStatus()).isEqualTo(InvitationStatus.REJECTED);
         verify(memberRepository, never()).save(any());
         verify(parcheRepository, never()).findById(any());
-        assert response.getStatus() == InvitationStatus.REJECTED;
+        verify(eventPublisher, never()).publishEvent(any(InvitationAcceptedEvent.class));
     }
 }
