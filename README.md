@@ -608,7 +608,7 @@ Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Archivar Parche](docs/images/archivarParche.png)
+![Diagrama de Secuencia Archivar Parche](docs/uml/ArchivarParches.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -699,7 +699,7 @@ Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Unirse a Parche](docs/images/unirseParche.png)
+![Diagrama de Secuencia Unirse a Parche](docs/images/UnirseParche.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -764,7 +764,7 @@ Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Salir de Parche](docs/images/salirParche.png)
+![Diagrama de Secuencia Salir de Parche](docs/images/SalirParche.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -858,7 +858,7 @@ Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Enviar Invitación](docs/images/enviarInvitacion.png)
+![Diagrama de Secuencia Enviar Invitación](docs/uml/enviarInvitacion.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -940,7 +940,7 @@ Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Responder Invitación](docs/images/responderInvitacion.png)
+![Diagrama de Secuencia Responder Invitación](docs/uml/AceptarInvitacion.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
