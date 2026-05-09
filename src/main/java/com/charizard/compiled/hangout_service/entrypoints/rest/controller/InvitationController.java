@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Tag(name = "Invitaciones", description = "Endpoints para gestionar invitaciones de parches")
+@Tag(name = "Invitations", description = "Parche's Invitations Management")
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor

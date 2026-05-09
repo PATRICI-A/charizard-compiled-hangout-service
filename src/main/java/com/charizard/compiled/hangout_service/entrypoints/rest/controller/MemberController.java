@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Tag(name = "Miembros", description = "Endpoints para gestionar la membresía en parches")
+@Tag(name = "Member", description = "manage membership in Parches")
 @RestController
 @RequestMapping("/api/v1/parches/{parcheId}/miembros")
 @RequiredArgsConstructor
