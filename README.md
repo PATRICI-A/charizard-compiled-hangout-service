@@ -411,7 +411,7 @@ GET /api/v1/parches?tipo=PUBLIC&estado=ACTIVE
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Consultar Parches](docs/images/consultarParches.png)
+![Diagrama de Secuencia Consultar Parches](docs/uml/ConsultarParches.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -471,7 +471,7 @@ GET /api/v1/parches/770e8400-e29b-41d4-a716-446655440000
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Consultar Parche por ID](docs/images/consultarParcheId.png)
+![Diagrama de Secuencia Consultar Parche por ID](docs/uml/ConsultarParcheById.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -608,7 +608,7 @@ Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Archivar Parche](docs/images/archivarParche.png)
+![Diagrama de Secuencia Archivar Parche](docs/uml/ArchivarParches.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -699,7 +699,7 @@ Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Unirse a Parche](docs/images/unirseParche.png)
+![Diagrama de Secuencia Unirse a Parche](docs/uml/UnirseParche.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -764,7 +764,7 @@ Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Salir de Parche](docs/images/salirParche.png)
+![Diagrama de Secuencia Salir de Parche](docs/images/SalirParche.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -858,7 +858,7 @@ Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Enviar Invitación](docs/images/enviarInvitacion.png)
+![Diagrama de Secuencia Enviar Invitación](docs/uml/EnviarInvitacion.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -940,7 +940,7 @@ Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
 
 ### 🖼️ Diagrama de Secuencia
 
-![Diagrama de Secuencia Responder Invitación](docs/images/responderInvitacion.png)
+![Diagrama de Secuencia Responder Invitación](docs/uml/AceptarInvitacion.png)
 
 <details>
 <summary><strong>🟢 Explicación del Flujo</strong></summary>
@@ -1047,13 +1047,13 @@ El microservicio se integra con otros sistemas del ecosistema DOSW.
 ### 📊 Diagrama de base de datos
 
 <div align="center">
-<img src="docs/images/parches_db.png" alt="Diagrama de base de datos" width="600"/>
+<img src="docs\uml\DiagramaEntidadRelacion.png" alt="Diagrama de base de datos" width="600"/>
 </div>
 
 El microservicio de Parches utiliza **PostgreSQL 18** como motor de base de datos relacional. Contiene tres tablas principales: `parches`, `members` e `invitations`.
 
 #### 📋 Tabla: `parches`
-
+b
 <div align="center">
 
 | 🏷️ Campo | 🗃️ Tipo | 📝 Descripción | ⚠️ Restricciones |
@@ -1243,7 +1243,7 @@ La arquitectura de dominio se centra en las entidades **Parche**, **Member** e *
 ### 🗄️ Diagrama de Despliegue
 
 <div align="center">
-<img src="docs/images/railwayParches.png" alt="Diagrama de Despliegue" width="600"/>
+<img src="docs\uml\DiagramaDespliegue.png" alt="Diagrama de Despliegue" width="600"/>
 </div>
 
 ---
