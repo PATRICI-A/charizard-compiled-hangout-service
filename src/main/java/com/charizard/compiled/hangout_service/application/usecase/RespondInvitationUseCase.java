@@ -81,6 +81,9 @@ public class RespondInvitationUseCase implements RespondInvitationInputPort {
 
             parcheEventPublisher.publishInvitationAccepted(
                     invitationId, invitation.getParcheId(), studentId, invitation.getCaptainId());
+
+            parcheEventPublisher.publishMemberJoined(
+                    invitation.getParcheId(), parche.getName(), invitation.getCaptainId(), studentId);
         }
 
         invitation.setStatus(answer);

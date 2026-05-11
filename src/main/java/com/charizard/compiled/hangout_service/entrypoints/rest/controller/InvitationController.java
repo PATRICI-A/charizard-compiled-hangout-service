@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -44,7 +45,7 @@ public class InvitationController {
             @PathVariable UUID parcheId,
             @Parameter(description = "Student ID to invite", required = true)
             @PathVariable UUID studentId,
-            @RequestHeader("X-User-Id") UUID captainId) {
+            @AuthenticationPrincipal UUID captainId) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(invitationService.sendInvitation(parcheId, captainId, studentId));
@@ -66,7 +67,7 @@ public class InvitationController {
             @Parameter(description = "Invitation ID", required = true)
             @PathVariable UUID invitationId,
             @Valid @RequestBody RespondInvitationRequest request,
-            @RequestHeader("X-User-Id") UUID studentId) {
+            @AuthenticationPrincipal UUID studentId) {
 
         return ResponseEntity.ok(
                 respondInvitationService.respondInvitation(invitationId, studentId, request.getAnswer()));
@@ -84,7 +85,7 @@ public class InvitationController {
     public ResponseEntity<InvitationResponse> acceptInvitation(
             @Parameter(description = "Invitation ID", required = true)
             @PathVariable UUID invitationId,
-            @RequestHeader("X-User-Id") UUID studentId) {
+            @AuthenticationPrincipal UUID studentId) {
 
         return ResponseEntity.ok(respondInvitationService.acceptInvitation(invitationId, studentId));
     }
@@ -101,7 +102,7 @@ public class InvitationController {
     public ResponseEntity<InvitationResponse> rejectInvitation(
             @Parameter(description = "Invitation ID", required = true)
             @PathVariable UUID invitationId,
-            @RequestHeader("X-User-Id") UUID studentId) {
+            @AuthenticationPrincipal UUID studentId) {
 
         return ResponseEntity.ok(respondInvitationService.rejectInvitation(invitationId, studentId));
     }

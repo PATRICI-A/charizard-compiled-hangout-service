@@ -16,4 +16,18 @@ public interface ParcheEventPublisherPort {
      */
     void publishInvitationAccepted(UUID invitationId, UUID parcheId,
                                    UUID studentId, UUID captainId);
+
+    /**
+     * Publishes the fact that the captain sent an invitation to a student.
+     * Consumed by: Notification service.
+     */
+    void publishInvitationSent(UUID invitationId, UUID parcheId,
+                               UUID invitedStudentId, UUID captainId);
+
+    /**
+     * Publishes the fact that a student joined a parche (directly or via invitation).
+     * Consumed by: Notification service.
+     */
+    void publishMemberJoined(UUID parcheId, String parcheNombre,
+                             UUID capitanId, UUID estudianteId);
 }

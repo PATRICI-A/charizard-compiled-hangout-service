@@ -29,10 +29,14 @@ public class RabbitMQConfig {
 
     // ── Routing keys ─────────────────────────────────────────────────────────
     public static final String RK_INVITATION_ACCEPTED = "invitation.accepted";
+    public static final String RK_INVITATION_SENT     = "invitation.sent";
+    public static final String RK_MEMBER_JOINED       = "member.joined";
 
     // ── Queues ────────────────────────────────────────────────────────────────
-    public static final String QUEUE_GAMIFICATION  = "gamification.invitation.accepted";
-    public static final String QUEUE_NOTIFICATION  = "notification.invitation.accepted";
+    public static final String QUEUE_GAMIFICATION              = "gamification.invitation.accepted";
+    public static final String QUEUE_NOTIFICATION_ACCEPTED     = "notification.invitation.accepted";
+    public static final String QUEUE_NOTIFICATION_SENT         = "notification.invitation.sent";
+    public static final String QUEUE_NOTIFICATION_MEMBER       = "notification.member.joined";
 
     // ── Exchange bean ─────────────────────────────────────────────────────────
     @Bean
@@ -48,7 +52,17 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue notificationInvitationAcceptedQueue() {
-        return QueueBuilder.durable(QUEUE_NOTIFICATION).build();
+        return QueueBuilder.durable(QUEUE_NOTIFICATION_ACCEPTED).build();
+    }
+
+    @Bean
+    public Queue notificationInvitationSentQueue() {
+        return QueueBuilder.durable(QUEUE_NOTIFICATION_SENT).build();
+    }
+
+    @Bean
+    public Queue notificationMemberJoinedQueue() {
+        return QueueBuilder.durable(QUEUE_NOTIFICATION_MEMBER).build();
     }
 
     // ── Bindings ──────────────────────────────────────────────────────────────
@@ -62,12 +76,30 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding notificationBinding(Queue notificationInvitationAcceptedQueue,
-                                       TopicExchange hangoutEventsExchange) {
+    public Binding notificationAcceptedBinding(Queue notificationInvitationAcceptedQueue,
+                                               TopicExchange hangoutEventsExchange) {
         return BindingBuilder
                 .bind(notificationInvitationAcceptedQueue)
                 .to(hangoutEventsExchange)
                 .with(RK_INVITATION_ACCEPTED);
+    }
+
+    @Bean
+    public Binding notificationSentBinding(Queue notificationInvitationSentQueue,
+                                           TopicExchange hangoutEventsExchange) {
+        return BindingBuilder
+                .bind(notificationInvitationSentQueue)
+                .to(hangoutEventsExchange)
+                .with(RK_INVITATION_SENT);
+    }
+
+    @Bean
+    public Binding notificationMemberJoinedBinding(Queue notificationMemberJoinedQueue,
+                                                   TopicExchange hangoutEventsExchange) {
+        return BindingBuilder
+                .bind(notificationMemberJoinedQueue)
+                .to(hangoutEventsExchange)
+                .with(RK_MEMBER_JOINED);
     }
 
     // ── Serialization ─────────────────────────────────────────────────────────

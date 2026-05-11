@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -41,7 +42,7 @@ public class MemberController {
     public ResponseEntity<MemberResponse> unirseAParche(
             @Parameter(description = "Hangout ID", required = true)
             @PathVariable UUID parcheId,
-            @RequestHeader("X-User-Id") UUID studentId) {
+            @AuthenticationPrincipal UUID studentId) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(joinParcheService.unirseAParche(parcheId, studentId));
@@ -60,7 +61,7 @@ public class MemberController {
     public ResponseEntity<Void> salirDeParche(
             @Parameter(description = "Hangout ID", required = true)
             @PathVariable UUID parcheId,
-            @RequestHeader("X-User-Id") UUID studentId) {
+            @AuthenticationPrincipal UUID studentId) {
 
         leaveParcheService.salirDeParche(parcheId, studentId);
         return ResponseEntity.noContent().build();

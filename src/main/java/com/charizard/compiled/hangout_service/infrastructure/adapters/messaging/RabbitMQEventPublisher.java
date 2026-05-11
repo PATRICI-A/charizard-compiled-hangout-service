@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.Optional;
 
 /**
  * Publishes hangout domain events to RabbitMQ.
@@ -42,5 +43,47 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
 
         log.info("[RabbitMQ] Published invitation.accepted → invitationId={} studentId={} parcheId={}",
                 invitationId, studentId, parcheId);
+    }
+
+    @Override
+    public void publishInvitationSent(UUID invitationId, UUID parcheId,
+                                      UUID invitedStudentId, UUID captainId) {
+        InvitationSentMessage message = InvitationSentMessage.builder()
+                .invitationId(invitationId.toString())
+                .parcheId(parcheId.toString())
+                .invitedStudentId(invitedStudentId.toString())
+                .captainId(captainId.toString())
+                .occurredAt(LocalDateTime.now())
+                .build();
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.RK_INVITATION_SENT,
+                message
+        );
+
+        log.info("[RabbitMQ] Published invitation.sent → invitationId={} invitedStudentId={} parcheId={}",
+                invitationId, invitedStudentId, parcheId);
+    }
+
+    @Override
+    public void publishMemberJoined(UUID parcheId, String parcheNombre,
+                                    UUID capitanId, UUID estudianteId) {
+        MemberJoinedMessage message = MemberJoinedMessage.builder()
+                .parcheId(parcheId.toString())
+                .parcheNombre(parcheNombre)
+                .capitanId(capitanId.toString())
+                .estudianteId(estudianteId.toString())
+                .occurredAt(LocalDateTime.now())
+                .build();
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.RK_MEMBER_JOINED,
+                message
+        );
+
+        log.info("[RabbitMQ] Published member.joined → estudianteId={} parcheId={}",
+                estudianteId, parcheId);
     }
 }
