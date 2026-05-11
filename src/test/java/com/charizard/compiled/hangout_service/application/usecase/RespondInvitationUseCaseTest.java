@@ -2,7 +2,6 @@ package com.charizard.compiled.hangout_service.application.usecase;
 
 import com.charizard.compiled.hangout_service.domain.exceptions.InvitationAlreadyRespondedException;
 import com.charizard.compiled.hangout_service.domain.exceptions.MaxHangoutsReachedException;
-import com.charizard.compiled.hangout_service.domain.events.InvitationAcceptedEvent;
 import com.charizard.compiled.hangout_service.domain.model.Invitation;
 import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
@@ -13,6 +12,7 @@ import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.domain.ports.out.InvitationRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.NotificacionPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.ParcheEventPublisherPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -37,7 +36,7 @@ class RespondInvitationUseCaseTest {
     @Mock InvitationRepositoryPort invitationRepository;
     @Mock ParcheRepositoryPort parcheRepository;
     @Mock MemberRepositoryPort memberRepository;
-    @Mock ApplicationEventPublisher eventPublisher;
+    @Mock ParcheEventPublisherPort parcheEventPublisher;
     @Mock NotificacionPort notificacionPort;
 
     @InjectMocks RespondInvitationUseCase useCase;
@@ -153,7 +152,7 @@ class RespondInvitationUseCaseTest {
                 m.getStudentId().equals(studentId)
         ));
         verify(notificacionPort).notificarNuevoMiembro(any(), eq(studentId), anyString());
-        verify(eventPublisher).publishEvent(any(InvitationAcceptedEvent.class));
+        verify(parcheEventPublisher).publishInvitationAccepted(eq(invitationId), eq(parcheId), eq(studentId), any());
     }
 
     @Test
@@ -174,7 +173,7 @@ class RespondInvitationUseCaseTest {
 
         useCase.respondInvitation(invitationId, studentId, InvitationStatus.ACCEPTED);
 
-        verify(eventPublisher, times(1)).publishEvent(any(InvitationAcceptedEvent.class));
+        verify(parcheEventPublisher, times(1)).publishInvitationAccepted(any(), any(), any(), any());
     }
 
     @Test
@@ -187,7 +186,7 @@ class RespondInvitationUseCaseTest {
         assertThatThrownBy(() -> useCase.respondInvitation(invitationId, studentId, InvitationStatus.ACCEPTED))
                 .isInstanceOf(ResponseStatusException.class);
 
-        verify(eventPublisher, never()).publishEvent(any(InvitationAcceptedEvent.class));
+        verify(parcheEventPublisher, never()).publishInvitationAccepted(any(), any(), any(), any());
     }
 
     // ─── Flujo REJECTED ───────────────────────────────────────────────────
@@ -209,6 +208,6 @@ class RespondInvitationUseCaseTest {
         assertThat(result.getStatus()).isEqualTo(InvitationStatus.REJECTED);
         verify(memberRepository, never()).save(any());
         verify(parcheRepository, never()).findById(any());
-        verify(eventPublisher, never()).publishEvent(any(InvitationAcceptedEvent.class));
+        verify(parcheEventPublisher, never()).publishInvitationAccepted(any(), any(), any(), any());
     }
 }
