@@ -11,6 +11,11 @@ import lombok.Builder.Default;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Entidad JPA que mapea la tabla {@code invitations} en PostgreSQL.
+ * Representa una invitación a un parche privado,
+ * con restricción única de (parche_id, invited_student_id).
+ */
 @Entity
 @Data
 @Builder

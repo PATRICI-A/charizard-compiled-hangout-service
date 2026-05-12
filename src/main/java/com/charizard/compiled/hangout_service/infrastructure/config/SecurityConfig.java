@@ -24,6 +24,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Configuración de seguridad del microservicio.
+ * Deshabilita CSRF, configura CORS para todos los orígenes,
+ * establece sesiones sin estado (stateless) y permite acceso público
+ * a Swagger UI mientras requiere autenticación para el resto de endpoints.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {

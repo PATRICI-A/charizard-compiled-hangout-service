@@ -21,41 +21,54 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO de solicitud para crear un nuevo parche.
+ * Contiene todos los campos necesarios con sus validaciones.
+ */
 public class CreateParcheRequest {
 
+    /** Nombre del parche (obligatorio, no vacío) */
     @NotBlank(message = "Name cannot be blank")
     @Schema(example = "Parche de estudio")
     private String name;
 
+    /** Descripción opcional del parche */
     @Schema(example = "Repaso grupal de matemáticas")
     private String description;
 
+    /** Lugar de encuentro (obligatorio, no vacío) */
     @NotBlank(message = "Place cannot be blank")
     @Schema(example = "Café del edificio Bernardo")
     private String place;
 
+    /** Categoría temática del parche (obligatorio) */
     @NotNull(message = "Category is required")
     @Schema(example = "MUSIC", allowableValues = {"MUSIC", "ART", "DANCE"})
     private ParcheCategory category;
 
+    /** Fecha de realización (obligatorio, debe ser hoy o futura) */
     @NotNull(message = "Date is required")
     @FutureOrPresent(message = "Date must be today or in the future")
     @Schema(example = "2026-05-15", description = "Date in ISO format (yyyy-MM-dd)")
     private LocalDate date;
 
+    /** Hora de inicio (obligatorio) */
     @NotNull(message = "Hour is required")
     @Schema(example = "14:00:00", description = "Hour in ISO format (HH:mm:ss)")
     private LocalTime hour;
 
+    /** Cupo máximo de participantes (2-30) */
     @Min(value = 2, message = "Maximum quota must be at least 2")
     @Max(value = 30, message = "Maximum quota cannot exceed 30")
     @Schema(example = "10")
     private int maximumQuota;
 
+    /** Tipo de acceso: PUBLIC o PRIVATE (obligatorio) */
     @NotNull(message = "Type is required")
     @Schema(example = "PUBLIC", allowableValues = {"PUBLIC", "PRIVATE"})
     private ParcheType type;
 
+    /** ID opcional de evento externo asociado */
     @Schema(example = "123e4567-e89b-12d3-a456-426614174000")
     private UUID eventId;
 

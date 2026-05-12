@@ -27,6 +27,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Controlador REST para la gestión de parches.
+ * Expone endpoints para crear, consultar, actualizar y archivar parches.
+ */
 @RestController
 @RequestMapping("/api/v1/parches")
 @RequiredArgsConstructor

@@ -8,8 +8,13 @@ import lombok.Data;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * DTO de solicitud para enviar invitaciones masivas a un parche privado.
+ * Permite invitar hasta 10 estudiantes en una sola llamada.
+ */
 @Data
 public class SendInvitationRequest {
+    /** Lista de IDs de estudiantes a invitar (máx. 10) */
     @Schema(description = "List of student IDs to invite", example = "[\"550e8400-e29b-41d4-a716-446655440000\", \"660e8400-e29b-41d4-a716-446655440001\"]", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty
     @Size(max = 10)

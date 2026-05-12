@@ -13,6 +13,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Caso de uso para archivar automáticamente parches vencidos.
+ * Busca parches activos cuya fecha de realización superó las 24 horas
+ * y los cambia a estado FILED. Ejecutado por un scheduler programado.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

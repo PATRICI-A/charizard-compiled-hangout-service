@@ -6,6 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * Scheduler programado que ejecuta el archivado automático de parches vencidos.
+ * Se ejecuta cada hora (cron: "0 0 * * * *") y archiva los parches cuya
+ * fecha de realización superó las 24 horas.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

@@ -14,6 +14,11 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Repositorio Spring Data JPA para la entidad {@link ParcheEntity}.
+ * Proporciona métodos de consulta estándar y personalizados,
+ * incluyendo soporte para Specifications (filtros dinámicos).
+ */
 @Repository
 public interface ParcheRepository extends JpaRepository<ParcheEntity, UUID>, JpaSpecificationExecutor<ParcheEntity> {
 

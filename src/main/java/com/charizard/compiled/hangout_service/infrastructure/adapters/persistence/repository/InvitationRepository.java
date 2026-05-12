@@ -13,6 +13,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Repositorio Spring Data JPA para la entidad {@link InvitationEntity}.
+ * Proporciona métodos para gestionar invitaciones, incluyendo
+ * la cancelación masiva de invitaciones pendientes de un parche.
+ */
 @Repository
 public interface InvitationRepository extends JpaRepository<InvitationEntity, UUID> {
 

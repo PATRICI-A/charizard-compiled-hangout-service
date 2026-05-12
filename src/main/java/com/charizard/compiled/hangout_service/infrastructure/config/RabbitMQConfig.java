@@ -13,13 +13,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * RabbitMQ topology for hangout-service.
+ * Configuración de la topología RabbitMQ para el hangout-service.
  *
- * Exchange : hangout.events  (topic, durable)
+ * Exchange : {@code hangout.events} (topic, durable)
  *
- * Events published:
- *   invitation.accepted  → gamification.invitation.accepted  (Gamification service)
- *   invitation.accepted  → notification.invitation.accepted  (Notification service M05)
+ * Eventos publicados:
+ * <ul>
+ *   <li>{@code invitation.accepted} → gamification / notification</li>
+ *   <li>{@code invitation.sent} → notification</li>
+ *   <li>{@code member.joined} → notification</li>
+ * </ul>
+ *
+ * Colas:
+ * <ul>
+ *   <li>{@code gamification.invitation.accepted}</li>
+ *   <li>{@code notification.invitation.accepted}</li>
+ *   <li>{@code notification.invitation.sent}</li>
+ *   <li>{@code notification.member.joined}</li>
+ * </ul>
  */
 @Configuration
 public class RabbitMQConfig {

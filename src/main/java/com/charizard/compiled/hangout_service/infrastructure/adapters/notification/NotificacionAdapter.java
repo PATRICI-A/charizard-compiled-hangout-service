@@ -10,6 +10,11 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Adaptador que implementa {@link NotificacionPort} publicando eventos de dominio
+ * {@link NuevoMiembroEvent} a través de {@link ApplicationEventPublisher}
+ * para ser procesados de forma asíncrona por los listeners.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

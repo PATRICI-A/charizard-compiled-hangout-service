@@ -17,6 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Caso de uso para crear un nuevo parche.
+ * Valida que el estudiante no exceda el límite de 5 parches activos,
+ * persiste el parche y registra al creador como capitán y primer miembro.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

@@ -18,6 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+/**
+ * Controlador REST para la gestión de membresías.
+ * Permite a los estudiantes unirse o salir de parches públicos.
+ */
 @Tag(name = "Member", description = "manage membership in Parches")
 @RestController
 @RequestMapping("/api/v1/parches/{parcheId}/miembros")

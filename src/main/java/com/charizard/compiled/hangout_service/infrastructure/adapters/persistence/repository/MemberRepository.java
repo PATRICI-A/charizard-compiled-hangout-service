@@ -12,6 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Repositorio Spring Data JPA para la entidad {@link MemberEntity}.
+ * Proporciona métodos para gestionar la membresía de estudiantes en parches,
+ * incluyendo validaciones de existencia y conteos.
+ */
 @Repository
 public interface MemberRepository extends JpaRepository<MemberEntity, UUID> {
 
