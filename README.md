@@ -1422,7 +1422,7 @@ Esto levanta:
 
 ## 10. 📸 Evidencia del Despliegue CI/CD
 
-> ⏳ *Pendiente — Se agregarán capturas de pantalla del pipeline de GitHub Actions ejecutándose exitosamente (jobs: build, unit-tests, integration-tests, quality, package, deploy).*
+![Captura](docs/uml/CICD.png)
 
 ---
 
