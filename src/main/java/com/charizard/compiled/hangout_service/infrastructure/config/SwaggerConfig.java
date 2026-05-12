@@ -9,6 +9,10 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuración de Swagger/OpenAPI para la documentación interactiva del microservicio.
+ * Expone la API en {@code /swagger-ui/index.html} con esquema de seguridad JWT.
+ */
 @Configuration
 public class SwaggerConfig {
 

@@ -9,12 +9,31 @@ import org.mapstruct.Mapping;
 
 import java.util.UUID;
 
+/**
+ * Mapper de MapStruct para transformar entre la entidad de dominio {@link Parche}
+ * y los DTOs de la capa de aplicación.
+ */
 @Mapper(componentModel = "spring", imports = {ParcheStatus.class})
 public interface ParcheMapper {
 
+    /**
+     * Convierte un {@link Parche} de dominio a {@link ParcheResponse} para la API.
+     *
+     * @param parche      entidad de dominio del parche
+     * @param memberCount número actual de miembros
+     * @return DTO de respuesta
+     */
     @Mapping(source = "memberCount", target = "actualMembers")
     ParcheResponse toResponse(Parche parche, int memberCount);
 
+    /**
+     * Convierte un {@link CreateParcheRequest} a un {@link Parche} de dominio.
+     * Asigna el capitán por defecto y establece el estado inicial como ACTIVE.
+     *
+     * @param request   datos de solicitud
+     * @param captainId ID del estudiante que crea el parche
+     * @return entidad de dominio del parche
+     */
     @Mapping(source = "captainId", target = "captainId")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", expression = "java(ParcheStatus.ACTIVE)")

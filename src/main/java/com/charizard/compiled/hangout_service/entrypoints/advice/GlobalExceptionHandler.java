@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 import java.util.Map;
 
 /**
- * Global exception handler for the invitations module.
- * Converts domain exceptions into appropriate HTTP status codes.
+ * Manejador global de excepciones del microservicio.
+ * Intercepta todas las excepciones lanzadas desde los controladores REST
+ * y las transforma en respuestas JSON estandarizadas con el código HTTP apropiado.
  */
-
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

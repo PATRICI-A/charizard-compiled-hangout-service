@@ -16,18 +16,34 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO de respuesta con los datos completos de un parche.
+ * Incluye información del parche y el conteo actual de miembros.
+ */
 public class ParcheResponse {
 
+    /** Identificador único del parche */
     private UUID id;
+    /** Nombre del parche */
     private String name;
+    /** Descripción del parche */
     private String description;
+    /** Lugar de encuentro */
     private String place;
+    /** Categoría temática */
     private ParcheCategory category;
+    /** Tipo de acceso (PUBLIC / PRIVATE) */
     private ParcheType type;
+    /** Estado actual (ACTIVE / FILED) */
     private ParcheStatus status;
+    /** Cupo máximo de participantes */
     private int maximumQuota;
+    /** Número actual de miembros inscritos */
     private int actualMembers;
+    /** ID del estudiante capitán */
     private UUID captainId;
+    /** Fecha de realización */
     private LocalDate date;
+    /** Hora de inicio */
     private LocalTime hour;
 }

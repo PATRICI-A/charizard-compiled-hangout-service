@@ -13,10 +13,18 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO de respuesta con los datos de la membresía de un estudiante en un parche.
+ */
 public class MemberResponse {
+    /** Identificador único de la membresía */
     private UUID id;
+    /** ID del parche al que pertenece */
     private UUID parcheId;
+    /** ID del estudiante miembro */
     private UUID studentId;
+    /** Rol del miembro (CAPTAIN / STUDENT) */
     private MemberRole memberRole;
+    /** Fecha y hora de ingreso al parche */
     private LocalDateTime unionDate;
 }

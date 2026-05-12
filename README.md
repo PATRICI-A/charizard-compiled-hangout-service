@@ -14,7 +14,7 @@
 
 ### ☁️ Infraestructura & Calidad
 
-![Railway](https://img.shields.io/badge/Railway-Deploy-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)
+![Azure](https://img.shields.io/badge/Azure-Pending-0078D4?style=for-the-badge&logo=microsoft-azure&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Container-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-Build-C71A36?style=for-the-badge&logo=apache-maven&logoColor=white)
 
@@ -31,166 +31,48 @@
 ## 📑 Tabla de Contenidos
 
 1. [👤 Integrantes](#1--integrantes)
-2. [🎯 Objetivo del Microservicio](#2--objetivo-del-microservicio)
-3. [⚡ Funcionalidades Principales](#3--funcionalidades-principales)
-4. [📋 Estrategia de Versionamiento y Branches](#4--manejo-de-estrategia-de-versionamiento-y-branches)
-   - [4.1 Convenciones para crear ramas](#41-convenciones-para-crear-ramas)
-   - [4.2 Convenciones para crear commits](#42-convenciones-para-crear-commits)
-5. [⚙️ Tecnologías Utilizadas](#5--tecnologias-utilizadas)
-6. [🧩 Funcionalidad](#6--funcionalidad)
-7. [📊 Diagramas](#7--diagramas)
-8. [⚠️ Manejo de Errores](#8--manejo-de-errores)
-9. [🧪 Evidencia de Pruebas y Ejecución](#9--evidencia-de-las-pruebas-y-como-ejecutarlas)
-10. [🗂️ Organización del Código](#10--codigo-de-la-implementacion-organizado-en-las-respectivas-carpetas)
-11. [🚀 Ejecución del Proyecto](#11--ejecucion-del-proyecto)
-12. [☁️ CI/CD y Despliegue en Railway](#12--evidencia-de-cicd-y-despliegue-en-railway)
-13. [🤝 Contribuciones](#13--contribuciones)
+2. [⚙️ Tecnologías Utilizadas](#2--tecnologias-utilizadas)
+3. [🎯 Descripción del Módulo](#3--descripcion-del-modulo)
+4. [🧠 Cómo Funciona el Módulo](#4--como-funciona-el-modulo)
+   - [4.1 Arquitectura Hexagonal](#41-arquitectura-hexagonal)
+   - [4.2 Principios de Diseño](#42-principios-de-diseno)
+   - [4.3 Patrones de Diseño Implementados](#43-patrones-de-diseno-implementados)
+   - [4.4 Estrategia de Ramas (Git Flow)](#44-estrategia-de-ramas-git-flow)
+   - [4.5 Despliegue e Infraestructura](#45-despliegue-e-infraestructura)
+5. [📊 Diagramas](#5--diagramas)
+   - [5.1 Diagrama de Base de Datos](#51-diagrama-de-base-de-datos)
+   - [5.2 Diagrama de Clases del Dominio](#52-diagrama-de-clases-del-dominio)
+   - [5.3 Diagrama de Componentes](#53-diagrama-de-componentes)
+6. [⚡ Funcionalidades — Endpoints](#6--funcionalidades--endpoints)
+   - [6.1 Manejo de Errores (Global Exception Handler)](#61-manejo-de-errores-global-exception-handler)
+   - [6.2 Crear Parche](#62-crear-parche)
+   - [6.3 Consultar Parches](#63-consultar-parches)
+   - [6.4 Consultar Parche por ID](#64-consultar-parche-por-id)
+   - [6.5 Actualizar Parche](#65-actualizar-parche)
+   - [6.6 Archivar Parche](#66-archivar-parche)
+   - [6.7 Unirse a un Parche Público](#67-unirse-a-un-parche-publico)
+   - [6.8 Salir de un Parche](#68-salir-de-un-parche)
+   - [6.9 Enviar Invitación](#69-enviar-invitacion)
+   - [6.10 Responder Invitación](#610-responder-invitacion)
+7. [📬 Mensajería Asíncrona (RabbitMQ)](#7--mensajeria-asincrona-rabbitmq)
+8. [🧪 Pruebas](#8--pruebas)
+9. [🚀 Ejecución del Proyecto](#9--ejecucion-del-proyecto)
+10. [📸 Evidencia del Despliegue CI/CD](#10--evidencia-del-despliegue-cicd)
+11. [🌐 Link Azure / Swagger](#11--link-azure--swagger)
+12. [🗂️ Código Organizado en Carpetas](#12--codigo-organizado-en-carpetas)
+13. [🔌 Conexiones con Servicios Externos](#13--conexiones-con-servicios-externos)
+14. [🔄 Pipelines (Desarrollo + PROD)](#14--pipelines-desarrollo--prod)
 
 ---
 
-## 1. 👤 Integrantes:
+## 1. 👤 Integrantes
 
 - David Shadday Correa Gonzalez
 - Juan Camilo Melo Cupitra
 - Juan Esteban Tellez Valencia
 - Stiven Esneider Pardo Gutierrez
 
-## 2. 🎯 Objetivo del microservicio
-
-El microservicio de Parches tiene como objetivo gestionar los encuentros sociales y académicos — llamados *parches* (jerga colombiana para reunión/salida grupal) — entre estudiantes dentro de la plataforma DOSW. Este servicio se encarga de crear y administrar parches públicos y privados, controlar la membresía de sus participantes, y gestionar el sistema de invitaciones para parches de acceso restringido. Además, implementa reglas de negocio como cupo máximo por parche, límite de parches activos por estudiante (máx. 5), y archivo automático de parches vencidos, garantizando una experiencia organizada y confiable para todos los usuarios.
-
----
-
-## 3. ⚡ Funcionalidades principales
-
-<div align="center">
-
-<table>
-  <thead>
-    <tr>
-      <th>💡 Funcionalidad</th>
-      <th>Descripción</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Gestión de Parches</strong></td>
-      <td>Crea, consulta, actualiza y archiva parches con datos como nombre, lugar, categoría, tipo (público/privado), cupo máximo y fecha de realización.</td>
-    </tr>
-    <tr>
-      <td><strong>Control de Membresía</strong></td>
-      <td>Permite a estudiantes unirse a parches públicos directamente y salir de ellos, respetando reglas de negocio como cupo y límite de parches activos.</td>
-    </tr>
-    <tr>
-      <td><strong>Sistema de Invitaciones</strong></td>
-      <td>El capitán puede invitar estudiantes a parches privados; el invitado acepta o rechaza la invitación, lo que desencadena su membresía automáticamente.</td>
-    </tr>
-    <tr>
-      <td><strong>Archivo Automático</strong></td>
-      <td>Un scheduler archiva automáticamente los parches cuya fecha de realización ha superado las 24 horas, manteniendo limpio el catálogo activo.</td>
-    </tr>
-    <tr>
-      <td><strong>Notificaciones de Eventos</strong></td>
-      <td>Publica eventos internos (nuevo miembro, invitación enviada, invitación aceptada) para integrarse con otros microservicios vía listeners asincrónicos.</td>
-    </tr>
-  </tbody>
-</table>
-
-</div>
-
-
-## 4. 📋 Manejo de Estrategia de versionamiento y branches
-
-### Estrategia de Ramas (Git Flow)
-
-### Ramas y propósito
-- Manejaremos GitFlow, el modelo de ramificación para el control de versiones de Git
-
-#### `main`
-- **Propósito:** rama **estable** con la versión final (lista para demo/producción).
-- **Reglas:**
-    - Solo recibe merges desde `release/*` y `hotfix/*`.
-    - Cada merge a `main` debe crear un **tag** SemVer (`vX.Y.Z`).
-    - Rama **protegida**: PR obligatorio, 1–2 aprobaciones, checks de CI en verde.
-
-#### `develop`
-- **Propósito:** integración continua de trabajo; base de nuevas funcionalidades.
-- **Reglas:**
-    - Recibe merges desde `feature/*` y también desde `release/*` al finalizar un release.
-    - Rama **protegida** similar a `main`.
-
-#### `feature/*`
-- **Propósito:** desarrollo de una funcionalidad, refactor o spike.
-- **Base:** `develop`.
-- **Cierre:** se fusiona a `develop` mediante **PR**
-
-
-#### `release/*`
-- **Propósito:** congelar cambios para estabilizar pruebas, textos y versiones previas al deploy.
-- **Base:** `develop`.
-- **Cierre:** merge a `main` (crear **tag** `vX.Y.Z`) **y** merge de vuelta a `develop`.
-- **Ejemplo de nombre:**  
-  `release/1.3.0`
-
-#### `hotfix/*`
-- **Propósito:** corregir un bug **crítico** detectado en `main`.
-- **Base:** `main`.
-- **Cierre:** merge a `main` (crear **tag** de **PATCH**) **y** merge a `develop` para mantener paridad.
-- **Ejemplos de nombre:**  
-  `hotfix/fix-blank-screen`, `hotfix/css-broken-header`
-
-
----
-
-### 4.1 Convenciones para **crear ramas**
-
-#### `feature/*`
-**Formato:**
-```
-feature/[nombre-funcionalidad]
-```
-
-**Ejemplos:**
-- `feature/gestionParches`
-- `feature/sistemaInvitaciones`
-
-**Reglas de nomenclatura:**
-- Usar **PascalCase** (palabras separadas por mayúscula)
-- Máximo 50 caracteres en total
-- Descripción clara y específica de la funcionalidad
-
-#### `release/*`
-**Formato:**
-```
-release/[version]
-```
-**Ejemplo:** `release/1.0.0`
-
-#### `hotfix/*`
-**Formato:**
-```
-hotfix/[descripcion-breve-del-fix]
-```
-**Ejemplos:**
-- `hotfix/corregirArchivoAutomatico`
-- `hotfix/fixValidacionCupo`
-
----
-
-### 4.2 Convenciones para **crear commits**
-
-#### **Formato:**
-```
-[tipo]: [descripción específica de la acción]
-```
-
-#### **Tipos de commit:**
-- `feat`: Nueva funcionalidad
-- `fix`: Corrección de errores
-- `docs`: Cambios en documentación
-
-## 5. ⚙️ Tecnologías Utilizadas
-
+## 2. ⚙️ Tecnologías Utilizadas
 
 | **Tecnología / Herramienta** | **Uso principal en el proyecto** |
 |------------------------------|----------------------------------|
@@ -199,7 +81,7 @@ hotfix/[descripcion-breve-del-fix]
 | **Spring Web** | Exposición de endpoints REST (controladores HTTP) dentro de la arquitectura hexagonal. |
 | **Spring Security** | Configuración de seguridad del microservicio; permite proteger endpoints y controlar el acceso mediante encabezados de identidad. |
 | **Spring Data JPA** | Integración del microservicio con la base de datos PostgreSQL usando el patrón Repository y puertos/adaptadores. |
-| **PostgreSQL 18** | Base de datos relacional principal, con tablas para `parches`, `members` e `invitations`. Desplegada en Railway. |
+| **PostgreSQL 18** | Base de datos relacional principal, con tablas para `parches`, `members` e `invitations`. |
 | **Flyway** | Gestión y versionado del esquema de base de datos mediante migraciones SQL controladas. |
 | **Apache Maven** | Gestión de dependencias, empaquetado del microservicio y automatización de builds en los pipelines CI/CD. |
 | **Lombok** | Reducción de código repetitivo con anotaciones como `@Getter`, `@Builder`, `@Data` y `@RequiredArgsConstructor`. |
@@ -207,787 +89,33 @@ hotfix/[descripcion-breve-del-fix]
 | **JUnit 5** | Framework de pruebas unitarias para validar la lógica de dominio y casos de uso en el microservicio. |
 | **Mockito** | Simulación de dependencias (puertos, repositorios) en pruebas unitarias sin acceder a infraestructura real. |
 | **JaCoCo** | Generación de reportes de cobertura de código para evaluar la efectividad de las pruebas. |
-| **SonarQube** | Análisis estático del código y control de calidad, identificando vulnerabilidades y code smells. |
 | **Swagger (OpenAPI 3 / springdoc)** | Generación automática de documentación y prueba interactiva de los endpoints REST. |
 | **Postman** | Validación manual de peticiones y respuestas JSON de los endpoints (`POST`, `GET`, `PATCH`, `DELETE`). |
 | **Docker** | Contenerización del microservicio con build multi-stage para despliegues aislados y consistentes. |
 | **Docker Compose** | Orquestación local de la aplicación y PostgreSQL para desarrollo y pruebas de integración. |
-| **Railway** | Plataforma cloud donde se despliega el contenedor Docker del microservicio junto a su base de datos PostgreSQL. |
+| **RabbitMQ** | Mensajería asíncrona para publicar eventos de dominio consumidos por otros microservicios. |
+| **Azure** | Plataforma cloud donde se desplegará el contenedor Docker del microservicio (pendiente Resource Group). |
 | **GitHub Actions** | Pipeline de integración y despliegue continuo (CI/CD) para compilar, probar, analizar y desplegar el microservicio. |
-
 
 > 🧠 **Stack tecnológico seleccionado** para asegurar **escalabilidad**, **modularidad**, **seguridad**, **trazabilidad** y **mantenibilidad**, aplicando buenas prácticas de ingeniería de software.
 
-## 6. 🧩 Funcionalidades
+---
+
+## 3. 🎯 Descripción del Módulo
+
+El microservicio de **Parches** tiene como objetivo gestionar los encuentros sociales y académicos — llamados *parches* (jerga colombiana para reunión/salida grupal) — entre estudiantes dentro de la plataforma DOSW. Este servicio se encarga de crear y administrar parches públicos y privados, controlar la membresía de sus participantes, y gestionar el sistema de invitaciones para parches de acceso restringido. Además, implementa reglas de negocio como cupo máximo por parche, límite de parches activos por estudiante (máx. 5), y archivo automático de parches vencidos, garantizando una experiencia organizada y confiable para todos los usuarios.
 
 ---
 
-### 🔑 Funcionalidades principales
+## 4. 🧠 Cómo Funciona el Módulo
 
-### 1️⃣ Crear Parche
+El microservicio de Parches se integra con otros módulos del ecosistema DOSW a través de eventos asíncronos (RabbitMQ) y validaciones síncronas (identidad de usuarios). Publica eventos cuando ocurren acciones relevantes (nuevo miembro, invitación enviada/aceptada) que son consumidos por **Gamification** (para recompensas) y **Notification** (para notificaciones push). Consume validación de identidad del **User Service** para verificar que los `X-User-Id` correspondan a estudiantes activos.
 
-Permite crear un nuevo parche indicando nombre, lugar, categoría, tipo (público/privado), cupo máximo y fecha. El estudiante que lo crea se convierte automáticamente en su capitán.
+A continuación se detalla la arquitectura, principios, patrones, estrategia de ramas y despliegue del módulo.
 
-**Endpoint principal:**  
-`POST /api/v1/parches`
+### 4.1 Arquitectura Hexagonal
 
----
-
-### 📦 Estructura de la Solicitud (Request)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
-|---|---|:---:|---|
-| name | String | Obligatorio, no vacío | Nombre del parche. |
-| description | String | Opcional | Descripción breve del parche. |
-| place | String | Obligatorio, no vacío | Lugar de encuentro. |
-| category | Enum | Obligatorio | Categoría del parche (MUSIC, PROGRAMMING, SOCCER, etc.). |
-| date | LocalDate | Obligatorio, hoy o futuro | Fecha de realización (yyyy-MM-dd). |
-| hour | LocalTime | Obligatorio | Hora de inicio (HH:mm:ss). |
-| maximumQuota | Integer | 2–30 | Cupo máximo de participantes. |
-| type | Enum | Obligatorio | Tipo: PUBLIC o PRIVATE. |
-| eventId | UUID | Opcional | ID del evento externo asociado. |
-
-</div>
-
----
-
-### 📦 Estructura de la Respuesta (Response)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | 📝 Descripción |
-|---|---|---|
-| id | UUID | Identificador único del parche creado. |
-| name | String | Nombre del parche. |
-| description | String | Descripción del parche. |
-| place | String | Lugar de encuentro. |
-| category | Enum | Categoría del parche. |
-| type | Enum | Tipo (PUBLIC / PRIVATE). |
-| status | Enum | Estado actual (ACTIVE / FILED). |
-| maximumQuota | Integer | Cupo máximo. |
-| actualMembers | Integer | Número actual de miembros. |
-| captainId | UUID | ID del estudiante capitán. |
-| dateRealization | LocalDateTime | Fecha y hora combinadas de realización. |
-
-</div>
-
-
----
-
-### ✅ Happy Path (Ejemplo de Uso Exitoso)
-
-1. El capitán envía un POST con los datos del parche e incluye su ID en el header `X-User-Id`.
-2. El sistema valida que la fecha sea presente o futura y que el cupo esté entre 2 y 30.
-3. Se verifica que el estudiante no haya alcanzado el límite de 5 parches activos.
-4. Se crea el parche en estado `ACTIVE` y el capitán queda registrado como primer miembro.
-5. Se retorna `201 CREATED` con los datos del parche.
-
-**Request (Solicitud):**
-```json
-POST /api/v1/parches
-Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
-
-{
-  "name": "Parche de estudio",
-  "description": "Repaso grupal de matemáticas",
-  "place": "Café del edificio Bernardo",
-  "category": "PROGRAMMING",
-  "date": "2026-06-15",
-  "hour": "14:00:00",
-  "maximumQuota": 10,
-  "type": "PUBLIC"
-}
-```
-
-**Response (Respuesta):**
-```json
-{
-  "id": "770e8400-e29b-41d4-a716-446655440000",
-  "name": "Parche de estudio",
-  "description": "Repaso grupal de matemáticas",
-  "place": "Café del edificio Bernardo",
-  "category": "PROGRAMMING",
-  "type": "PUBLIC",
-  "status": "ACTIVE",
-  "maximumQuota": 10,
-  "actualMembers": 1,
-  "captainId": "550e8400-e29b-41d4-a716-446655440001",
-  "dateRealization": "2026-06-15T14:00:00"
-}
-```
-
----
-
-### 🖼️ Diagrama de Secuencia
-
-![Diagrama de Secuencia Crear Parche](docs/uml/CrearParche.png)
-
-<details>
-<summary><strong>🟢 Explicación del Flujo</strong></summary>
-
-El proceso inicia cuando el capitán envía un POST al `ParcheController`. El `CreateParcheUseCase` valida las restricciones de negocio (fecha futura, cupo válido, límite de parches activos). Se crea el parche con estado `ACTIVE`, se persiste en PostgreSQL vía el adaptador de repositorio, y el capitán queda automáticamente inscrito como primer miembro. Se retorna la respuesta con el parche creado.
-
-</details>
-
----
-
-### 📊 Tipos de errores manejados
-
-<div align="center">
-
-| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
-|:------------------:|:----------------|:------------------------|
-| ![400](https://img.shields.io/badge/400-Bad_Request-red?style=flat) | Datos inválidos | `"Name cannot be blank"` |
-| ![400](https://img.shields.io/badge/400-Bad_Request-red?style=flat) | Fecha pasada | `"Date must be today or in the future"` |
-| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Límite de parches | `"Student has reached the maximum number of active hangouts"` |
-
-</div>
-
----
-
-### 2️⃣ Consultar Parches
-
-Permite listar todos los parches existentes con filtros opcionales por tipo y estado.
-
-**Endpoint principal:**  
-`GET /api/v1/parches`
-
----
-
-### 📦 Estructura de la Solicitud (Request)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
-|---|---|:---:|---|
-| tipo | Enum | Opcional (query param) | Filtrar por PUBLIC o PRIVATE. |
-| estado | Enum | Opcional (query param) | Filtrar por ACTIVE o FILED. |
-
-</div>
-
----
-
-### 📦 Estructura de la Respuesta (Response)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | 📝 Descripción |
-|---|---|---|
-| (lista) | List\<ParcheResponse\> | Lista de parches que cumplen los filtros. |
-
-</div>
-
----
-
-### ✅ Happy Path (Ejemplo de Uso Exitoso)
-
-1. El cliente consulta los parches enviando filtros opcionales.
-2. El sistema ejecuta la búsqueda en la base de datos aplicando los filtros.
-3. Se retorna la lista de parches encontrados.
-
-**Request (Solicitud):**
-```
-GET /api/v1/parches?tipo=PUBLIC&estado=ACTIVE
-```
-
-**Response (Respuesta):**
-```json
-[
-  {
-    "id": "770e8400-e29b-41d4-a716-446655440000",
-    "name": "Parche de estudio",
-    "type": "PUBLIC",
-    "status": "ACTIVE",
-    "actualMembers": 3,
-    "maximumQuota": 10,
-    "dateRealization": "2026-06-15T14:00:00"
-  }
-]
-```
-
----
-
-### 🖼️ Diagrama de Secuencia
-
-![Diagrama de Secuencia Consultar Parches](docs/uml/ConsultarParches.png)
-
-<details>
-<summary><strong>🟢 Explicación del Flujo</strong></summary>
-
-El `ParcheController` recibe la petición con los filtros opcionales y los delega al `GetParcheUseCase`. Este invoca al repositorio para recuperar los parches que coinciden con los criterios. Los resultados se transforman a `ParcheResponse` y se retorna la lista al cliente.
-
-</details>
-
----
-
-### 📊 Tipos de errores manejados
-
-<div align="center">
-
-| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
-|:------------------:|:----------------|:------------------------|
-| ![200](https://img.shields.io/badge/200-OK-success?style=flat) | Sin resultados | Lista vacía `[]` |
-| ![500](https://img.shields.io/badge/500-Internal_Error-critical?style=flat) | Error interno | `"Unexpected error"` |
-
-</div>
-
----
-
-### 3️⃣ Consultar Parche por ID
-
-Permite recuperar la información detallada de un parche específico.
-
-**Endpoint principal:**  
-`GET /api/v1/parches/{id}`
-
----
-
-### 📦 Estructura de la Solicitud (Request)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
-|---|---|:---:|---|
-| id | UUID | Obligatorio (path) | Identificador único del parche. |
-
-</div>
-
----
-
-### ✅ Happy Path (Ejemplo de Uso Exitoso)
-
-1. El cliente envía el `id` del parche en el path.
-2. El sistema busca el parche en la base de datos.
-3. Si existe, retorna la información completa.
-
-**Request (Solicitud):**
-```
-GET /api/v1/parches/770e8400-e29b-41d4-a716-446655440000
-```
-
----
-
-### 🖼️ Diagrama de Secuencia
-
-![Diagrama de Secuencia Consultar Parche por ID](docs/uml/ConsultarParcheById.png)
-
-<details>
-<summary><strong>🟢 Explicación del Flujo</strong></summary>
-
-El `ParcheController` recibe el UUID del parche. El `GetParcheUseCase` busca el parche por ID en el repositorio. Si no se encuentra, lanza `ParcheNotFoundException`. Si existe, convierte la entidad a `ParcheResponse` y retorna la respuesta con HTTP 200.
-
-</details>
-
----
-
-### 📊 Tipos de errores manejados
-
-<div align="center">
-
-| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
-|:------------------:|:----------------|:------------------------|
-| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | Parche no existe | `"Parche not found"` |
-
-</div>
-
----
-
-### 4️⃣ Actualizar Parche
-
-Permite al capitán modificar los datos de un parche existente.
-
-**Endpoint principal:**  
-`PATCH /api/v1/parches/{id}`
-
----
-
-### 📦 Estructura de la Solicitud (Request)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
-|---|---|:---:|---|
-| name | String | Opcional | Nuevo nombre del parche. |
-| description | String | Opcional | Nueva descripción. |
-| place | String | Opcional | Nuevo lugar de encuentro. |
-| category | Enum | Opcional | Nueva categoría. |
-| date | LocalDate | Opcional | Nueva fecha (yyyy-MM-dd). |
-| hour | LocalTime | Opcional | Nueva hora (HH:mm). |
-| maximumQuota | Integer | Opcional, 2–50 | Nuevo cupo máximo. |
-| type | Enum | Opcional | Nuevo tipo (PUBLIC / PRIVATE). |
-| eventId | UUID | Opcional | Nuevo ID de evento externo. |
-
-</div>
-
----
-
-### ✅ Happy Path (Ejemplo de Uso Exitoso)
-
-1. El capitán envía un PATCH con los campos a actualizar e incluye su ID en `X-User-Id`.
-2. El sistema verifica que el solicitante sea el capitán del parche.
-3. Se actualizan únicamente los campos enviados.
-4. Se retorna `200 OK` con el parche actualizado.
-
-**Request (Solicitud):**
-```json
-PATCH /api/v1/parches/770e8400-e29b-41d4-a716-446655440000
-Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
-
-{
-  "place": "Biblioteca central",
-  "maximumQuota": 15
-}
-```
-
----
-
-### 🖼️ Diagrama de Secuencia
-
-![Diagrama de Secuencia Actualizar Parche](docs/images/actualizarParche.png)
-
-<details>
-<summary><strong>🟢 Explicación del Flujo</strong></summary>
-
-El `ParcheController` delega al `UpdateParcheUseCase`. Este verifica que el solicitante sea el capitán del parche; si no lo es, lanza `AccessDeniedException`. Si la validación pasa, aplica los cambios sobre los campos enviados y persiste la entidad actualizada.
-
-</details>
-
----
-
-### 📊 Tipos de errores manejados
-
-<div align="center">
-
-| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
-|:------------------:|:----------------|:------------------------|
-| ![403](https://img.shields.io/badge/403-Forbidden-red?style=flat) | No es el capitán | `"Only the captain can update this parche"` |
-| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | Parche no existe | `"Parche not found"` |
-
-</div>
-
----
-
-### 5️⃣ Archivar Parche (Soft Delete)
-
-Permite al capitán archivar un parche, cambiando su estado de `ACTIVE` a `FILED`.
-
-**Endpoint principal:**  
-`DELETE /api/v1/parches/{id}`
-
----
-
-### 📦 Estructura de la Solicitud (Request)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
-|---|---|:---:|---|
-| id | UUID | Obligatorio (path) | Identificador del parche a archivar. |
-| X-User-Id | UUID | Obligatorio (header) | ID del estudiante que solicita el archivo. |
-
-</div>
-
----
-
-### ✅ Happy Path (Ejemplo de Uso Exitoso)
-
-1. El capitán envía un DELETE con su ID en el header.
-2. El sistema verifica que sea el capitán.
-3. El parche pasa a estado `FILED` (no se elimina físicamente).
-4. Se retorna `204 No Content`.
-
-**Request (Solicitud):**
-```
-DELETE /api/v1/parches/770e8400-e29b-41d4-a716-446655440000
-Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
-```
-
----
-
-### 🖼️ Diagrama de Secuencia
-
-![Diagrama de Secuencia Archivar Parche](docs/uml/ArchivarParches.png)
-
-<details>
-<summary><strong>🟢 Explicación del Flujo</strong></summary>
-
-El `CloseParcheUseCase` valida que el solicitante es el capitán del parche. Si la verificación es exitosa, cambia el estado del parche a `FILED` y lo persiste. La operación es un soft delete: el registro permanece en la base de datos pero deja de aparecer en listados activos.
-
-</details>
-
----
-
-### 📊 Tipos de errores manejados
-
-<div align="center">
-
-| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
-|:------------------:|:----------------|:------------------------|
-| ![403](https://img.shields.io/badge/403-Forbidden-red?style=flat) | No es el capitán | `"Only the captain can archive this parche"` |
-| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | Parche no existe | `"Parche not found"` |
-
-</div>
-
----
-
-### 6️⃣ Unirse a un Parche Público
-
-Permite a un estudiante unirse directamente a un parche público activo sin necesidad de invitación.
-
-**Endpoint principal:**  
-`POST /api/v1/parches/{parcheId}/miembros`
-
----
-
-### 📦 Estructura de la Solicitud (Request)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
-|---|---|:---:|---|
-| parcheId | UUID | Obligatorio (path) | ID del parche al que desea unirse. |
-| X-User-Id | UUID | Obligatorio (header) | ID del estudiante. |
-
-</div>
-
----
-
-### 📦 Estructura de la Respuesta (Response)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | 📝 Descripción |
-|---|---|---|
-| id | UUID | Identificador único de la membresía. |
-| parcheId | UUID | ID del parche. |
-| studentId | UUID | ID del estudiante. |
-| memberRole | Enum | Rol del miembro (STUDENT / CAPTAIN). |
-| unionDate | LocalDateTime | Fecha y hora de ingreso. |
-
-</div>
-
----
-
-### ✅ Happy Path (Ejemplo de Uso Exitoso)
-
-1. El estudiante envía un POST con el `parcheId` en el path y su ID en el header.
-2. El sistema verifica que el parche esté activo y no archivado.
-3. Se valida que el estudiante no sea ya miembro y que haya cupo disponible.
-4. Se verifica que el estudiante no tenga 5 parches activos.
-5. Se crea la membresía y se retorna `201 CREATED`.
-
-**Request (Solicitud):**
-```
-POST /api/v1/parches/770e8400-e29b-41d4-a716-446655440000/miembros
-Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
-```
-
-**Response (Respuesta):**
-```json
-{
-  "id": "990e8400-e29b-41d4-a716-446655440003",
-  "parcheId": "770e8400-e29b-41d4-a716-446655440000",
-  "studentId": "880e8400-e29b-41d4-a716-446655440002",
-  "memberRole": "STUDENT",
-  "unionDate": "2026-05-06T10:30:00"
-}
-```
-
----
-
-### 🖼️ Diagrama de Secuencia
-
-![Diagrama de Secuencia Unirse a Parche](docs/uml/UnirseParche.png)
-
-<details>
-<summary><strong>🟢 Explicación del Flujo</strong></summary>
-
-El `MemberController` delega al `JoinParcheUseCase`. Este verifica que el parche exista y esté activo, que no haya superado su cupo máximo, que el estudiante no sea miembro ya, y que el estudiante no tenga más de 5 parches activos. Si todo es válido, se persiste la membresía y se publica un `NuevoMiembroEvent`.
-
-</details>
-
----
-
-### 📊 Tipos de errores manejados
-
-<div align="center">
-
-| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
-|:------------------:|:----------------|:------------------------|
-| ![400](https://img.shields.io/badge/400-Bad_Request-red?style=flat) | Parche archivado | `"Cannot join a filed parche"` |
-| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | Parche no existe | `"Parche not found"` |
-| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Ya es miembro | `"Student is already a member of this parche"` |
-| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Cupo lleno | `"Maximum capacity reached"` |
-| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Límite de parches | `"Student has reached the maximum number of active hangouts"` |
-
-</div>
-
----
-
-### 7️⃣ Salir de un Parche
-
-Permite a un estudiante abandonar voluntariamente un parche del que es miembro.
-
-**Endpoint principal:**  
-`DELETE /api/v1/parches/{parcheId}/miembros`
-
----
-
-### 📦 Estructura de la Solicitud (Request)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
-|---|---|:---:|---|
-| parcheId | UUID | Obligatorio (path) | ID del parche. |
-| X-User-Id | UUID | Obligatorio (header) | ID del estudiante que desea salir. |
-
-</div>
-
----
-
-### ✅ Happy Path (Ejemplo de Uso Exitoso)
-
-1. El estudiante envía un DELETE con su ID en el header.
-2. El sistema verifica que sea miembro del parche y que no sea el capitán.
-3. Se elimina la membresía y se retorna `204 No Content`.
-
-**Request (Solicitud):**
-```
-DELETE /api/v1/parches/770e8400-e29b-41d4-a716-446655440000/miembros
-Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
-```
-
----
-
-### 🖼️ Diagrama de Secuencia
-
-![Diagrama de Secuencia Salir de Parche](docs/images/SalirParche.png)
-
-<details>
-<summary><strong>🟢 Explicación del Flujo</strong></summary>
-
-El `LeaveParcheUseCase` verifica que el parche esté activo y que el estudiante sea miembro. Si el estudiante es el capitán, se lanza una excepción indicando que debe transferir el liderazgo primero. Si la validación pasa, se elimina la membresía de la base de datos.
-
-</details>
-
----
-
-### 📊 Tipos de errores manejados
-
-<div align="center">
-
-| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
-|:------------------:|:----------------|:------------------------|
-| ![400](https://img.shields.io/badge/400-Bad_Request-red?style=flat) | Es el capitán | `"Captain must transfer leadership before leaving"` |
-| ![400](https://img.shields.io/badge/400-Bad_Request-red?style=flat) | Parche archivado | `"Cannot leave a filed parche"` |
-| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | No es miembro | `"Member not found in this parche"` |
-
-</div>
-
----
-
-### 8️⃣ Enviar Invitación
-
-Permite al capitán de un parche privado invitar a un estudiante específico.
-
-**Endpoint principal:**  
-`POST /api/v1/parches/{parcheId}/invitaciones/{studentId}`
-
----
-
-### 📦 Estructura de la Solicitud (Request)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
-|---|---|:---:|---|
-| parcheId | UUID | Obligatorio (path) | ID del parche privado. |
-| studentId | UUID | Obligatorio (path) | ID del estudiante a invitar. |
-| X-User-Id | UUID | Obligatorio (header) | ID del capitán que envía la invitación. |
-
-</div>
-
----
-
-### 📦 Estructura de la Respuesta (Response)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | 📝 Descripción |
-|---|---|---|
-| id | UUID | Identificador único de la invitación. |
-| parcheId | UUID | ID del parche al que se invita. |
-| invitedStudentId | UUID | ID del estudiante invitado. |
-| status | Enum | Estado de la invitación (PENDING). |
-| sentAt | LocalDateTime | Fecha y hora de envío. |
-| respondedAt | LocalDateTime | Fecha y hora de respuesta (null si pendiente). |
-
-</div>
-
----
-
-### ✅ Happy Path (Ejemplo de Uso Exitoso)
-
-1. El capitán envía un POST con el ID del parche y el ID del estudiante a invitar.
-2. El sistema verifica que el solicitante sea el capitán del parche.
-3. Se valida que el estudiante no sea ya miembro y no tenga una invitación pendiente.
-4. Se crea la invitación con estado `PENDING` y se retorna `201 CREATED`.
-
-**Request (Solicitud):**
-```
-POST /api/v1/parches/770e8400-e29b-41d4-a716-446655440000/invitaciones/880e8400-e29b-41d4-a716-446655440002
-Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
-```
-
-**Response (Respuesta):**
-```json
-{
-  "id": "aa0e8400-e29b-41d4-a716-446655440004",
-  "parcheId": "770e8400-e29b-41d4-a716-446655440000",
-  "invitedStudentId": "880e8400-e29b-41d4-a716-446655440002",
-  "status": "PENDING",
-  "sentAt": "2026-05-06T11:00:00",
-  "respondedAt": null
-}
-```
-
----
-
-### 🖼️ Diagrama de Secuencia
-
-![Diagrama de Secuencia Enviar Invitación](docs/uml/EnviarInvitacion.png)
-
-<details>
-<summary><strong>🟢 Explicación del Flujo</strong></summary>
-
-El `InvitationUseCase` verifica que el remitente sea el capitán. Luego confirma que el estudiante no sea ya miembro del parche y que no tenga una invitación activa pendiente. Si todo es válido, crea la invitación con estado `PENDING`, la persiste y publica un `InvitationSentEvent` para notificaciones.
-
-</details>
-
----
-
-### 📊 Tipos de errores manejados
-
-<div align="center">
-
-| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
-|:------------------:|:----------------|:------------------------|
-| ![403](https://img.shields.io/badge/403-Forbidden-red?style=flat) | No es el capitán | `"Only the captain can send invitations"` |
-| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Ya es miembro | `"Student is already a member"` |
-| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Invitación duplicada | `"Student already has a pending invitation"` |
-
-</div>
-
----
-
-### 9️⃣ Responder Invitación
-
-Permite al estudiante invitado aceptar o rechazar una invitación pendiente.
-
-**Endpoint principal:**  
-`PATCH /api/v1/invitaciones/{invitationId}`
-
----
-
-### 📦 Estructura de la Solicitud (Request)
-
-<div align="center">
-
-| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
-|---|---|:---:|---|
-| invitationId | UUID | Obligatorio (path) | ID de la invitación a responder. |
-| X-User-Id | UUID | Obligatorio (header) | ID del estudiante invitado. |
-| answer | Enum | Obligatorio (body) | Respuesta: ACCEPTED o REJECTED. |
-
-</div>
-
----
-
-### ✅ Happy Path (Ejemplo de Uso Exitoso)
-
-1. El estudiante invitado envía PATCH con su respuesta y su ID en el header.
-2. El sistema verifica que sea el destinatario de la invitación.
-3. Verifica que la invitación esté en estado `PENDING`.
-4. Si acepta: se crea automáticamente la membresía en el parche.
-5. La invitación queda con estado `ACCEPTED` o `REJECTED`.
-
-**Request (Solicitud):**
-```json
-PATCH /api/v1/invitaciones/aa0e8400-e29b-41d4-a716-446655440004
-Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
-
-{
-  "answer": "ACCEPTED"
-}
-```
-
-**Response (Respuesta):**
-```json
-{
-  "id": "aa0e8400-e29b-41d4-a716-446655440004",
-  "parcheId": "770e8400-e29b-41d4-a716-446655440000",
-  "invitedStudentId": "880e8400-e29b-41d4-a716-446655440002",
-  "status": "ACCEPTED",
-  "sentAt": "2026-05-06T11:00:00",
-  "respondedAt": "2026-05-06T11:30:00"
-}
-```
-
----
-
-### 🖼️ Diagrama de Secuencia
-
-![Diagrama de Secuencia Responder Invitación](docs/uml/AceptarInvitacion.png)
-
-<details>
-<summary><strong>🟢 Explicación del Flujo</strong></summary>
-
-El `RespondInvitationUseCase` verifica que el estudiante sea el destinatario de la invitación y que ésta esté en estado `PENDING`. Si acepta, se verifica que el parche tenga cupo disponible y se crea la membresía. La invitación se actualiza con el estado final y la fecha de respuesta. Se publica un `InvitationAcceptedEvent` en caso de aceptación.
-
-</details>
-
----
-
-### 📊 Tipos de errores manejados
-
-<div align="center">
-
-| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
-|:------------------:|:----------------|:------------------------|
-| ![403](https://img.shields.io/badge/403-Forbidden-red?style=flat) | No es el invitado | `"You are not the invited student"` |
-| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | Invitación no existe | `"Invitation not found"` |
-| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Ya respondida | `"Invitation has already been responded"` |
-| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Parche lleno | `"Maximum capacity reached"` |
-
-</div>
-
----
-
-## 7. 📊 Diagramas
-
-Esta sección muestra los diagramas clave del microservicio de parches, ilustrando su arquitectura, componentes principales y despliegue.
-
----
-
-### 🏗️ Diagrama de Componentes — Vista General
-<div align="center">
-<img src="docs\uml\DiagramaComponentesGeneral.png" alt="Diagrama de Componentes General" width="600"/>
-</div>
-
-
----
-
-### 🔍 Diagrama de Componentes — Vista Específica
-
-<div align="center">
-<img src="docs\uml\DiagramaComponentesEspecifico.png" alt="Diagrama de Componentes Específico" width="600"/>
-</div>
-
-**Arquitectura Hexagonal:**  
-El microservicio de Parches separa controladores, casos de uso, lógica de negocio y adaptadores externos para mantener modularidad y escalabilidad.
+El microservicio de **Parches** sigue una **arquitectura hexagonal (puertos y adaptadores)** que separa las responsabilidades en capas bien definidas, promoviendo la escalabilidad, testabilidad y mantenibilidad del código.
 
 **Flujo principal:**
 
@@ -1012,39 +140,152 @@ El microservicio de Parches separa controladores, casos de uso, lógica de negoc
   - Mappers (MapStruct) traducen entre entidades de dominio y entidades JPA.
   - Persiste en PostgreSQL con queries Spring Data JPA.
 
+- **Mensajería Asíncrona:**
+  - `RabbitMQEventPublisher` publica eventos de dominio (`NuevoMiembroEvent`, `InvitationSentEvent`, `InvitationAcceptedEvent`) en el exchange `hangout.events`.
+
 - **Notificaciones:**
-  - `NotificacionEventListener` escucha eventos de dominio (`NuevoMiembroEvent`, `InvitationSentEvent`, `InvitationAcceptedEvent`) y los reenvía vía `NotificacionAdapter`.
+  - `NotificacionEventListener` escucha eventos de dominio y los reenvía vía `NotificacionAdapter`.
 
 - **Manejo de Errores:**
   - `GlobalExceptionHandler` centraliza el manejo de excepciones de dominio.
 
-> El microservicio de Parches gestiona todo el ciclo de vida de los encuentros estudiantiles, integrándose con otros servicios del ecosistema DOSW a través de eventos.
-
-
-### 🔌 Servicios Externos Integrados
-
-El microservicio se integra con otros sistemas del ecosistema DOSW.
-
 <div align="center">
 
-| 🌍 **Microservicio** | ⚙️ **Operación** | 📋 **Propósito** |
-|:---------------|:----------------|:-----------------------|
-| **Gamification** | Nuevo miembro / Invitación aceptada | Disparar recompensas o puntos al unirse a un parche |
-| **Notification** | Invitación enviada / Nuevo miembro | Enviar notificaciones push a los estudiantes |
-| **User Service** | Validación de identidad | Verificar que el `X-User-Id` corresponde a un estudiante activo |
+| 🎨 **Capa** | 📋 **Responsabilidad** | 🔗 **Dependencias** |
+|:-----------|:----------------------|:-------------------|
+| **🟢 Domain** | Lógica de negocio pura, entidades (`Parche`, `Member`, `Invitation`), enums, eventos y puertos (interfaces) | ❌ Ninguna (independiente) |
+| **🔵 Application** | Casos de uso, DTOs, mappers y validaciones | ✅ Solo `Domain` |
+| **🟠 Entrypoints** | Controladores REST y manejador global de excepciones | ✅ `Domain` + `Application` |
+| **🟠 Infrastructure** | Adaptadores JPA, scheduler, notificaciones, mensajería y configuración | ✅ `Domain` + `Application` |
 
 </div>
 
-**Dominio y Mapeo:**
+**Flujo de dependencias:** `Entrypoints / Infrastructure → Application → Domain`
 
-- Las entidades `Parche`, `Member` e `Invitation` encapsulan la lógica central.
-- Los mappers MapStruct transforman los datos entre capas de forma segura y sin reflexión en tiempo de ejecución.
+### 4.2 Principios de Diseño
 
-> El diagrama ilustra cómo el dominio de parches se mantiene aislado de la infraestructura, permitiendo cambiar la base de datos o los adaptadores externos sin afectar las reglas de negocio.
+<div align="center">
 
+| ✅ **Principio** | 📋 **Implementación** |
+|:----------------|:---------------------|
+| **Separación de responsabilidades** | Cada capa tiene un propósito único y bien definido |
+| **Inversión de dependencias** | Las capas externas dependen de interfaces (puertos) definidas en el dominio |
+| **Independencia del framework** | La lógica de negocio no depende de Spring ni de JPA |
+| **Patrón Ports & Adapters** | Los casos de uso consumen puertos; la infraestructura los implementa |
+| **Testabilidad** | Fácil crear pruebas unitarias mockeando puertos; integración con BD real |
+| **Mantenibilidad** | Cambios en una capa no afectan a las demás |
+
+</div>
+
+### 4.3 Patrones de Diseño Implementados
+
+<div align="center">
+
+| 🏷️ **Patrón** | 📋 **Implementación** | 🎯 **Propósito** |
+|:--------------|:----------------------|:-----------------|
+| **Builder** | `@Builder` de Lombok en `Parche`, `Member`, `Invitation`, DTOs y entidades JPA | Construir objetos complejos con múltiples campos opcionales de forma legible e inmutable |
+| **Repository** | `Spring Data JPA` repositories + adaptadores que implementan puertos de salida del dominio | Abstraer el acceso a datos y permitir cambiar la tecnología de persistencia sin afectar el dominio |
+| **Adapter (Ports & Adapters)** | `ParcheRepositoryAdapter`, `MemberRepositoryAdapter`, `InvitationRepositoryAdapter`, `NotificacionAdapter`, `RabbitMQEventPublisher` | Implementar los puertos de salida definidos en el dominio para conectar con infraestructura externa |
+| **Use Case / Interactor** | Casos de uso en `application/usecase/` que implementan interfaces `InputPort` | Orquestar flujos de negocio completos manteniendo el dominio puro y sin dependencias externas |
+| **DTO (Data Transfer Object)** | `CreateParcheRequest`, `UpdateParcheRequest`, `RespondInvitationRequest`, `ParcheResponse`, `MemberResponse`, `InvitationResponse` | Separar la representación de los datos de entrada/salida de las entidades del dominio |
+| **Observer (Eventos de dominio)** | `ApplicationEventPublisher` + `@EventListener` asíncrono para `NuevoMiembroEvent`, `InvitationSentEvent`, `InvitationAcceptedEvent` | Notificar cambios a otros componentes del sistema sin acoplamiento directo |
+| **Mapper (MapStruct)** | `ParcheMapper`, `ParcheEntityMapper`, `MemberEntityMapper`, `InvitationEntityMapper` | Transformar objetos entre capas (dominio ↔ persistencia, dominio ↔ DTO) de forma segura y eficiente |
+| **Scheduler** | `@Scheduled` en `ParcheArchiveScheduler` | Ejecutar tareas programadas (archivar parches vencidos) sin intervención manual |
+| **Global Exception Handler** | `@ControllerAdvice` + `@ExceptionHandler` en `GlobalExceptionHandler` | Centralizar el manejo de errores HTTP con respuestas JSON estandarizadas |
+
+</div>
+
+### 4.4 Estrategia de Ramas (Git Flow)
+
+El proyecto maneja **GitFlow**, el modelo de ramificación para el control de versiones de Git.
+
+#### Ramas y propósito
+
+##### `main`
+- **Propósito:** rama **estable** con la versión final (lista para demo/producción).
+- **Reglas:**
+  - Solo recibe merges desde `release/*` y `hotfix/*`.
+  - Cada merge a `main` debe crear un **tag** SemVer (`vX.Y.Z`).
+  - Rama **protegida**: PR obligatorio, 1–2 aprobaciones, checks de CI en verde.
+
+##### `develop`
+- **Propósito:** integración continua de trabajo; base de nuevas funcionalidades.
+- **Reglas:**
+  - Recibe merges desde `feature/*` y también desde `release/*` al finalizar un release.
+  - Rama **protegida** similar a `main`.
+
+##### `feature/*`
+- **Propósito:** desarrollo de una funcionalidad, refactor o spike.
+- **Base:** `develop`.
+- **Cierre:** se fusiona a `develop` mediante PR.
+
+##### `release/*`
+- **Propósito:** congelar cambios para estabilizar pruebas, textos y versiones previas al deploy.
+- **Base:** `develop`.
+- **Cierre:** merge a `main` (crear **tag** `vX.Y.Z`) **y** merge de vuelta a `develop`.
+- **Ejemplo de nombre:** `release/1.3.0`
+
+##### `hotfix/*`
+- **Propósito:** corregir un bug **crítico** detectado en `main`.
+- **Base:** `main`.
+- **Cierre:** merge a `main` (crear **tag** de **PATCH**) **y** merge a `develop` para mantener paridad.
+- **Ejemplos de nombre:** `hotfix/fix-blank-screen`, `hotfix/css-broken-header`
+
+#### Convenciones para crear ramas
+
+**`feature/*`**
+- Formato: `feature/[nombre-funcionalidad]`
+- Ejemplos: `feature/gestionParches`, `feature/sistemaInvitaciones`
+- Usar **PascalCase**, máximo 50 caracteres, descripción clara.
+
+**`release/*`**
+- Formato: `release/[version]`
+- Ejemplo: `release/1.0.0`
+
+**`hotfix/*`**
+- Formato: `hotfix/[descripcion-breve-del-fix]`
+- Ejemplos: `hotfix/corregirArchivoAutomatico`, `hotfix/fixValidacionCupo`
+
+#### Convenciones para crear commits
+
+Formato: `[tipo]: [descripción específica de la acción]`
+
+| Tipo | Uso |
+|------|-----|
+| `feat` | Nueva funcionalidad |
+| `fix` | Corrección de errores |
+| `docs` | Cambios en documentación |
+
+### 4.5 Despliegue e Infraestructura
+
+El microservicio de **Parches** se ejecutará como un contenedor Docker en **Azure Web App**, respaldado por una arquitectura robusta de CI/CD.
+
+- **Ejecución:** Contenedor Docker en Azure Web App (imagen construida con Dockerfile multi-stage).
+- **Base de datos:** **PostgreSQL 18** provisionada por Azure con variables de entorno inyectadas automáticamente (`PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`).
+- **CI/CD (GitHub Actions):**
+  - Pruebas unitarias (JUnit 5) y cobertura (JaCoCo).
+  - Tests de integración contra PostgreSQL 18 en servicio de GitHub Actions.
+  - Despliegue a Azure vía publish profile cuando esté configurado.
+- **Construcción:** Dockerfile multi-stage (Maven Build → JRE 21 Alpine Runtime).
+- **Configuración:** Variables de entorno gestionadas desde Azure App Service.
+
+<div align="center">
+
+| 🌐 **Componente** | 📝 **Descripción** |
+|------------------|-------------------|
+| Azure App Service | Hosting del contenedor Docker del microservicio |
+| Azure Database for PostgreSQL | Base de datos relacional gestionada |
+| GitHub Actions | Automatización de CI/CD y calidad de código |
+| RabbitMQ (CloudAMQP / Azure) | Mensajería asíncrona entre microservicios |
+| Swagger UI | Documentación interactiva en `/swagger-ui/index.html` |
+
+</div>
 
 ---
-### 📊 Diagrama de base de datos
+
+## 5. 📊 Diagramas
+
+### 5.1 Diagrama de Base de Datos
 
 <div align="center">
 <img src="docs\uml\DiagramaEntidadRelacion.png" alt="Diagrama de base de datos" width="600"/>
@@ -1053,7 +294,7 @@ El microservicio se integra con otros sistemas del ecosistema DOSW.
 El microservicio de Parches utiliza **PostgreSQL 18** como motor de base de datos relacional. Contiene tres tablas principales: `parches`, `members` e `invitations`.
 
 #### 📋 Tabla: `parches`
-b
+
 <div align="center">
 
 | 🏷️ Campo | 🗃️ Tipo | 📝 Descripción | ⚠️ Restricciones |
@@ -1105,9 +346,7 @@ b
 
 </div>
 
----
-
-### 📦 Diagrama de Clases del Dominio
+### 5.2 Diagrama de Clases del Dominio
 
 <div align="center">
 <img src="docs\uml\DiagramaDeClases.png" alt="Diagrama de Clases" width="600"/>
@@ -1124,10 +363,7 @@ La arquitectura de dominio se centra en las entidades **Parche**, **Member** e *
 
 > Este diseño asegura la integridad de los parches y permite extender las funcionalidades sin afectar las reglas de negocio centrales.
 
-
----
-
-### 📦 DTOs Principales
+#### DTOs Principales
 
 <div align="center">
 <div style="background:#111; color:#fff; border-radius:12px; padding:24px 12px; box-shadow:0 2px 12px #0002;">
@@ -1238,60 +474,33 @@ La arquitectura de dominio se centra en las entidades **Parche**, **Member** e *
 </div>
 </div>
 
----
+### 5.3 Diagrama de Componentes
 
-### 🗄️ Diagrama de Despliegue
-
-<div align="center">
-<img src="docs\uml\DiagramaDespliegue.png" alt="Diagrama de Despliegue" width="600"/>
-</div>
-
----
-
-#### 🚀 Despliegue e Infraestructura
-
-El microservicio de **Parches** se ejecuta como un contenedor Docker en **Railway**, respaldado por una arquitectura robusta de CI/CD.
-
-- **Ejecución:** Contenedor Docker en Railway (imagen construida con Dockerfile multi-stage).
-- **Base de datos:** **PostgreSQL 18** provisionada por Railway con variables de entorno inyectadas automáticamente (`PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`).
-- **CI/CD (GitHub Actions):**
-  - Pruebas unitarias (JUnit 5), cobertura (JaCoCo), calidad (SonarQube).
-  - Tests de integración contra PostgreSQL 18 en servicio de GitHub Actions.
-  - Despliegue automático a Railway vía deploy hook en merges a `main`.
-- **Construcción:** Dockerfile multi-stage (Maven Build → JRE 21 Alpine Runtime).
-- **Configuración:** Variables de entorno gestionadas desde Railway dashboard.
+#### 🏗️ Vista General
 
 <div align="center">
-
-| 🌐 **Componente** | 📝 **Descripción** |
-|------------------|-------------------|
-| Railway App | Hosting del contenedor Docker del microservicio |
-| Railway PostgreSQL | Base de datos relacional gestionada con backups |
-| GitHub Actions | Automatización de CI/CD y calidad de código |
-| Swagger UI | Documentación interactiva en `/swagger-ui/index.html` |
-
+<img src="docs\uml\DiagramaComponentesGeneral.png" alt="Diagrama de Componentes General" width="600"/>
 </div>
 
+#### 🔍 Vista Específica
 
+<div align="center">
+<img src="docs\uml\DiagramaComponentesEspecifico.png" alt="Diagrama de Componentes Específico" width="600"/>
+</div>
+
+> El microservicio de Parches gestiona todo el ciclo de vida de los encuentros estudiantiles, integrándose con otros servicios del ecosistema DOSW a través de eventos.
 
 ---
 
-## 8. ⚠️ Manejo de Errores
+## 6. ⚡ Funcionalidades — Endpoints
+
+### 6.1 Manejo de Errores (Global Exception Handler)
 
 El microservicio de **Parches** implementa un **mecanismo centralizado de manejo de errores** que garantiza uniformidad, claridad y seguridad en todas las respuestas enviadas al cliente cuando ocurre un fallo.
 
----
-
-### 🧠 Estrategia general de manejo de errores
+#### 🧠 Estrategia general
 
 El sistema utiliza una **clase global** `GlobalExceptionHandler` con la anotación `@ControllerAdvice` que intercepta todas las excepciones lanzadas desde los controladores REST. Cada excepción de dominio se transforma en una respuesta **JSON estandarizada** con el código HTTP apropiado.
-
-
----
-
-### ⚙️ Global Exception Handler
-
-El **Global Exception Handler** captura y maneja todas las excepciones del sistema de forma centralizada. Utiliza métodos con `@ExceptionHandler` para procesar cada tipo de error.
 
 **✨ Características principales:**
 
@@ -1302,10 +511,7 @@ El **Global Exception Handler** captura y maneja todas las excepciones del siste
 - ✅ **Mantiene la aplicación limpia**, eliminando bloques try-catch redundantes
 - ✅ **Mejora la trazabilidad** y facilita la depuración en entornos de prueba y producción
 
-
----
-
-### 🧩 Excepciones de dominio manejadas
+#### 🧩 Excepciones de dominio manejadas
 
 <div align="center">
 
@@ -1327,34 +533,728 @@ El **Global Exception Handler** captura y maneja todas las excepciones del siste
 
 ---
 
-### ✅ Beneficios del manejo centralizado
+### 6.2 Crear Parche
+
+Permite crear un nuevo parche indicando nombre, lugar, categoría, tipo (público/privado), cupo máximo y fecha. El estudiante que lo crea se convierte automáticamente en su capitán.
+
+**Endpoint principal:** `POST /api/v1/parches`
+
+#### 📦 Estructura de la Solicitud (Request)
 
 <div align="center">
 
-| 🎯 **Beneficio** | 📋 **Descripción** |
-|:-----------------|:-------------------|
-| **🎯 Uniformidad** | Todas las respuestas de error tienen el mismo formato JSON estandarizado |
-| **🔧 Mantenibilidad** | Agregar nuevas excepciones no requiere modificar cada controlador |
-| **🔒 Seguridad** | Oculta los detalles internos del servidor y evita exponer trazas sensibles |
-| **📍 Trazabilidad** | Cada error incluye el código HTTP y descripción del fallo |
-| **🤝 Integración fluida** | Facilita la comunicación con frontend y herramientas como Postman/Swagger |
+| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
+|---|---|---|---|
+| name | String | Obligatorio, no vacío | Nombre del parche. |
+| description | String | Opcional | Descripción breve del parche. |
+| place | String | Obligatorio, no vacío | Lugar de encuentro. |
+| category | Enum | Obligatorio | Categoría del parche (MUSIC, PROGRAMMING, SOCCER, etc.). |
+| date | LocalDate | Obligatorio, hoy o futuro | Fecha de realización (yyyy-MM-dd). |
+| hour | LocalTime | Obligatorio | Hora de inicio (HH:mm:ss). |
+| maximumQuota | Integer | 2–30 | Cupo máximo de participantes. |
+| type | Enum | Obligatorio | Tipo: PUBLIC o PRIVATE. |
+| eventId | UUID | Opcional | ID del evento externo asociado. |
+
+</div>
+
+#### 📦 Estructura de la Respuesta (Response)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | 📝 Descripción |
+|---|---|---|
+| id | UUID | Identificador único del parche creado. |
+| name | String | Nombre del parche. |
+| description | String | Descripción del parche. |
+| place | String | Lugar de encuentro. |
+| category | Enum | Categoría del parche. |
+| type | Enum | Tipo (PUBLIC / PRIVATE). |
+| status | Enum | Estado actual (ACTIVE / FILED). |
+| maximumQuota | Integer | Cupo máximo. |
+| actualMembers | Integer | Número actual de miembros. |
+| captainId | UUID | ID del estudiante capitán. |
+| dateRealization | LocalDateTime | Fecha y hora combinadas de realización. |
+
+</div>
+
+#### ✅ Happy Path (Ejemplo de Uso Exitoso)
+
+1. El capitán envía un POST con los datos del parche e incluye su ID en el header `X-User-Id`.
+2. El sistema valida que la fecha sea presente o futura y que el cupo esté entre 2 y 30.
+3. Se verifica que el estudiante no haya alcanzado el límite de 5 parches activos.
+4. Se crea el parche en estado `ACTIVE` y el capitán queda registrado como primer miembro.
+5. Se retorna `201 CREATED` con los datos del parche.
+
+**Request (Solicitud):**
+```json
+POST /api/v1/parches
+Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
+
+{
+  "name": "Parche de estudio",
+  "description": "Repaso grupal de matemáticas",
+  "place": "Café del edificio Bernardo",
+  "category": "PROGRAMMING",
+  "date": "2026-06-15",
+  "hour": "14:00:00",
+  "maximumQuota": 10,
+  "type": "PUBLIC"
+}
+```
+
+**Response (Respuesta):**
+```json
+{
+  "id": "770e8400-e29b-41d4-a716-446655440000",
+  "name": "Parche de estudio",
+  "description": "Repaso grupal de matemáticas",
+  "place": "Café del edificio Bernardo",
+  "category": "PROGRAMMING",
+  "type": "PUBLIC",
+  "status": "ACTIVE",
+  "maximumQuota": 10,
+  "actualMembers": 1,
+  "captainId": "550e8400-e29b-41d4-a716-446655440001",
+  "dateRealization": "2026-06-15T14:00:00"
+}
+```
+
+#### 🖼️ Diagrama de Secuencia
+
+![Diagrama de Secuencia Crear Parche](docs/uml/CrearParche.png)
+
+<details>
+<summary><strong>🟢 Explicación del Flujo</strong></summary>
+
+El proceso inicia cuando el capitán envía un POST al `ParcheController`. El `CreateParcheUseCase` valida las restricciones de negocio (fecha futura, cupo válido, límite de parches activos). Se crea el parche con estado `ACTIVE`, se persiste en PostgreSQL vía el adaptador de repositorio, y el capitán queda automáticamente inscrito como primer miembro. Se retorna la respuesta con el parche creado.
+
+</details>
+
+#### 📊 Tipos de errores manejados
+
+<div align="center">
+
+| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
+|:------------------:|:----------------|:------------------------|
+| ![400](https://img.shields.io/badge/400-Bad_Request-red?style=flat) | Datos inválidos | `"Name cannot be blank"` |
+| ![400](https://img.shields.io/badge/400-Bad_Request-red?style=flat) | Fecha pasada | `"Date must be today or in the future"` |
+| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Límite de parches | `"Student has reached the maximum number of active hangouts"` |
 
 </div>
 
 ---
 
-> Gracias a este enfoque, el microservicio de Parches logra un manejo de errores **robusto**, **escalable** y **seguro**, garantizando una experiencia de usuario más confiable y profesional.
+### 6.3 Consultar Parches
+
+Permite listar todos los parches existentes con filtros opcionales por tipo y estado.
+
+**Endpoint principal:** `GET /api/v1/parches`
+
+#### 📦 Estructura de la Solicitud (Request)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
+|---|---|---|---|
+| tipo | Enum | Opcional (query param) | Filtrar por PUBLIC o PRIVATE. |
+| estado | Enum | Opcional (query param) | Filtrar por ACTIVE o FILED. |
+
+</div>
+
+#### 📦 Estructura de la Respuesta (Response)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | 📝 Descripción |
+|---|---|---|
+| (lista) | List\<ParcheResponse\> | Lista de parches que cumplen los filtros. |
+
+</div>
+
+#### ✅ Happy Path (Ejemplo de Uso Exitoso)
+
+1. El cliente consulta los parches enviando filtros opcionales.
+2. El sistema ejecuta la búsqueda en la base de datos aplicando los filtros.
+3. Se retorna la lista de parches encontrados.
+
+**Request (Solicitud):**
+```
+GET /api/v1/parches?tipo=PUBLIC&estado=ACTIVE
+```
+
+**Response (Respuesta):**
+```json
+[
+  {
+    "id": "770e8400-e29b-41d4-a716-446655440000",
+    "name": "Parche de estudio",
+    "type": "PUBLIC",
+    "status": "ACTIVE",
+    "actualMembers": 3,
+    "maximumQuota": 10,
+    "dateRealization": "2026-06-15T14:00:00"
+  }
+]
+```
+
+#### 🖼️ Diagrama de Secuencia
+
+![Diagrama de Secuencia Consultar Parches](docs/uml/ConsultarParches.png)
+
+<details>
+<summary><strong>🟢 Explicación del Flujo</strong></summary>
+
+El `ParcheController` recibe la petición con los filtros opcionales y los delega al `GetParcheUseCase`. Este invoca al repositorio para recuperar los parches que coinciden con los criterios. Los resultados se transforman a `ParcheResponse` y se retorna la lista al cliente.
+
+</details>
+
+#### 📊 Tipos de errores manejados
+
+<div align="center">
+
+| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
+|:------------------:|:----------------|:------------------------|
+| ![200](https://img.shields.io/badge/200-OK-success?style=flat) | Sin resultados | Lista vacía `[]` |
+| ![500](https://img.shields.io/badge/500-Internal_Error-critical?style=flat) | Error interno | `"Unexpected error"` |
+
+</div>
 
 ---
 
+### 6.4 Consultar Parche por ID
+
+Permite recuperar la información detallada de un parche específico.
+
+**Endpoint principal:** `GET /api/v1/parches/{id}`
+
+#### 📦 Estructura de la Solicitud (Request)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
+|---|---|---|---|
+| id | UUID | Obligatorio (path) | Identificador único del parche. |
+
+</div>
+
+#### ✅ Happy Path (Ejemplo de Uso Exitoso)
+
+1. El cliente envía el `id` del parche en el path.
+2. El sistema busca el parche en la base de datos.
+3. Si existe, retorna la información completa.
+
+**Request (Solicitud):**
+```
+GET /api/v1/parches/770e8400-e29b-41d4-a716-446655440000
+```
+
+#### 🖼️ Diagrama de Secuencia
+
+![Diagrama de Secuencia Consultar Parche por ID](docs/uml/ConsultarParcheById.png)
+
+<details>
+<summary><strong>🟢 Explicación del Flujo</strong></summary>
+
+El `ParcheController` recibe el UUID del parche. El `GetParcheUseCase` busca el parche por ID en el repositorio. Si no se encuentra, lanza `ParcheNotFoundException`. Si existe, convierte la entidad a `ParcheResponse` y retorna la respuesta con HTTP 200.
+
+</details>
+
+#### 📊 Tipos de errores manejados
+
+<div align="center">
+
+| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
+|:------------------:|:----------------|:------------------------|
+| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | Parche no existe | `"Parche not found"` |
+
+</div>
 
 ---
 
-## 9. 🧪 Evidencia de las pruebas y cómo ejecutarlas
+### 6.5 Actualizar Parche
+
+Permite al capitán modificar los datos de un parche existente.
+
+**Endpoint principal:** `PATCH /api/v1/parches/{id}`
+
+#### 📦 Estructura de la Solicitud (Request)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
+|---|---|---|---|
+| name | String | Opcional | Nuevo nombre del parche. |
+| description | String | Opcional | Nueva descripción. |
+| place | String | Opcional | Nuevo lugar de encuentro. |
+| category | Enum | Opcional | Nueva categoría. |
+| date | LocalDate | Opcional | Nueva fecha (yyyy-MM-dd). |
+| hour | LocalTime | Opcional | Nueva hora (HH:mm). |
+| maximumQuota | Integer | Opcional, 2–50 | Nuevo cupo máximo. |
+| type | Enum | Opcional | Nuevo tipo (PUBLIC / PRIVATE). |
+| eventId | UUID | Opcional | Nuevo ID de evento externo. |
+
+</div>
+
+#### ✅ Happy Path (Ejemplo de Uso Exitoso)
+
+1. El capitán envía un PATCH con los campos a actualizar e incluye su ID en `X-User-Id`.
+2. El sistema verifica que el solicitante sea el capitán del parche.
+3. Se actualizan únicamente los campos enviados.
+4. Se retorna `200 OK` con el parche actualizado.
+
+**Request (Solicitud):**
+```json
+PATCH /api/v1/parches/770e8400-e29b-41d4-a716-446655440000
+Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
+
+{
+  "place": "Biblioteca central",
+  "maximumQuota": 15
+}
+```
+
+#### 🖼️ Diagrama de Secuencia
+
+![Diagrama de Secuencia Actualizar Parche](docs/uml/ActualizarParche.png)
+
+<details>
+<summary><strong>🟢 Explicación del Flujo</strong></summary>
+
+El `ParcheController` delega al `UpdateParcheUseCase`. Este verifica que el solicitante sea el capitán del parche; si no lo es, lanza `AccessDeniedException`. Si la validación pasa, aplica los cambios sobre los campos enviados y persiste la entidad actualizada.
+
+</details>
+
+#### 📊 Tipos de errores manejados
+
+<div align="center">
+
+| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
+|:------------------:|:----------------|:------------------------|
+| ![403](https://img.shields.io/badge/403-Forbidden-red?style=flat) | No es el capitán | `"Only the captain can update this parche"` |
+| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | Parche no existe | `"Parche not found"` |
+
+</div>
+
+---
+
+### 6.6 Archivar Parche
+
+Permite al capitán archivar un parche, cambiando su estado de `ACTIVE` a `FILED`.
+
+**Endpoint principal:** `DELETE /api/v1/parches/{id}`
+
+#### 📦 Estructura de la Solicitud (Request)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
+|---|---|---|---|
+| id | UUID | Obligatorio (path) | Identificador del parche a archivar. |
+| X-User-Id | UUID | Obligatorio (header) | ID del estudiante que solicita el archivo. |
+
+</div>
+
+#### ✅ Happy Path (Ejemplo de Uso Exitoso)
+
+1. El capitán envía un DELETE con su ID en el header.
+2. El sistema verifica que sea el capitán.
+3. El parche pasa a estado `FILED` (no se elimina físicamente).
+4. Se retorna `204 No Content`.
+
+**Request (Solicitud):**
+```
+DELETE /api/v1/parches/770e8400-e29b-41d4-a716-446655440000
+Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
+```
+
+#### 🖼️ Diagrama de Secuencia
+
+![Diagrama de Secuencia Archivar Parche](docs/uml/ArchivarParches.png)
+
+<details>
+<summary><strong>🟢 Explicación del Flujo</strong></summary>
+
+El `CloseParcheUseCase` valida que el solicitante es el capitán del parche. Si la verificación es exitosa, cambia el estado del parche a `FILED` y lo persiste. La operación es un soft delete: el registro permanece en la base de datos pero deja de aparecer en listados activos.
+
+</details>
+
+#### 📊 Tipos de errores manejados
+
+<div align="center">
+
+| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
+|:------------------:|:----------------|:------------------------|
+| ![403](https://img.shields.io/badge/403-Forbidden-red?style=flat) | No es el capitán | `"Only the captain can archive this parche"` |
+| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | Parche no existe | `"Parche not found"` |
+
+</div>
+
+---
+
+### 6.7 Unirse a un Parche Público
+
+Permite a un estudiante unirse directamente a un parche público activo sin necesidad de invitación.
+
+**Endpoint principal:** `POST /api/v1/parches/{parcheId}/miembros`
+
+#### 📦 Estructura de la Solicitud (Request)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
+|---|---|---|---|
+| parcheId | UUID | Obligatorio (path) | ID del parche al que desea unirse. |
+| X-User-Id | UUID | Obligatorio (header) | ID del estudiante. |
+
+</div>
+
+#### 📦 Estructura de la Respuesta (Response)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | 📝 Descripción |
+|---|---|---|
+| id | UUID | Identificador único de la membresía. |
+| parcheId | UUID | ID del parche. |
+| studentId | UUID | ID del estudiante. |
+| memberRole | Enum | Rol del miembro (STUDENT / CAPTAIN). |
+| unionDate | LocalDateTime | Fecha y hora de ingreso. |
+
+</div>
+
+#### ✅ Happy Path (Ejemplo de Uso Exitoso)
+
+1. El estudiante envía un POST con el `parcheId` en el path y su ID en el header.
+2. El sistema verifica que el parche esté activo y no archivado.
+3. Se valida que el estudiante no sea ya miembro y que haya cupo disponible.
+4. Se verifica que el estudiante no tenga 5 parches activos.
+5. Se crea la membresía y se retorna `201 CREATED`.
+
+**Request (Solicitud):**
+```
+POST /api/v1/parches/770e8400-e29b-41d4-a716-446655440000/miembros
+Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
+```
+
+**Response (Respuesta):**
+```json
+{
+  "id": "990e8400-e29b-41d4-a716-446655440003",
+  "parcheId": "770e8400-e29b-41d4-a716-446655440000",
+  "studentId": "880e8400-e29b-41d4-a716-446655440002",
+  "memberRole": "STUDENT",
+  "unionDate": "2026-05-06T10:30:00"
+}
+```
+
+#### 🖼️ Diagrama de Secuencia
+
+![Diagrama de Secuencia Unirse a Parche](docs/uml/UnirseParche.png)
+
+<details>
+<summary><strong>🟢 Explicación del Flujo</strong></summary>
+
+El `MemberController` delega al `JoinParcheUseCase`. Este verifica que el parche exista y esté activo, que no haya superado su cupo máximo, que el estudiante no sea miembro ya, y que el estudiante no tenga más de 5 parches activos. Si todo es válido, se persiste la membresía y se publica un `NuevoMiembroEvent`.
+
+</details>
+
+#### 📊 Tipos de errores manejados
+
+<div align="center">
+
+| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
+|:------------------:|:----------------|:------------------------|
+| ![400](https://img.shields.io/badge/400-Bad_Request-red?style=flat) | Parche archivado | `"Cannot join a filed parche"` |
+| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | Parche no existe | `"Parche not found"` |
+| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Ya es miembro | `"Student is already a member of this parche"` |
+| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Cupo lleno | `"Maximum capacity reached"` |
+| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Límite de parches | `"Student has reached the maximum number of active hangouts"` |
+
+</div>
+
+---
+
+### 6.8 Salir de un Parche
+
+Permite a un estudiante abandonar voluntariamente un parche del que es miembro.
+
+**Endpoint principal:** `DELETE /api/v1/parches/{parcheId}/miembros`
+
+#### 📦 Estructura de la Solicitud (Request)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
+|---|---|---|---|
+| parcheId | UUID | Obligatorio (path) | ID del parche. |
+| X-User-Id | UUID | Obligatorio (header) | ID del estudiante que desea salir. |
+
+</div>
+
+#### ✅ Happy Path (Ejemplo de Uso Exitoso)
+
+1. El estudiante envía un DELETE con su ID en el header.
+2. El sistema verifica que sea miembro del parche y que no sea el capitán.
+3. Se elimina la membresía y se retorna `204 No Content`.
+
+**Request (Solicitud):**
+```
+DELETE /api/v1/parches/770e8400-e29b-41d4-a716-446655440000/miembros
+Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
+```
+
+#### 🖼️ Diagrama de Secuencia
+
+![Diagrama de Secuencia Salir de Parche](docs/uml/SalirParche.png)
+
+<details>
+<summary><strong>🟢 Explicación del Flujo</strong></summary>
+
+El `LeaveParcheUseCase` verifica que el parche esté activo y que el estudiante sea miembro. Si el estudiante es el capitán, se lanza una excepción indicando que debe transferir el liderazgo primero. Si la validación pasa, se elimina la membresía de la base de datos.
+
+</details>
+
+#### 📊 Tipos de errores manejados
+
+<div align="center">
+
+| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
+|:------------------:|:----------------|:------------------------|
+| ![400](https://img.shields.io/badge/400-Bad_Request-red?style=flat) | Es el capitán | `"Captain must transfer leadership before leaving"` |
+| ![400](https://img.shields.io/badge/400-Bad_Request-red?style=flat) | Parche archivado | `"Cannot leave a filed parche"` |
+| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | No es miembro | `"Member not found in this parche"` |
+
+</div>
+
+---
+
+### 6.9 Enviar Invitación
+
+Permite al capitán de un parche privado invitar a un estudiante específico.
+
+**Endpoint principal:** `POST /api/v1/parches/{parcheId}/invitaciones/{studentId}`
+
+#### 📦 Estructura de la Solicitud (Request)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
+|---|---|---|---|
+| parcheId | UUID | Obligatorio (path) | ID del parche privado. |
+| studentId | UUID | Obligatorio (path) | ID del estudiante a invitar. |
+| X-User-Id | UUID | Obligatorio (header) | ID del capitán que envía la invitación. |
+
+</div>
+
+#### 📦 Estructura de la Respuesta (Response)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | 📝 Descripción |
+|---|---|---|
+| id | UUID | Identificador único de la invitación. |
+| parcheId | UUID | ID del parche al que se invita. |
+| invitedStudentId | UUID | ID del estudiante invitado. |
+| status | Enum | Estado de la invitación (PENDING). |
+| sentAt | LocalDateTime | Fecha y hora de envío. |
+| respondedAt | LocalDateTime | Fecha y hora de respuesta (null si pendiente). |
+
+</div>
+
+#### ✅ Happy Path (Ejemplo de Uso Exitoso)
+
+1. El capitán envía un POST con el ID del parche y el ID del estudiante a invitar.
+2. El sistema verifica que el solicitante sea el capitán del parche.
+3. Se valida que el estudiante no sea ya miembro y no tenga una invitación pendiente.
+4. Se crea la invitación con estado `PENDING` y se retorna `201 CREATED`.
+
+**Request (Solicitud):**
+```
+POST /api/v1/parches/770e8400-e29b-41d4-a716-446655440000/invitaciones/880e8400-e29b-41d4-a716-446655440002
+Headers: X-User-Id: 550e8400-e29b-41d4-a716-446655440001
+```
+
+**Response (Respuesta):**
+```json
+{
+  "id": "aa0e8400-e29b-41d4-a716-446655440004",
+  "parcheId": "770e8400-e29b-41d4-a716-446655440000",
+  "invitedStudentId": "880e8400-e29b-41d4-a716-446655440002",
+  "status": "PENDING",
+  "sentAt": "2026-05-06T11:00:00",
+  "respondedAt": null
+}
+```
+
+#### 🖼️ Diagrama de Secuencia
+
+![Diagrama de Secuencia Enviar Invitación](docs/uml/EnviarInvitacion.png)
+
+<details>
+<summary><strong>🟢 Explicación del Flujo</strong></summary>
+
+El `InvitationUseCase` verifica que el remitente sea el capitán. Luego confirma que el estudiante no sea ya miembro del parche y que no tenga una invitación activa pendiente. Si todo es válido, crea la invitación con estado `PENDING`, la persiste y publica un `InvitationSentEvent` para notificaciones.
+
+</details>
+
+#### 📊 Tipos de errores manejados
+
+<div align="center">
+
+| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
+|:------------------:|:----------------|:------------------------|
+| ![403](https://img.shields.io/badge/403-Forbidden-red?style=flat) | No es el capitán | `"Only the captain can send invitations"` |
+| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Ya es miembro | `"Student is already a member"` |
+| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Invitación duplicada | `"Student already has a pending invitation"` |
+
+</div>
+
+---
+
+### 6.10 Responder Invitación
+
+Permite al estudiante invitado aceptar o rechazar una invitación pendiente.
+
+**Endpoint principal:** `PATCH /api/v1/invitaciones/{invitationId}`
+
+#### 📦 Estructura de la Solicitud (Request)
+
+<div align="center">
+
+| 🏷️ Campo | 🗃️ Tipo | ⚠️ Restricciones | 📝 Descripción |
+|---|---|---|---|
+| invitationId | UUID | Obligatorio (path) | ID de la invitación a responder. |
+| X-User-Id | UUID | Obligatorio (header) | ID del estudiante invitado. |
+| answer | Enum | Obligatorio (body) | Respuesta: ACCEPTED o REJECTED. |
+
+</div>
+
+#### ✅ Happy Path (Ejemplo de Uso Exitoso)
+
+1. El estudiante invitado envía PATCH con su respuesta y su ID en el header.
+2. El sistema verifica que sea el destinatario de la invitación.
+3. Verifica que la invitación esté en estado `PENDING`.
+4. Si acepta: se crea automáticamente la membresía en el parche.
+5. La invitación queda con estado `ACCEPTED` o `REJECTED`.
+
+**Request (Solicitud):**
+```json
+PATCH /api/v1/invitaciones/aa0e8400-e29b-41d4-a716-446655440004
+Headers: X-User-Id: 880e8400-e29b-41d4-a716-446655440002
+
+{
+  "answer": "ACCEPTED"
+}
+```
+
+**Response (Respuesta):**
+```json
+{
+  "id": "aa0e8400-e29b-41d4-a716-446655440004",
+  "parcheId": "770e8400-e29b-41d4-a716-446655440000",
+  "invitedStudentId": "880e8400-e29b-41d4-a716-446655440002",
+  "status": "ACCEPTED",
+  "sentAt": "2026-05-06T11:00:00",
+  "respondedAt": "2026-05-06T11:30:00"
+}
+```
+
+#### 🖼️ Diagrama de Secuencia
+
+![Diagrama de Secuencia Responder Invitación](docs/uml/AceptarInvitacion.png)
+
+<details>
+<summary><strong>🟢 Explicación del Flujo</strong></summary>
+
+El `RespondInvitationUseCase` verifica que el estudiante sea el destinatario de la invitación y que ésta esté en estado `PENDING`. Si acepta, se verifica que el parche tenga cupo disponible y se crea la membresía. La invitación se actualiza con el estado final y la fecha de respuesta. Se publica un `InvitationAcceptedEvent` en caso de aceptación.
+
+</details>
+
+#### 📊 Tipos de errores manejados
+
+<div align="center">
+
+| 🔢 **Código HTTP** | ⚠️ **Escenario** | 💬 **Mensaje de Error** |
+|:------------------:|:----------------|:------------------------|
+| ![403](https://img.shields.io/badge/403-Forbidden-red?style=flat) | No es el invitado | `"You are not the invited student"` |
+| ![404](https://img.shields.io/badge/404-Not_Found-orange?style=flat) | Invitación no existe | `"Invitation not found"` |
+| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Ya respondida | `"Invitation has already been responded"` |
+| ![409](https://img.shields.io/badge/409-Conflict-orange?style=flat) | Parche lleno | `"Maximum capacity reached"` |
+
+</div>
+
+---
+
+## 7. 📬 Mensajería Asíncrona (RabbitMQ)
+
+El microservicio utiliza **RabbitMQ** para publicar eventos de dominio que son consumidos asincrónicamente por otros microservicios del ecosistema DOSW. La topología se define en `RabbitMQConfig.java`.
+
+### 🏗️ Topología
+
+| Componente | Nombre | Tipo | Características |
+|:-----------|:-------|:-----|:----------------|
+| **Exchange** | `hangout.events` | Topic | Durable |
+
+### 🔑 Routing Keys y Colas
+
+| Routing Key | Cola | Consumidor | Evento que lo dispara |
+|:------------|:-----|:-----------|:---------------------|
+| `invitation.accepted` | `gamification.invitation.accepted` | gamification-service | Invitación aceptada |
+| `invitation.accepted` | `notification.invitation.accepted` | notification-service | Invitación aceptada |
+| `invitation.sent` | `notification.invitation.sent` | notification-service | Invitación enviada |
+| `member.joined` | `notification.member.joined` | notification-service | Nuevo miembro en parche |
+
+### 📦 Payloads de Mensajes (JSON)
+
+#### InvitationAcceptedMessage
+Publicado cuando un estudiante acepta una invitación.
+
+| Campo | Tipo | Descripción |
+|:------|:-----|:------------|
+| invitationId | String | UUID de la invitación |
+| parcheId | String | UUID del parche |
+| studentId | String | UUID del estudiante que aceptó |
+| captainId | String | UUID del capitán del parche |
+| occurredAt | LocalDateTime | Timestamp del evento |
+
+#### InvitationSentMessage
+Publicado cuando el capitán envía una invitación.
+
+| Campo | Tipo | Descripción |
+|:------|:-----|:------------|
+| invitationId | String | UUID de la invitación |
+| parcheId | String | UUID del parche |
+| invitedStudentId | String | UUID del estudiante invitado |
+| captainId | String | UUID del capitán que envía |
+| occurredAt | LocalDateTime | Timestamp del evento |
+
+#### MemberJoinedMessage
+Publicado cuando un estudiante se une a un parche público.
+
+| Campo | Tipo | Descripción |
+|:------|:-----|:------------|
+| parcheId | String | UUID del parche |
+| parcheNombre | String | Nombre del parche |
+| capitanId | String | UUID del capitán |
+| estudianteId | String | UUID del nuevo miembro |
+| occurredAt | LocalDateTime | Timestamp del evento |
+
+### 🔌 Configuración
+
+```properties
+spring.rabbitmq.host=${RABBITMQ_HOST:localhost}
+spring.rabbitmq.port=${RABBITMQ_PORT:5671}
+spring.rabbitmq.username=${RABBITMQ_USERNAME:guest}
+spring.rabbitmq.password=${RABBITMQ_PASSWORD:guest}
+spring.rabbitmq.virtual-host=${RABBITMQ_VHOST:/}
+spring.rabbitmq.ssl.enabled=${RABBITMQ_SSL:true}
+```
+
+---
+
+## 8. 🧪 Pruebas
 
 El microservicio de **Parches** implementa una **estrategia integral de pruebas** que garantiza la calidad, funcionalidad y confiabilidad del código mediante pruebas unitarias y de integración.
-
----
 
 ### 🎯 Tipos de pruebas implementadas
 
@@ -1368,11 +1268,9 @@ El microservicio de **Parches** implementa una **estrategia integral de pruebas*
 
 </div>
 
----
-
 ### 🚀 Cómo ejecutar las pruebas
 
-#### **1️⃣ Ejecutar pruebas unitarias**
+#### 1️⃣ Ejecutar pruebas unitarias
 
 ```bash
 mvn test
@@ -1380,7 +1278,7 @@ mvn test
 
 Este comando ejecuta solo las pruebas unitarias (excluye las de integración).
 
-#### **2️⃣ Ejecutar pruebas de integración**
+#### 2️⃣ Ejecutar pruebas de integración
 
 Requiere una instancia de PostgreSQL corriendo (usa `docker compose up -d postgres`):
 
@@ -1388,13 +1286,13 @@ Requiere una instancia de PostgreSQL corriendo (usa `docker compose up -d postgr
 mvn failsafe:integration-test failsafe:verify
 ```
 
-#### **3️⃣ Ejecutar todas las pruebas**
+#### 3️⃣ Ejecutar todas las pruebas
 
 ```bash
 mvn verify
 ```
 
-#### **4️⃣ Generar reporte de cobertura con JaCoCo**
+#### 4️⃣ Generar reporte de cobertura con JaCoCo
 
 ```bash
 mvn clean test jacoco:report
@@ -1405,19 +1303,17 @@ El reporte HTML se generará en:
 target/site/jacoco/index.html
 ```
 
-#### **5️⃣ Ejecutar pruebas desde IntelliJ IDEA**
+#### 5️⃣ Ejecutar pruebas desde IntelliJ IDEA
 
 1. Click derecho sobre la carpeta `src/test/java`
-2. Selecciona **"Run 'Tests in...'**
+2. Selecciona **"Run 'Tests in...'"**
 3. Ver resultados en el panel inferior
 
-#### **6️⃣ Ejecutar una prueba específica**
+#### 6️⃣ Ejecutar una prueba específica
 
 ```bash
 mvn test -Dtest=RespondInvitationUseCaseTest
 ```
-
----
 
 ### 🧪 Ejemplo de prueba de integración
 
@@ -1440,10 +1336,6 @@ void accept_successFlow_createsMembership() throws Exception {
 }
 ```
 
-
-
----
-
 ### 🖼️ Evidencias de ejecución
 
 1. **Consola mostrando pruebas ejecutándose exitosamente**
@@ -1454,8 +1346,6 @@ void accept_successFlow_createsMembership() throws Exception {
 
     ![Evidencia reporte JaCoCo](./docs/images/CoberturaJaCoCo.png)
 
----
-
 ### ✅ Criterios de aceptación de pruebas
 
 Para considerar el sistema correctamente probado, se debe cumplir:
@@ -1464,8 +1354,6 @@ Para considerar el sistema correctamente probado, se debe cumplir:
 - ✅ **Cero errores de compilación** en el código de pruebas
 - ✅ **Pruebas de casos felices y casos de error** implementadas
 - ✅ **Pruebas de integración** verifican flujos completos contra BD real
-
----
 
 ### 🔄 Integración con CI/CD
 
@@ -1483,117 +1371,7 @@ Esto garantiza que ningún cambio roto llegue a producción.
 
 ---
 
-## 10. 🗂️ Código de la implementación organizado en las respectivas carpetas
-
-El microservicio de **Parches** sigue una **arquitectura hexagonal (puertos y adaptadores)** que separa las responsabilidades en capas bien definidas, promoviendo la escalabilidad, testabilidad y mantenibilidad del código.
-
----
-
-### 📂 Estructura general del proyecto (Scaffolding)
-
-```
-charizard-compiled-hangout-service/
-│
-├── 📁 src/
-│   ├── 📁 main/
-│   │   ├── 📁 java/com/charizard/compiled/hangout_service/
-│   │   │   │
-│   │   │   ├── 📁 application/                              # 🔵 CAPA DE APLICACIÓN
-│   │   │   │   ├── 📁 dto/
-│   │   │   │   │   ├── 📁 request/   (CreateParcheRequest, UpdateParcheRequest, RespondInvitationRequest)
-│   │   │   │   │   └── 📁 response/  (ParcheResponse, MemberResponse, InvitationResponse, ErrorResponse)
-│   │   │   │   ├── 📁 mapper/        (ParcheMapper)
-│   │   │   │   └── 📁 usecase/       (CreateParche, GetParche, UpdateParche, CloseParche, JoinParche,
-│   │   │   │                          LeaveParche, InvitationUseCase, RespondInvitationUseCase, ArchiveParche)
-│   │   │   │
-│   │   │   ├── 📁 domain/                                   # 🟢 CAPA DE DOMINIO
-│   │   │   │   ├── 📁 events/        (NuevoMiembroEvent, InvitationSentEvent, InvitationAcceptedEvent)
-│   │   │   │   ├── 📁 exceptions/    (ParcheNotFoundException, AccessDeniedException, ...)
-│   │   │   │   ├── 📁 model/         (Parche, Member, Invitation)
-│   │   │   │   │   └── 📁 enums/     (ParcheType, ParcheStatus, ParcheCategory, MemberRole, InvitationStatus)
-│   │   │   │   └── 📁 ports/
-│   │   │   │       ├── 📁 in/        (Input ports / interfaces de casos de uso)
-│   │   │   │       └── 📁 out/       (Output ports / interfaces de repositorios y notificaciones)
-│   │   │   │
-│   │   │   ├── 📁 entrypoints/                              # 🟠 ENTRADA (DRIVING ADAPTERS)
-│   │   │   │   ├── 📁 advice/        (GlobalExceptionHandler)
-│   │   │   │   └── 📁 rest/controller/ (ParcheController, MemberController, InvitationController)
-│   │   │   │
-│   │   │   └── 📁 infrastructure/                           # 🟠 INFRAESTRUCTURA (DRIVEN ADAPTERS)
-│   │   │       ├── 📁 adapters/
-│   │   │       │   ├── 📁 notification/  (NotificacionAdapter, NotificacionEventListener)
-│   │   │       │   ├── 📁 persistence/
-│   │   │       │   │   ├── 📁 adapter/   (ParcheRepositoryAdapter, MemberRepositoryAdapter, InvitationRepositoryAdapter)
-│   │   │       │   │   ├── 📁 entity/    (ParcheEntity, MemberEntity, InvitationEntity)
-│   │   │       │   │   ├── 📁 mapper/    (ParcheEntityMapper, MemberEntityMapper, InvitationEntityMapper)
-│   │   │       │   │   └── 📁 repository/ (ParcheRepository, MemberRepository, InvitationRepository)
-│   │   │       │   └── 📁 scheduler/     (ParcheArchiveScheduler)
-│   │   │       └── 📁 config/            (SecurityConfig, SwaggerConfig, AsyncConfig, FlywayConfig)
-│   │   │
-│   │   └── 📁 resources/
-│   │       ├── 📄 application.properties
-│   │       └── 📁 db/migration/
-│   │           ├── 📄 V1__create_parches_tables.sql
-│   │           └── 📄 V2__create_invitaciones_table.sql
-│   │
-│   └── 📁 test/                                             # 🧪 PRUEBAS
-│       ├── 📁 java/.../
-│       │   ├── 📁 application/usecase/   (RespondInvitationUseCaseTest, NotificacionEventListenerTest)
-│       │   ├── 📁 entrypoints/rest/controller/ (InvitationControllerTest, InvitationIntegrationTest, MiembroIntegrationTest)
-│       │   └── 📁 infrastructure/
-│       │       ├── 📁 scheduler/         (ParcheArchivoSchedulerTest)
-│       │       └── 📁 persistence/entity/ (ParcheEntityTest, InvitationEntityTest)
-│       └── 📁 resources/
-│           └── 📄 application.properties
-│
-├── 📁 .github/workflows/
-│   └── 📄 ci-cd.yml
-│
-├── 📄 Dockerfile
-├── 📄 docker-compose.yml
-├── 📄 pom.xml
-└── 📄 README.md
-```
-
----
-
-> ℹ️ El código fuente está organizado siguiendo estrictamente la arquitectura hexagonal para garantizar la separación de responsabilidades y facilitar el mantenimiento y la extensión del sistema.
-
-### 🏛️ Arquitectura Hexagonal Implementada
-
-<div align="center">
-
-| 🎨 **Capa** | 📋 **Responsabilidad** | 🔗 **Dependencias** |
-|:-----------|:----------------------|:-------------------|
-| **🟢 Domain** | Lógica de negocio pura, entidades (`Parche`, `Member`, `Invitation`), enums, eventos y puertos (interfaces) | ❌ Ninguna (independiente) |
-| **🔵 Application** | Casos de uso, DTOs, mappers y validaciones | ✅ Solo `Domain` |
-| **🟠 Entrypoints** | Controladores REST y manejador global de excepciones | ✅ `Domain` + `Application` |
-| **🟠 Infrastructure** | Adaptadores JPA, scheduler, notificaciones y configuración | ✅ `Domain` + `Application` |
-
-</div>
-
-**Flujo de dependencias:** `Entrypoints / Infrastructure → Application → Domain`
-
----
-
-### 🎯 Principios de diseño aplicados
-
-<div align="center">
-
-| ✅ **Principio** | 📋 **Implementación** |
-|:----------------|:---------------------|
-| **Separación de responsabilidades** | Cada capa tiene un propósito único y bien definido |
-| **Inversión de dependencias** | Las capas externas dependen de interfaces (puertos) definidas en el dominio |
-| **Independencia del framework** | La lógica de negocio no depende de Spring ni de JPA |
-| **Patrón Ports & Adapters** | Los casos de uso consumen puertos; la infraestructura los implementa |
-| **Testabilidad** | Fácil crear pruebas unitarias mockeando puertos; integración con BD real |
-| **Mantenibilidad** | Cambios en una capa no afectan a las demás |
-
-</div>  
-
----
-
-## 11. 🚀 Ejecución del Proyecto
+## 9. 🚀 Ejecución del Proyecto
 
 ### 📋 Prerrequisitos
 - **Java 21**
@@ -1638,81 +1416,190 @@ Esto levanta:
 | `PGPASSWORD` | `postgres` | Contraseña de PostgreSQL |
 | `PORT` | `8080` | Puerto del servidor |
 
-## 12. ☁️ CI/CD y Despliegue en Railway
-
-El proyecto implementa un **pipeline automatizado** con **GitHub Actions** para garantizar la calidad del código y el despliegue continuo en **Railway**.
+> 📚 **Swagger UI:** Cuando el proyecto esté desplegado en Azure, la documentación interactiva estará disponible en `https://<app-name>.azurewebsites.net/swagger-ui/index.html`
 
 ---
 
-### 🔗 Enlaces de Despliegue
+## 10. 📸 Evidencia del Despliegue CI/CD
+
+> ⏳ *Pendiente — Se agregarán capturas de pantalla del pipeline de GitHub Actions ejecutándose exitosamente (jobs: build, unit-tests, integration-tests, quality, package, deploy).*
+
+---
+
+## 11. 🌐 Link Azure / Swagger
+
+| 🌍 Recurso | 📝 Estado / URL |
+|:-----------|:----------------|
+| **Swagger UI** | ⏳ Pendiente — se habilitará cuando se configure el Resource Group en Azure |
+| **Azure App Service** | ⏳ Pendiente — URL se asignará al completar el despliegue |
+
+---
+
+## 12. 🗂️ Código Organizado en Carpetas
+
+El microservicio de **Parches** sigue una **arquitectura hexagonal (puertos y adaptadores)** que separa las responsabilidades en capas bien definidas. Todo el código fuente cuenta con **documentación Javadoc** completa en cada clase, método y campo.
+
+### 📂 Estructura general del proyecto (Scaffolding)
+
+```
+charizard-compiled-hangout-service/
+│
+├── 📁 src/
+│   ├── 📁 main/
+│   │   ├── 📁 java/com/charizard/compiled/hangout_service/
+│   │   │   │
+│   │   │   ├── 📁 application/                              # 🔵 CAPA DE APLICACIÓN
+│   │   │   │   ├── 📁 dto/
+│   │   │   │   │   ├── 📁 request/   (CreateParcheRequest, UpdateParcheRequest, RespondInvitationRequest)
+│   │   │   │   │   └── 📁 response/  (ParcheResponse, MemberResponse, InvitationResponse, ErrorResponse)
+│   │   │   │   ├── 📁 mapper/        (ParcheMapper)
+│   │   │   │   └── 📁 usecase/       (CreateParche, GetParche, UpdateParche, CloseParche, JoinParche,
+│   │   │   │                          LeaveParche, InvitationUseCase, RespondInvitationUseCase, ArchiveParche)
+│   │   │   │
+│   │   │   ├── 📁 domain/                                   # 🟢 CAPA DE DOMINIO
+│   │   │   │   ├── 📁 events/        (NuevoMiembroEvent, InvitationSentEvent, InvitationAcceptedEvent)
+│   │   │   │   ├── 📁 exceptions/    (ParcheNotFoundException, AccessDeniedException, ...)
+│   │   │   │   ├── 📁 model/         (Parche, Member, Invitation)
+│   │   │   │   │   └── 📁 enums/     (ParcheType, ParcheStatus, ParcheCategory, MemberRole, InvitationStatus)
+│   │   │   │   └── 📁 ports/
+│   │   │   │       ├── 📁 in/        (Input ports / interfaces de casos de uso)
+│   │   │   │       └── 📁 out/       (Output ports / interfaces de repositorios y notificaciones)
+│   │   │   │
+│   │   │   ├── 📁 entrypoints/                              # 🟠 ENTRADA (DRIVING ADAPTERS)
+│   │   │   │   ├── 📁 advice/        (GlobalExceptionHandler)
+│   │   │   │   └── 📁 rest/controller/ (ParcheController, MemberController, InvitationController)
+│   │   │   │
+│   │   │   └── 📁 infrastructure/                           # 🟠 INFRAESTRUCTURA (DRIVEN ADAPTERS)
+│   │   │       ├── 📁 adapters/
+│   │   │       │   ├── 📁 messaging/   (RabbitMQEventPublisher, InvitationAcceptedMessage,
+│   │   │       │   │                    InvitationSentMessage, MemberJoinedMessage)
+│   │   │       │   ├── 📁 notification/ (NotificacionAdapter, NotificacionEventListener)
+│   │   │       │   ├── 📁 persistence/
+│   │   │       │   │   ├── 📁 adapter/   (ParcheRepositoryAdapter, MemberRepositoryAdapter, InvitationRepositoryAdapter)
+│   │   │       │   │   ├── 📁 entity/    (ParcheEntity, MemberEntity, InvitationEntity)
+│   │   │       │   │   ├── 📁 mapper/    (ParcheEntityMapper, MemberEntityMapper, InvitationEntityMapper)
+│   │   │       │   │   └── 📁 repository/ (ParcheRepository, MemberRepository, InvitationRepository)
+│   │   │       │   └── 📁 scheduler/     (ParcheArchiveScheduler)
+│   │   │       └── 📁 config/            (SecurityConfig, SwaggerConfig, AsyncConfig, FlywayConfig,
+│   │   │                                   RabbitMQConfig)
+│   │   │
+│   │   └── 📁 resources/
+│   │       ├── 📄 application.properties
+│   │       └── 📁 db/migration/
+│   │           ├── 📄 V1__create_parches_tables.sql
+│   │           └── 📄 V2__create_invitaciones_table.sql
+│   │
+│   └── 📁 test/                                             # 🧪 PRUEBAS
+│       ├── 📁 java/.../
+│       │   ├── 📁 application/usecase/   (RespondInvitationUseCaseTest, NotificacionEventListenerTest)
+│       │   ├── 📁 entrypoints/rest/controller/ (InvitationControllerTest, InvitationIntegrationTest, MiembroIntegrationTest)
+│       │   └── 📁 infrastructure/
+│       │       ├── 📁 scheduler/         (ParcheArchivoSchedulerTest)
+│       │       └── 📁 persistence/entity/ (ParcheEntityTest, InvitationEntityTest)
+│       └── 📁 resources/
+│           └── 📄 application.properties
+│
+├── 📁 .github/workflows/
+│   └── 📄 ci-cd.yml
+│
+├── 📄 Dockerfile
+├── 📄 docker-compose.yml
+├── 📄 pom.xml
+└── 📄 README.md
+```
+
+> ℹ️ El código fuente está organizado siguiendo estrictamente la arquitectura hexagonal para garantizar la separación de responsabilidades y facilitar el mantenimiento y la extensión del sistema. Toda la implementación en Java cuenta con **Javadoc** completo.
+
+---
+
+## 13. 🔌 Conexiones con Servicios Externos
+
+El microservicio se integra con otros sistemas del ecosistema DOSW a través de eventos asíncronos y validaciones síncronas.
 
 <div align="center">
 
-| 🌍 Ambiente | 📝 Estado |
-|:-----------|:---------|
-| **🟢 Producción (Railway)** | ![Active](https://img.shields.io/badge/Status-Active-success?style=flat) |
+| 🌍 **Microservicio** | ⚙️ **Operación** | 📋 **Propósito** |
+|:---------------|:----------------|:-----------------------|
+| **Gamification** | Nuevo miembro / Invitación aceptada | Disparar recompensas o puntos al unirse a un parche |
+| **Notification** | Invitación enviada / Nuevo miembro | Enviar notificaciones push a los estudiantes |
+| **User Service** | Validación de identidad | Verificar que el `X-User-Id` corresponde a un estudiante activo |
 
 </div>
 
----
+**Mecanismo de integración:**
 
-### 🔄 Pipeline de Automatización
-
-El flujo de trabajo en `.github/workflows/ci-cd.yml` ejecuta los siguientes pasos en cada push o PR:
-
-1. **Build** — Compila el proyecto con Maven (`mvn package -DskipTests`).
-2. **Tests Unitarios** — Ejecuta `mvn test` y publica el reporte de resultados.
-3. **Tests de Integración** — Ejecuta `mvn failsafe:integration-test failsafe:verify` contra un servicio PostgreSQL 18 en el runner de CI.
-4. **Deploy** — En merges a `main`, dispara el deploy hook de Railway vía `curl -X POST ${{ secrets.DEPLOY_HOOK }}`.
+- **Mensajería asíncrona:** Los eventos de dominio (`invitation.accepted`, `invitation.sent`, `member.joined`) se publican en el exchange `hangout.events` de RabbitMQ y son consumidos por Gamification y Notification.
+- **Validación síncrona:** El servicio consume la identidad del usuario vía User Service para validar los headers `X-User-Id` en las peticiones.
 
 ---
 
-### ☁️ Infraestructura
+## 14. 🔄 Pipelines (Desarrollo + PROD)
 
-<div align="center">
+El proyecto implementa un **pipeline automatizado** con **GitHub Actions** para garantizar la calidad del código. El flujo está definido en `.github/workflows/ci-cd.yml` y se adapta según el evento y la rama.
 
-| Componente | Servicio | Propósito |
-|:-----------|:---------|:----------|
-| **Compute** | ![Railway](https://img.shields.io/badge/Railway-0B0D0E?logo=railway&logoColor=white) | Ejecución del contenedor Docker del microservicio |
-| **Database** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_18-336791?logo=postgresql&logoColor=white) | Persistencia de parches, membresías e invitaciones |
-| **CI/CD** | ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white) | Automatización de pruebas y despliegue continuo |
-| **API Docs** | ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=black) | Documentación interactiva de endpoints REST |
+### 🔄 Estructura del Pipeline
 
-</div>
+```
+                ┌──────────────┐
+                │    Build     │
+                │ (mvn package)│
+                └──────┬───────┘
+                       │
+         ┌─────────────┼─────────────┐
+         ▼             ▼             ▼
+  ┌────────────┐ ┌────────────┐ ┌────────────┐
+  │Unit Tests  │ │Integration │ │   Quality   │
+  │ (mvn test) │ │  Tests     │ │(JaCoCo check)│
+  └────────────┘ │(failsafe)  │ └────────────┘
+                 └────────────┘
+                       │
+                       ▼
+                ┌──────────────┐
+                │   Package    │
+                │(Docker build)│
+                └──────┬───────┘
+                       │
+                       ▼
+                ┌──────────────┐
+                │   Deploy     │
+                │ (Azure - ⏳) │
+                └──────────────┘
+```
 
----
+### 📋 Jobs del Pipeline
 
-### 📊 Evidencias de Despliegue
+| Job | Descripción | Depende de |
+|-----|-------------|------------|
+| **build** | Compila y empaqueta el JAR con Maven. Sube el artifact del JAR. | — |
+| **unit-tests** | Ejecuta pruebas unitarias (surefire) y publica reporte JUnit | build |
+| **integration-tests** | Ejecuta pruebas de integración (failsafe) con PostgreSQL 18 en servicio del runner | build |
+| **quality** | Verifica cobertura de código con JaCoCo | build |
+| **package** | Construye imagen Docker del microservicio y la guarda como artifact | unit-tests, integration-tests, quality |
+| **deploy** | Despliegue a Azure Web App (pendiente de configurar Resource Group) | package |
 
-**Railway — Aplicación en ejecución**
+### 🧩 Comportamiento por entorno
 
-<div align="center">
-  <img src="docs\uml\DiagramaDespliegue.png" alt="Evidencia Railway Deploy" width="80%" />
-</div>
+#### Pipeline de Desarrollo (`develop`)
 
----
+Se ejecuta en cada **push a `develop`**:
+- `build` → `unit-tests`, `integration-tests`, `quality` (corren en paralelo)
+- Si `unit-tests` falla, `integration-tests` continúa igualmente (continue on failure)
 
-## 13. 🤝 Contribuciones y Metodología
+#### Pipeline de Producción (`main`)
 
-El equipo **Charizard Compiled** aplicó la metodología **Scrum** con sprints semanales para garantizar una entrega incremental de valor y mejora continua.
+Se ejecuta en **PR a `main`**:
+- `build` → `unit-tests`, `integration-tests`, `quality` → `package` (validar construcción Docker)
 
-### 👥 Equipo Scrum
+Se ejecuta en **push a `main`**:
+- `build` → `unit-tests`, `integration-tests`, `quality` → `package` → `deploy` (a Azure)
 
-| Rol | Responsabilidad |
-|:---|:---|
-| **Product Owner** | Priorización del Backlog y maximización de valor. |
-| **Scrum Master** | Facilitador del proceso y eliminación de impedimentos. |
-| **Developers** | Diseño, implementación y pruebas de funcionalidades. |
+| Evento | Jobs que se ejecutan |
+|--------|----------------------|
+| **Push a `develop`** | `build` → `unit-tests`, `integration-tests`, `quality` |
+| **PR a `main`** | `build` → `unit-tests`, `integration-tests`, `quality` → `package` |
+| **Push a `main`** | `build` → `unit-tests`, `integration-tests`, `quality` → `package` → `deploy` |
 
-### 🔄 Eventos y Artefactos
-
-- **Sprints Semanales**: Ciclos cortos de desarrollo.
-- **Daily Scrum**: Sincronización diaria (15 min).
-- **Sprint Review & Retrospective**: Demostración de incrementos y mejora de procesos.
-- **Backlogs**: Gestión de tareas en Jira/GitHub Projects.
-
-### 🎯 Valores del Equipo
-Compromiso, Coraje, Enfoque, Apertura y Respeto fueron los pilares para afrontar desafíos técnicos como la arquitectura hexagonal con Spring Boot 4 y la gestión de parches en tiempo real.
+> Los jobs `unit-tests`, `integration-tests` y `quality` corren en **paralelo** después de `build`.
 
 ---
 

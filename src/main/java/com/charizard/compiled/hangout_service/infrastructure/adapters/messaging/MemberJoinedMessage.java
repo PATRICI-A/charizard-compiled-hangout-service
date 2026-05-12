@@ -7,6 +7,10 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Payload de RabbitMQ para la routing key {@code member.joined}.
+ * Serializado como JSON. Consumido por: notification-service.
+ */
 @Data
 @Builder
 @NoArgsConstructor

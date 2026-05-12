@@ -17,6 +17,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Caso de uso para consultar parches.
+ * Permite buscar parches por filtros (tipo, estado, nombre, fecha, cupo disponible)
+ * y obtener un parche específico por su ID.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

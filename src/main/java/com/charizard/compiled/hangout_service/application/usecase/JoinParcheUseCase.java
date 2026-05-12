@@ -19,6 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Caso de uso para que un estudiante se una a un parche público.
+ * Valida que el parche esté activo, tenga cupo disponible, que el estudiante
+ * no sea ya miembro y no haya alcanzado el límite de 5 parches activos.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

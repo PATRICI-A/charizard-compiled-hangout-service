@@ -13,6 +13,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Configuración de seguridad del microservicio.
+ * Deshabilita CSRF, configura CORS para todos los orígenes,
+ * establece sesiones sin estado (stateless) y permite acceso público
+ * a Swagger UI mientras requiere autenticación para el resto de endpoints.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {

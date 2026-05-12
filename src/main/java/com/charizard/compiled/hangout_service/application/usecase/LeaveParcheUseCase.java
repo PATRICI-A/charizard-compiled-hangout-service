@@ -13,6 +13,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
+/**
+ * Caso de uso para que un estudiante abandone un parche voluntariamente.
+ * Valida que sea miembro, que el parche esté activo y que no sea el capitán
+ * (el capitán debe transferir el liderazgo antes de irse).
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

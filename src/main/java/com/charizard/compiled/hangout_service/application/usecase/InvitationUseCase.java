@@ -19,6 +19,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
+/**
+ * Caso de uso para enviar invitaciones a parches privados.
+ * El capitán puede invitar estudiantes; valida que no sean ya miembros
+ * y que no tengan una invitación pendiente duplicada. Publica eventos
+ * de dominio para notificaciones.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

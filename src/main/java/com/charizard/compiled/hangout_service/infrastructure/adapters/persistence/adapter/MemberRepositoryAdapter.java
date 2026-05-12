@@ -11,6 +11,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+/**
+ * Adaptador que implementa {@link MemberRepositoryPort} usando Spring Data JPA.
+ * Traduce entre el modelo de dominio {@link Member} y la entidad JPA {@link MemberEntity}
+ * a través de {@link MemberEntityMapper}.
+ */
 @Component
 @RequiredArgsConstructor
 public class MemberRepositoryAdapter implements MemberRepositoryPort {

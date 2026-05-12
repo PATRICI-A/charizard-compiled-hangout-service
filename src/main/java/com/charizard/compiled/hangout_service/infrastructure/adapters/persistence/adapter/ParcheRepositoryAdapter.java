@@ -17,6 +17,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Adaptador que implementa {@link com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort}
+ * usando Spring Data JPA. Traduce entre el modelo de dominio {@link com.charizard.compiled.hangout_service.domain.model.Parche}
+ * y la entidad JPA {@link ParcheEntity}, y construye Specifications para filtros dinámicos.
+ */
 @Component
 @RequiredArgsConstructor
 public class ParcheRepositoryAdapter implements ParcheRepositoryPort {

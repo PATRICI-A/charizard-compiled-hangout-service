@@ -20,6 +20,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+/**
+ * Controlador REST para la gestión de invitaciones a parches privados.
+ * Permite enviar, aceptar y rechazar invitaciones.
+ */
 @Tag(name = "Invitations", description = "Parche's Invitations Management")
 @RestController
 @RequestMapping("/api/v1")

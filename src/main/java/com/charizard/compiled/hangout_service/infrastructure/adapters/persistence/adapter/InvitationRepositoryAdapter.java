@@ -15,8 +15,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Adapter implementing the InvitationRepositoryPort output port.
- * Converts between domain models and JPA entities using the mapper.
+ * Adaptador que implementa {@link com.charizard.compiled.hangout_service.domain.ports.out.InvitationRepositoryPort}
+ * usando Spring Data JPA. Traduce entre el modelo de dominio {@link com.charizard.compiled.hangout_service.domain.model.Invitation}
+ * y la entidad JPA {@link InvitationEntity}.
  */
 @Component
 @RequiredArgsConstructor

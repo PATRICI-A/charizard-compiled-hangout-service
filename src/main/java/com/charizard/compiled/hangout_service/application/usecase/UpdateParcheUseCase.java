@@ -15,6 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Caso de uso para actualizar parcialmente un parche.
+ * Solo el capitán del parche puede modificar sus datos.
+ * Soporta actualización parcial (solo los campos enviados en la solicitud).
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

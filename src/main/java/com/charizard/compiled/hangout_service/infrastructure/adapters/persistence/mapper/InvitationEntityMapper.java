@@ -5,8 +5,8 @@ import com.charizard.compiled.hangout_service.infrastructure.adapters.persistenc
 import org.mapstruct.Mapper;
 
 /**
- * Mapper between the domain model Invitation and the JPA entity InvitationEntity.
- * Uses MapStruct for automatic code generation.
+ * Mapper de MapStruct para transformar entre la entidad JPA {@link InvitationEntity}
+ * y la entidad de dominio {@link Invitation}.
  */
 @Mapper(componentModel = "spring")
 public interface InvitationEntityMapper {

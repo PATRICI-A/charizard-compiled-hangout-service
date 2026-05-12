@@ -12,6 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Caso de uso para archivar manualmente un parche (soft delete).
+ * Cambia el estado del parche de ACTIVE a FILED.
+ * Solo el capitán puede ejecutar esta acción.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

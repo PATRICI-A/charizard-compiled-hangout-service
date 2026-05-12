@@ -10,6 +10,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Entidad JPA que mapea la tabla {@code members} en PostgreSQL.
+ * Representa la membresía de un estudiante en un parche,
+ * con restricción única de (parche_id, student_id).
+ */
 @Entity
 @Data
 @Builder

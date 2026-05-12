@@ -7,9 +7,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * Listens for NuevoMiembroEvent and logs the notification.
- * Prepared for future integration with WebSocket or Firebase Cloud Messaging
- * via NotificacionPushPort.
+ * Listener asíncrono que procesa los eventos {@link NuevoMiembroEvent}.
+ * Prepara el camino para futura integración con WebSocket o Firebase Cloud Messaging
+ * a través de {@link com.charizard.compiled.hangout_service.domain.ports.out.NotificacionPushPort}.
  */
 @Slf4j
 @Component

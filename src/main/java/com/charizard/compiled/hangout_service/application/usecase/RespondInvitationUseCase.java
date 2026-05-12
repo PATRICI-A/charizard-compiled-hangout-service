@@ -23,6 +23,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Caso de uso para responder invitaciones a parches privados.
+ * El estudiante invitado puede aceptar o rechazar. Al aceptar,
+ * se crea automáticamente la membresía y se publican eventos
+ * de integración con otros servicios.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
