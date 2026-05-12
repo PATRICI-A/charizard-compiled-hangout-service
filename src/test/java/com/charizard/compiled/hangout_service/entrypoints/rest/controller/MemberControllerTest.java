@@ -9,6 +9,7 @@ import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.ports.in.JoinParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.LeaveParcheInputPort;
 import com.charizard.compiled.hangout_service.entrypoints.advice.GlobalExceptionHandler;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,9 +17,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
@@ -40,13 +46,23 @@ class MemberControllerTest {
 
     @BeforeEach
     void setUp() {
+        parcheId = UUID.randomUUID();
+        studentId = UUID.randomUUID();
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(studentId, null, List.of()));
+        SecurityContextHolder.setContext(context);
+
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .build();
+    }
 
-        parcheId = UUID.randomUUID();
-        studentId = UUID.randomUUID();
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     // ─── POST /parches/{id}/miembros ──────────────────────────────────────
@@ -63,8 +79,7 @@ class MemberControllerTest {
 
         when(joinParcheService.unirseAParche(parcheId, studentId)).thenReturn(response);
 
-        mockMvc.perform(post("/api/v1/parches/{parcheId}/miembros", parcheId)
-                        .header("X-User-Id", studentId.toString()))
+        mockMvc.perform(post("/api/v1/parches/{parcheId}/miembros", parcheId))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.studentId").value(studentId.toString()))
                 .andExpect(jsonPath("$.memberRole").value("STUDENT"));
@@ -76,8 +91,7 @@ class MemberControllerTest {
         when(joinParcheService.unirseAParche(parcheId, studentId))
                 .thenThrow(new ParcheNotFoundException("Parche not found with id: " + parcheId));
 
-        mockMvc.perform(post("/api/v1/parches/{parcheId}/miembros", parcheId)
-                        .header("X-User-Id", studentId.toString()))
+        mockMvc.perform(post("/api/v1/parches/{parcheId}/miembros", parcheId))
                 .andExpect(status().isNotFound());
     }
 
@@ -87,8 +101,7 @@ class MemberControllerTest {
         when(joinParcheService.unirseAParche(parcheId, studentId))
                 .thenThrow(new StudentAlreadyMemberException("Student is already a member of this parche"));
 
-        mockMvc.perform(post("/api/v1/parches/{parcheId}/miembros", parcheId)
-                        .header("X-User-Id", studentId.toString()))
+        mockMvc.perform(post("/api/v1/parches/{parcheId}/miembros", parcheId))
                 .andExpect(status().isConflict());
     }
 
@@ -98,8 +111,7 @@ class MemberControllerTest {
         when(joinParcheService.unirseAParche(parcheId, studentId))
                 .thenThrow(new MaximumCapacityReachedException("Parche is already full"));
 
-        mockMvc.perform(post("/api/v1/parches/{parcheId}/miembros", parcheId)
-                        .header("X-User-Id", studentId.toString()))
+        mockMvc.perform(post("/api/v1/parches/{parcheId}/miembros", parcheId))
                 .andExpect(status().isConflict());
     }
 
@@ -109,8 +121,7 @@ class MemberControllerTest {
         when(joinParcheService.unirseAParche(parcheId, studentId))
                 .thenThrow(new MaxHangoutsReachedException());
 
-        mockMvc.perform(post("/api/v1/parches/{parcheId}/miembros", parcheId)
-                        .header("X-User-Id", studentId.toString()))
+        mockMvc.perform(post("/api/v1/parches/{parcheId}/miembros", parcheId))
                 .andExpect(status().isConflict());
     }
 
@@ -121,8 +132,7 @@ class MemberControllerTest {
     void salirDeParche_valido_retorna204() throws Exception {
         doNothing().when(leaveParcheService).salirDeParche(parcheId, studentId);
 
-        mockMvc.perform(delete("/api/v1/parches/{parcheId}/miembros", parcheId)
-                        .header("X-User-Id", studentId.toString()))
+        mockMvc.perform(delete("/api/v1/parches/{parcheId}/miembros", parcheId))
                 .andExpect(status().isNoContent());
 
         verify(leaveParcheService).salirDeParche(parcheId, studentId);
@@ -134,8 +144,7 @@ class MemberControllerTest {
         doThrow(new ParcheNotFoundException("Parche not found with id: " + parcheId))
                 .when(leaveParcheService).salirDeParche(parcheId, studentId);
 
-        mockMvc.perform(delete("/api/v1/parches/{parcheId}/miembros", parcheId)
-                        .header("X-User-Id", studentId.toString()))
+        mockMvc.perform(delete("/api/v1/parches/{parcheId}/miembros", parcheId))
                 .andExpect(status().isNotFound());
     }
 
@@ -145,8 +154,7 @@ class MemberControllerTest {
         doThrow(new IllegalArgumentException("Captain cannot leave without transferring leadership first"))
                 .when(leaveParcheService).salirDeParche(parcheId, studentId);
 
-        mockMvc.perform(delete("/api/v1/parches/{parcheId}/miembros", parcheId)
-                        .header("X-User-Id", studentId.toString()))
+        mockMvc.perform(delete("/api/v1/parches/{parcheId}/miembros", parcheId))
                 .andExpect(status().isBadRequest());
     }
 }

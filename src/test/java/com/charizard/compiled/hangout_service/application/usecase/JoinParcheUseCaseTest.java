@@ -11,6 +11,7 @@ import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.ParcheEventPublisherPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +33,7 @@ class JoinParcheUseCaseTest {
 
     @Mock ParcheRepositoryPort parcheRepository;
     @Mock MemberRepositoryPort memberRepository;
+    @Mock ParcheEventPublisherPort parcheEventPublisher;
 
     @InjectMocks JoinParcheUseCase useCase;
 

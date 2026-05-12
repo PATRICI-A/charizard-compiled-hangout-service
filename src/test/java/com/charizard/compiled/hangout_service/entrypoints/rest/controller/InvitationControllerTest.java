@@ -9,6 +9,7 @@ import com.charizard.compiled.hangout_service.domain.ports.in.InvitationInputPor
 import com.charizard.compiled.hangout_service.domain.ports.in.RespondInvitationInputPort;
 import com.charizard.compiled.hangout_service.entrypoints.advice.GlobalExceptionHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,11 +19,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -48,14 +54,25 @@ class InvitationControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(invitationController)
-                .setControllerAdvice(new GlobalExceptionHandler())
-                .build();
-        objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
         parcheId = UUID.randomUUID();
         captainId = UUID.randomUUID();
         studentId = UUID.randomUUID();
+
+        SecurityContext context = org.springframework.security.core.context.SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(captainId, null, List.of()));
+        SecurityContextHolder.setContext(context);
+
+        mockMvc = MockMvcBuilders.standaloneSetup(invitationController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
+                .build();
+        objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -73,8 +90,7 @@ class InvitationControllerTest {
                 .thenReturn(response);
 
         mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Id", captainId.toString()))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("PENDING"))
                 .andExpect(jsonPath("$.invitedStudentId").value(studentId.toString()));
@@ -87,8 +103,7 @@ class InvitationControllerTest {
                 .thenThrow(new ParcheNotFoundException("Parche not found with id: " + parcheId));
 
         mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Id", captainId.toString()))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
@@ -99,8 +114,7 @@ class InvitationControllerTest {
                 .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not the captain of this hangout"));
 
         mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Id", captainId.toString()))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
 
@@ -111,8 +125,7 @@ class InvitationControllerTest {
                 .thenThrow(new StudentAlreadyMemberException("Student is already a member of this hangout"));
 
         mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Id", captainId.toString()))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
     }
 
@@ -123,8 +136,7 @@ class InvitationControllerTest {
                 .thenThrow(new DuplicateInvitationException("A pending invitation already exists for this student"));
 
         mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Id", captainId.toString()))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
     }
 }

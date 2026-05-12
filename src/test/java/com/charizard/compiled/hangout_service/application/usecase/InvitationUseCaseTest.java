@@ -4,7 +4,6 @@ import com.charizard.compiled.hangout_service.application.dto.response.Invitatio
 import com.charizard.compiled.hangout_service.domain.exceptions.DuplicateInvitationException;
 import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundException;
 import com.charizard.compiled.hangout_service.domain.exceptions.StudentAlreadyMemberException;
-import com.charizard.compiled.hangout_service.domain.events.InvitationSentEvent;
 import com.charizard.compiled.hangout_service.domain.model.Invitation;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
@@ -12,6 +11,7 @@ import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.domain.ports.out.InvitationRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.ParcheEventPublisherPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -36,7 +35,7 @@ class InvitationUseCaseTest {
     @Mock InvitationRepositoryPort invitationRepository;
     @Mock MemberRepositoryPort memberRepository;
     @Mock ParcheRepositoryPort parcheRepository;
-    @Mock ApplicationEventPublisher eventPublisher;
+    @Mock ParcheEventPublisherPort parcheEventPublisher;
 
     @InjectMocks InvitationUseCase useCase;
 
@@ -140,7 +139,7 @@ class InvitationUseCaseTest {
         assertThat(result.getStatus()).isEqualTo(InvitationStatus.PENDING);
         assertThat(result.getInvitedStudentId()).isEqualTo(studentId);
         verify(invitationRepository).save(any(Invitation.class));
-        verify(eventPublisher).publishEvent(any(InvitationSentEvent.class));
+        verify(parcheEventPublisher).publishInvitationSent(any(), any(), any(), any());
     }
 
     @Test
@@ -179,6 +178,6 @@ class InvitationUseCaseTest {
         assertThatThrownBy(() -> useCase.sendInvitation(parcheId, captainId, studentId))
                 .isInstanceOf(ParcheNotFoundException.class);
 
-        verify(eventPublisher, never()).publishEvent(any());
+        verify(parcheEventPublisher, never()).publishInvitationSent(any(), any(), any(), any());
     }
 }
