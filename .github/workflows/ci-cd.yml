@@ -71,7 +71,7 @@ jobs:
           name: hangout-service
 
       - name: Ejecutar tests unitarios
-        run: mvn test
+        run: mvn test jacoco:check
 
       - name: Publicar reporte de tests unitarios
         uses: mikepenz/action-junit-report@v4
@@ -130,42 +130,12 @@ jobs:
         with:
           report_paths: '**/target/failsafe-reports/TEST-*.xml'
 
-  quality:
-    name: Code Quality
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout codigo
-        uses: actions/checkout@v4
-
-      - name: Configurar JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Cache Maven
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven-
-
-      - name: Descargar artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: hangout-service
-
-      - name: Verificar cobertura con JaCoCo
-        run: mvn jacoco:check
-
   package:
     name: Package Docker Image
     if: >-
       (github.ref == 'refs/heads/main' && github.event_name == 'push')
       || github.event_name == 'pull_request'
-    needs: [unit-tests, integration-tests, quality]
+    needs: [unit-tests, integration-tests]
     runs-on: ubuntu-latest
 
     steps:

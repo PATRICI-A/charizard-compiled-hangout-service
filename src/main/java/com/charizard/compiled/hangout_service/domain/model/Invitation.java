@@ -14,6 +14,7 @@ import java.util.UUID;
  * Tiene un ciclo de vida {@link InvitationStatus#PENDING} → {@link InvitationStatus#ACCEPTED}
  * o {@link InvitationStatus#REJECTED}. Al ser aceptada, se crea automáticamente una membresía.
  */
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
