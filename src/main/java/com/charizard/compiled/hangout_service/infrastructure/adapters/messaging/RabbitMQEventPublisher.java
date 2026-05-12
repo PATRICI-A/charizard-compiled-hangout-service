@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import java.util.Optional;
 
 /**
  * Publishes hangout domain events to RabbitMQ.
@@ -32,7 +31,7 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
                 .parcheId(parcheId.toString())
                 .studentId(studentId.toString())
                 .captainId(captainId.toString())
-                .occurredAt(LocalDateTime.now())
+                .ocurredAt(LocalDateTime.now())
                 .build();
 
         rabbitTemplate.convertAndSend(
@@ -52,8 +51,7 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
                 .invitationId(invitationId.toString())
                 .parcheId(parcheId.toString())
                 .invitedStudentId(invitedStudentId.toString())
-                .captainId(captainId.toString())
-                .occurredAt(LocalDateTime.now())
+                .capatinId(captainId.toString())
                 .build();
 
         rabbitTemplate.convertAndSend(
@@ -70,11 +68,10 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
     public void publishMemberJoined(UUID parcheId, String parcheNombre,
                                     UUID capitanId, UUID estudianteId) {
         MemberJoinedMessage message = MemberJoinedMessage.builder()
-                .parcheId(parcheId.toString())
-                .parcheNombre(parcheNombre)
                 .capitanId(capitanId.toString())
                 .estudianteId(estudianteId.toString())
-                .occurredAt(LocalDateTime.now())
+                .nombreParche(parcheNombre)
+                .timestamp(LocalDateTime.now())
                 .build();
 
         rabbitTemplate.convertAndSend(

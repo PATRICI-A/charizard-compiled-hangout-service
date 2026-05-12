@@ -10,7 +10,8 @@ import java.time.LocalDateTime;
 /**
  * RabbitMQ payload for the invitation.accepted routing key.
  *
- * Serialized as JSON via Jackson2JsonMessageConverter.
+ * Field names match notification-service's InvitationAcceptedEventDto exactly
+ * (including the typo "ocurredAt").
  * Consumers: gamification-service, notification-service.
  */
 @Data
@@ -23,5 +24,5 @@ public class InvitationAcceptedMessage {
     private String parcheId;
     private String studentId;
     private String captainId;
-    private LocalDateTime occurredAt;
+    private LocalDateTime ocurredAt;   // matches notification-service typo
 }

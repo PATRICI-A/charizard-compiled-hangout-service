@@ -30,6 +30,9 @@ public class CreateParcheUseCase implements CreateParcheInputPort {
 
     @Override
     public ParcheResponse createParche(CreateParcheRequest request, UUID captainId) {
+        if (captainId == null) {
+            throw new IllegalArgumentException("User not authenticated: X-User-Id header is required");
+        }
         if (memberRepository.countParchesActivosByStudentId(captainId) >= MAX_ACTIVE_HANGOUTS) {
             throw new MaxHangoutsReachedException();
         }

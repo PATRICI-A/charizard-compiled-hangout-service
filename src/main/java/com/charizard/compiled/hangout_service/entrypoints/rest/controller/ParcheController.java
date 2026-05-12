@@ -9,6 +9,7 @@ import com.charizard.compiled.hangout_service.domain.ports.in.CloseParcheInputPo
 import com.charizard.compiled.hangout_service.domain.ports.in.CreateParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.GetParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.UpdateParcheInputPort;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,7 +31,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/parches")
 @RequiredArgsConstructor
 @Tag(name = "Parche", description = "Parche Management")
-public class ParcheController {
+public class    ParcheController {
 
     private final CreateParcheInputPort createParcheUseCase;
     private final GetParcheInputPort getParcheUseCase;
@@ -38,15 +39,17 @@ public class ParcheController {
     private final CloseParcheInputPort closeParcheUseCase;
 
     @PostMapping
-    @Operation(summary = "Create parche")
+    @Operation(summary = "Create parche", parameters = {
+            @Parameter(name = "X-User-Id", description = "User UUID (who becomes captain)", required = true, in = ParameterIn.HEADER)
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Parche created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request body"),
+            @ApiResponse(responseCode = "400", description = "Invalid request body or missing X-User-Id header"),
             @ApiResponse(responseCode = "409", description = "Student reached max active hangouts")
     })
     public ResponseEntity<ParcheResponse> createParche(
             @Valid @RequestBody CreateParcheRequest req,
-            @AuthenticationPrincipal UUID captainId) {
+            @Parameter(hidden = true) @AuthenticationPrincipal UUID captainId) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(createParcheUseCase.createParche(req, captainId));
     }

@@ -5,8 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
+/**
+ * RabbitMQ payload for the invitation.sent routing key.
+ *
+ * Field names match notification-service's InvitationSentEventDto exactly
+ * (including the typo "capatinId").
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,6 +20,5 @@ public class InvitationSentMessage {
     private String invitationId;
     private String parcheId;
     private String invitedStudentId;
-    private String captainId;
-    private LocalDateTime occurredAt;
+    private String capatinId;   // matches notification-service typo (captainId)
 }
