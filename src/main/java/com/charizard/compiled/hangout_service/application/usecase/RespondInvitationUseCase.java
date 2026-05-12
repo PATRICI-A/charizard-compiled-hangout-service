@@ -1,7 +1,6 @@
 package com.charizard.compiled.hangout_service.application.usecase;
 
 import com.charizard.compiled.hangout_service.application.dto.response.InvitationResponse;
-import com.charizard.compiled.hangout_service.domain.events.InvitationAcceptedEvent;
 import com.charizard.compiled.hangout_service.domain.exceptions.InvitationAlreadyRespondedException;
 import com.charizard.compiled.hangout_service.domain.exceptions.MaxHangoutsReachedException;
 import com.charizard.compiled.hangout_service.domain.model.Invitation;
@@ -13,9 +12,9 @@ import com.charizard.compiled.hangout_service.domain.ports.in.RespondInvitationI
 import com.charizard.compiled.hangout_service.domain.ports.out.InvitationRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.NotificacionPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.ParcheEventPublisherPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +31,7 @@ public class RespondInvitationUseCase implements RespondInvitationInputPort {
     private final InvitationRepositoryPort invitationRepository;
     private final ParcheRepositoryPort parcheRepository;
     private final MemberRepositoryPort memberRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final ParcheEventPublisherPort parcheEventPublisher;
     private final NotificacionPort notificacionPort;
 
     @Override
@@ -80,8 +79,11 @@ public class RespondInvitationUseCase implements RespondInvitationInputPort {
 
             notificacionPort.notificarNuevoMiembro(invitation.getCaptainId(), studentId, parche.getName());
 
-            eventPublisher.publishEvent(new InvitationAcceptedEvent(
-                    invitationId, invitation.getParcheId(), studentId, invitation.getCaptainId()));
+            parcheEventPublisher.publishInvitationAccepted(
+                    invitationId, invitation.getParcheId(), studentId, invitation.getCaptainId());
+
+            parcheEventPublisher.publishMemberJoined(
+                    invitation.getParcheId(), parche.getName(), invitation.getCaptainId(), studentId);
         }
 
         invitation.setStatus(answer);

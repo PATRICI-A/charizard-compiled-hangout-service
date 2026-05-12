@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -45,7 +46,7 @@ public class ParcheController {
     })
     public ResponseEntity<ParcheResponse> createParche(
             @Valid @RequestBody CreateParcheRequest req,
-            @RequestHeader("X-User-Id") UUID captainId) {
+            @AuthenticationPrincipal UUID captainId) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(createParcheUseCase.createParche(req, captainId));
     }
@@ -84,7 +85,7 @@ public class ParcheController {
     public ResponseEntity<ParcheResponse> updateParche(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateParcheRequest req,
-            @RequestHeader("X-User-Id") UUID solicitanteId) {
+            @AuthenticationPrincipal UUID solicitanteId) {
         return ResponseEntity.ok(updateParcheUseCase.updateParche(id, req, solicitanteId));
     }
 
@@ -97,7 +98,7 @@ public class ParcheController {
     })
     public ResponseEntity<Void> deleteParche(
             @PathVariable UUID id,
-            @RequestHeader("X-User-Id") UUID captainId) {
+            @AuthenticationPrincipal UUID captainId) {
         closeParcheUseCase.closeParche(id, captainId);
         return ResponseEntity.noContent().build();
     }

@@ -2,7 +2,6 @@ package com.charizard.compiled.hangout_service.application.usecase;
 
 import com.charizard.compiled.hangout_service.application.dto.response.InvitationResponse;
 import com.charizard.compiled.hangout_service.domain.ports.in.InvitationInputPort;
-import com.charizard.compiled.hangout_service.domain.events.InvitationSentEvent;
 import com.charizard.compiled.hangout_service.domain.exceptions.StudentAlreadyMemberException;
 import com.charizard.compiled.hangout_service.domain.exceptions.DuplicateInvitationException;
 import com.charizard.compiled.hangout_service.domain.model.Invitation;
@@ -10,9 +9,9 @@ import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundEx
 import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
 import com.charizard.compiled.hangout_service.domain.ports.out.InvitationRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.ParcheEventPublisherPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +27,7 @@ public class InvitationUseCase implements InvitationInputPort {
     private final InvitationRepositoryPort invitationRepository;
     private final MemberRepositoryPort memberRepository;
     private final ParcheRepositoryPort parcheRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final ParcheEventPublisherPort parcheEventPublisher;
 
     @Override
     public InvitationResponse sendInvitation(UUID parcheId, UUID captainId, UUID studentId) {
@@ -57,12 +56,12 @@ public class InvitationUseCase implements InvitationInputPort {
 
         Invitation saved = invitationRepository.save(newInvitation);
 
-        eventPublisher.publishEvent(new InvitationSentEvent(
+        parcheEventPublisher.publishInvitationSent(
                 saved.getId(),
                 saved.getParcheId(),
                 saved.getInvitedStudentId(),
                 saved.getCaptainId()
-        ));
+        );
 
         return toResponse(saved);
     }

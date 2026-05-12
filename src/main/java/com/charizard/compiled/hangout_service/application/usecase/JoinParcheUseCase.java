@@ -11,6 +11,7 @@ import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.ports.in.JoinParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.ParcheEventPublisherPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class JoinParcheUseCase implements JoinParcheInputPort {
 
     private final ParcheRepositoryPort parcheRepository;
     private final MemberRepositoryPort memberRepository;
+    private final ParcheEventPublisherPort parcheEventPublisher;
 
     @Override
     public MemberResponse unirseAParche(UUID parcheId, UUID studentId) {
@@ -52,6 +54,9 @@ public class JoinParcheUseCase implements JoinParcheInputPort {
                 .studentId(studentId)
                 .memberRole(MemberRole.STUDENT)
                 .build());
+
+        parcheEventPublisher.publishMemberJoined(
+                parcheId, parche.getName(), parche.getCaptainId(), studentId);
 
         return MemberResponse.builder()
                 .id(saved.getId())
