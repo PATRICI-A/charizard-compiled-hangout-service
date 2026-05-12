@@ -16,6 +16,7 @@ import com.charizard.compiled.hangout_service.domain.ports.in.UpdateParcheInputP
 import com.charizard.compiled.hangout_service.entrypoints.advice.GlobalExceptionHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -61,6 +66,7 @@ class ParcheControllerTest {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .build();
 
         parcheId = UUID.randomUUID();
@@ -75,6 +81,17 @@ class ParcheControllerTest {
                 .date(LocalDate.of(2026, 6, 15))
                 .hour(LocalTime.of(15, 30))
                 .build();
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void setAuthentication(UUID userId) {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(userId, null, List.of()));
+        SecurityContextHolder.setContext(context);
     }
 
     // ─── GET /parches ─────────────────────────────────────────────────────
@@ -197,6 +214,8 @@ class ParcheControllerTest {
     @DisplayName("POST /parches retorna 201 con el parche creado")
     void createParche_valido_retorna201ConParche() throws Exception {
         UUID captainId = UUID.randomUUID();
+        setAuthentication(captainId);
+
         CreateParcheRequest req = CreateParcheRequest.builder()
                 .name("Parche nuevo")
                 .place("Parque")
@@ -211,7 +230,6 @@ class ParcheControllerTest {
 
         mockMvc.perform(post("/api/v1/parches")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Id", captainId.toString())
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Parche de fútbol"));
@@ -221,6 +239,8 @@ class ParcheControllerTest {
     @DisplayName("POST /parches retorna 409 cuando el captain alcanzó el límite de 5 parches")
     void createParche_limiteAlcanzado_retorna409() throws Exception {
         UUID captainId = UUID.randomUUID();
+        setAuthentication(captainId);
+
         CreateParcheRequest req = CreateParcheRequest.builder()
                 .name("Parche nuevo").place("Parque").category(ParcheCategory.MUSIC)
                 .date(LocalDate.of(2027, 1, 1)).hour(LocalTime.of(14, 0))
@@ -231,7 +251,6 @@ class ParcheControllerTest {
 
         mockMvc.perform(post("/api/v1/parches")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Id", captainId.toString())
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isConflict());
     }
@@ -242,6 +261,8 @@ class ParcheControllerTest {
     @DisplayName("PATCH /parches/{id} retorna 200 con parche actualizado")
     void updateParche_valido_retorna200() throws Exception {
         UUID solicitanteId = UUID.randomUUID();
+        setAuthentication(solicitanteId);
+
         UpdateParcheRequest req = UpdateParcheRequest.builder().name("Nombre Actualizado").build();
 
         when(updateParcheUseCase.updateParche(eq(parcheId), any(), eq(solicitanteId)))
@@ -249,7 +270,6 @@ class ParcheControllerTest {
 
         mockMvc.perform(patch("/api/v1/parches/{id}", parcheId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Id", solicitanteId.toString())
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk());
     }
@@ -258,6 +278,8 @@ class ParcheControllerTest {
     @DisplayName("PATCH /parches/{id} retorna 403 cuando el solicitante no es el capitán")
     void updateParche_noEsCaptain_retorna403() throws Exception {
         UUID solicitanteId = UUID.randomUUID();
+        setAuthentication(solicitanteId);
+
         UpdateParcheRequest req = UpdateParcheRequest.builder().name("Nombre").build();
 
         when(updateParcheUseCase.updateParche(eq(parcheId), any(), eq(solicitanteId)))
@@ -265,7 +287,6 @@ class ParcheControllerTest {
 
         mockMvc.perform(patch("/api/v1/parches/{id}", parcheId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Id", solicitanteId.toString())
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isForbidden());
     }
@@ -276,10 +297,11 @@ class ParcheControllerTest {
     @DisplayName("DELETE /parches/{id} retorna 204 cuando el capitán cierra el parche")
     void deleteParche_captainCierra_retorna204() throws Exception {
         UUID captainId = UUID.randomUUID();
+        setAuthentication(captainId);
+
         doNothing().when(closeParcheUseCase).closeParche(parcheId, captainId);
 
-        mockMvc.perform(delete("/api/v1/parches/{id}", parcheId)
-                        .header("X-User-Id", captainId.toString()))
+        mockMvc.perform(delete("/api/v1/parches/{id}", parcheId))
                 .andExpect(status().isNoContent());
 
         verify(closeParcheUseCase).closeParche(parcheId, captainId);
@@ -289,11 +311,12 @@ class ParcheControllerTest {
     @DisplayName("DELETE /parches/{id} retorna 404 cuando el parche no existe")
     void deleteParche_noExiste_retorna404() throws Exception {
         UUID captainId = UUID.randomUUID();
+        setAuthentication(captainId);
+
         doThrow(new ParcheNotFoundException("Parche not found with id: " + parcheId))
                 .when(closeParcheUseCase).closeParche(parcheId, captainId);
 
-        mockMvc.perform(delete("/api/v1/parches/{id}", parcheId)
-                        .header("X-User-Id", captainId.toString()))
+        mockMvc.perform(delete("/api/v1/parches/{id}", parcheId))
                 .andExpect(status().isNotFound());
     }
 
@@ -301,11 +324,12 @@ class ParcheControllerTest {
     @DisplayName("DELETE /parches/{id} retorna 403 cuando el solicitante no es el capitán")
     void deleteParche_noEsCaptain_retorna403() throws Exception {
         UUID solicitanteId = UUID.randomUUID();
+        setAuthentication(solicitanteId);
+
         doThrow(new AccessDeniedException("Only the captain can delete this parche"))
                 .when(closeParcheUseCase).closeParche(parcheId, solicitanteId);
 
-        mockMvc.perform(delete("/api/v1/parches/{id}", parcheId)
-                        .header("X-User-Id", solicitanteId.toString()))
+        mockMvc.perform(delete("/api/v1/parches/{id}", parcheId))
                 .andExpect(status().isForbidden());
     }
 }
