@@ -16,11 +16,12 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<mapstruct.version>1.6.3</mapstruct.version>
-	</properties>
 
-	<properties>
 		<sonar.organization>shadday123</sonar.organization>
+		<sonar.projectKey>shadday123_hangout-service</sonar.projectKey>
+
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 	</properties>
 
 	<dependencies>
