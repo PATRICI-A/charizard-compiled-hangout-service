@@ -1,4 +1,4 @@
-  name: CD - Deploy a Azure
+name: CD - Deploy a Azure
 
 on:
   workflow_run:
