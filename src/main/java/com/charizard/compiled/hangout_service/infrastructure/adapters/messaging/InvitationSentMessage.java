@@ -20,5 +20,5 @@ public class InvitationSentMessage {
     private String invitationId;
     private String parcheId;
     private String invitedStudentId;
-    private String capatinId;   // matches notification-service typo (captainId)
+    private String captainId;
 }

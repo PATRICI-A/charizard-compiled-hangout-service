@@ -19,6 +19,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -50,18 +53,24 @@ public class SecurityConfig {
     }
 
     private static class XUserIdFilter extends OncePerRequestFilter {
+
+        private static final Logger log = LoggerFactory.getLogger(XUserIdFilter.class);
+
         @Override
         protected void doFilterInternal(HttpServletRequest request,
                                         HttpServletResponse response,
                                         FilterChain chain) throws ServletException, IOException {
             String userId = request.getHeader("X-User-Id");
+            log.debug("X-User-Id header received: {}", userId);
             if (userId != null) {
                 try {
                     UUID uuid = UUID.fromString(userId);
+                    log.debug("Authenticated user UUID: {}", uuid);
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(uuid, null, Collections.emptyList());
                     SecurityContextHolder.getContext().setAuthentication(auth);
-                } catch (IllegalArgumentException ignored) {
+                } catch (IllegalArgumentException e) {
+                    log.warn("Invalid X-User-Id format: {}", userId);
                 }
             }
             chain.doFilter(request, response);

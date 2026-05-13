@@ -24,5 +24,5 @@ public class InvitationAcceptedMessage {
     private String parcheId;
     private String studentId;
     private String captainId;
-    private LocalDateTime ocurredAt;   // matches notification-service typo
+    private LocalDateTime occurredAt;
 }

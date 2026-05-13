@@ -1,27 +1,35 @@
 package com.charizard.compiled.hangout_service.infrastructure.adapters.messaging;
 
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheEventPublisherPort;
-import com.charizard.compiled.hangout_service.infrastructure.config.RabbitMQConfig;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Publishes hangout domain events to RabbitMQ.
- *
- * Implements {@link ParcheEventPublisherPort} so the application layer
- * never depends directly on RabbitMQ.
- */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
 
     private final RabbitTemplate rabbitTemplate;
+
+    @Value("${rabbitmq.exchange.hangout}")
+    private String hangoutExchange;
+
+    @Value("${rabbitmq.routing-key.invitation-accepted}")
+    private String invitationAcceptedKey;
+
+    @Value("${rabbitmq.routing-key.invitation-sent}")
+    private String invitationSentKey;
+
+    @Value("${rabbitmq.routing-key.member-joined}")
+    private String memberJoinedKey;
+
+    public RabbitMQEventPublisher(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
+    }
 
     @Override
     public void publishInvitationAccepted(UUID invitationId, UUID parcheId,
@@ -31,14 +39,10 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
                 .parcheId(parcheId.toString())
                 .studentId(studentId.toString())
                 .captainId(captainId.toString())
-                .ocurredAt(LocalDateTime.now())
+                .occurredAt(LocalDateTime.now())
                 .build();
 
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE,
-                RabbitMQConfig.RK_INVITATION_ACCEPTED,
-                message
-        );
+        rabbitTemplate.convertAndSend(hangoutExchange, invitationAcceptedKey, message);
 
         log.info("[RabbitMQ] Published invitation.accepted → invitationId={} studentId={} parcheId={}",
                 invitationId, studentId, parcheId);
@@ -51,14 +55,10 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
                 .invitationId(invitationId.toString())
                 .parcheId(parcheId.toString())
                 .invitedStudentId(invitedStudentId.toString())
-                .capatinId(captainId.toString())
+                .captainId(captainId.toString())
                 .build();
 
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE,
-                RabbitMQConfig.RK_INVITATION_SENT,
-                message
-        );
+        rabbitTemplate.convertAndSend(hangoutExchange, invitationSentKey, message);
 
         log.info("[RabbitMQ] Published invitation.sent → invitationId={} invitedStudentId={} parcheId={}",
                 invitationId, invitedStudentId, parcheId);
@@ -74,11 +74,7 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE,
-                RabbitMQConfig.RK_MEMBER_JOINED,
-                message
-        );
+        rabbitTemplate.convertAndSend(hangoutExchange, memberJoinedKey, message);
 
         log.info("[RabbitMQ] Published member.joined → estudianteId={} parcheId={}",
                 estudianteId, parcheId);
