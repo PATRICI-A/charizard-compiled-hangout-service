@@ -1,0 +1,3 @@
+-- Seed data moved to Flyway migration: V4__seed_test_data.sql
+-- This file is kept only as a reference and does NOT run automatically.
+-- To enable, set spring.sql.init.mode=always (NOT recommended with Flyway).
