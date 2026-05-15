@@ -1,6 +1,5 @@
 package com.charizard.compiled.hangout_service.application.dto.response;
 
-import com.charizard.compiled.hangout_service.domain.model.enums.ParcheCategory;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import lombok.AllArgsConstructor;
@@ -31,7 +30,7 @@ public class ParcheResponse {
     /** Lugar de encuentro */
     private String place;
     /** Categoría temática */
-    private ParcheCategory category;
+    private String category;
     /** Tipo de acceso (PUBLIC / PRIVATE) */
     private ParcheType type;
     /** Estado actual (ACTIVE / FILED) */

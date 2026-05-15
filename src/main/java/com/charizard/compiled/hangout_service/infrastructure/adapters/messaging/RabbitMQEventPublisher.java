@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j
-@Component
+// @Component
 public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
 
     private final RabbitTemplate rabbitTemplate;

@@ -16,7 +16,7 @@ import java.util.UUID;
  * para ser procesados de forma asíncrona por los listeners.
  */
 @Slf4j
-@Component
+// @Component
 @RequiredArgsConstructor
 public class NotificacionAdapter implements NotificacionPort {
 

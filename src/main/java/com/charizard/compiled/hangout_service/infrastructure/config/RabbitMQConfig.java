@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  * Solo publica eventos — no declara exchanges ni queues porque
  * notification-service ya se encarga de la topología.
  */
-@Configuration
+// @Configuration
 public class RabbitMQConfig {
 
     @Bean
