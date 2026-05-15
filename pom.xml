@@ -198,6 +198,7 @@
 						<exclude>**/events/**</exclude>
 						<exclude>**/messaging/**</exclude>
 						<exclude>**/repository/**</exclude>
+						<exclude>**/notification/NoOpNotificacionAdapter.*</exclude>
 					</excludes>
 				</configuration>
 				<executions>
