@@ -17,7 +17,7 @@
 	<properties>
 		<java.version>21</java.version>
 		<mapstruct.version>1.6.3</mapstruct.version>
-		<sonar.organization>shadday123</sonar.organization>
+		<sonar.organization>patrici-a</sonar.organization>
 	</properties>
 
 

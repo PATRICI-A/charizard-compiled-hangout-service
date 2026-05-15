@@ -6,7 +6,6 @@ import com.charizard.compiled.hangout_service.application.dto.response.ParcheRes
 import com.charizard.compiled.hangout_service.domain.exceptions.AccessDeniedException;
 import com.charizard.compiled.hangout_service.domain.exceptions.MaxHangoutsReachedException;
 import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundException;
-import com.charizard.compiled.hangout_service.domain.model.enums.ParcheCategory;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.domain.ports.in.CloseParcheInputPort;
@@ -219,7 +218,7 @@ class ParcheControllerTest {
         CreateParcheRequest req = CreateParcheRequest.builder()
                 .name("Parche nuevo")
                 .place("Parque")
-                .category(ParcheCategory.MUSIC)
+                .category("MUSIC")
                 .date(LocalDate.of(2027, 1, 1))
                 .hour(LocalTime.of(14, 0))
                 .maximumQuota(10)
@@ -242,7 +241,7 @@ class ParcheControllerTest {
         setAuthentication(captainId);
 
         CreateParcheRequest req = CreateParcheRequest.builder()
-                .name("Parche nuevo").place("Parque").category(ParcheCategory.MUSIC)
+                .name("Parche nuevo").place("Parque").category("MUSIC")
                 .date(LocalDate.of(2027, 1, 1)).hour(LocalTime.of(14, 0))
                 .maximumQuota(10).type(ParcheType.PUBLIC).build();
 

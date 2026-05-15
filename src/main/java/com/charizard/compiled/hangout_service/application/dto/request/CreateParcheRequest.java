@@ -1,6 +1,5 @@
 package com.charizard.compiled.hangout_service.application.dto.request;
 
-import com.charizard.compiled.hangout_service.domain.model.enums.ParcheCategory;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.FutureOrPresent;
@@ -42,9 +41,9 @@ public class CreateParcheRequest {
     private String place;
 
     /** Categoría temática del parche (obligatorio) */
-    @NotNull(message = "Category is required")
-    @Schema(example = "MUSIC", allowableValues = {"MUSIC", "ART", "DANCE"})
-    private ParcheCategory category;
+    @NotBlank(message = "Category is required")
+    @Schema(example = "MUSIC")
+    private String category;
 
     /** Fecha de realización (obligatorio, debe ser hoy o futura) */
     @NotNull(message = "Date is required")
