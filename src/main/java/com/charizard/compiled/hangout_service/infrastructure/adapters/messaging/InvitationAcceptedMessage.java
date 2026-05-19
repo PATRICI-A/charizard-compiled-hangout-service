@@ -6,12 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * RabbitMQ payload for the invitation.accepted routing key.
- *
- * Field names match notification-service's InvitationAcceptedEventDto exactly
- * (including the typo "ocurredAt").
  * Consumers: gamification-service, notification-service.
  */
 @Data
@@ -20,9 +18,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class InvitationAcceptedMessage {
 
-    private String invitationId;
-    private String parcheId;
-    private String studentId;
-    private String inviterId;
+    private UUID invitationId;
+    private UUID parcheId;
+    private UUID studentId;
+    private UUID inviterId;
     private LocalDateTime occurredAt;
 }

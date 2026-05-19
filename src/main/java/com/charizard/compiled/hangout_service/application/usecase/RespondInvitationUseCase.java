@@ -88,6 +88,10 @@ public class RespondInvitationUseCase implements RespondInvitationInputPort {
 
             parcheEventPublisher.publishMemberJoined(
                     invitation.getParcheId(), parche.getName(), parche.getOwnerId(), studentId);
+
+        } else if (answer == InvitationStatus.REJECTED) {
+            parcheEventPublisher.publishInvitationRejected(
+                    invitationId, invitation.getParcheId(), studentId, invitation.getInviterId());
         }
 
         invitation.setStatus(answer);

@@ -5,20 +5,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
- * RabbitMQ payload for the invitation.sent routing key.
- * Consumed by: notification-service.
+ * RabbitMQ payload for the member.left routing key.
+ * Consumed by: notification-service (notifies all remaining members).
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InvitationSentMessage {
+public class MemberLeftMessage {
 
-    private UUID invitationId;
     private UUID parcheId;
-    private UUID invitedStudentId;
-    private UUID captainId;
+    private String parcheNombre;
+    private UUID studentId;
+    private List<UUID> memberIds;
 }

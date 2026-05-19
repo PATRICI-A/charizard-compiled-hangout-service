@@ -1,10 +1,9 @@
 package com.charizard.compiled.hangout_service.domain.ports.out;
 
+import com.charizard.compiled.hangout_service.application.dto.response.CategoryResponse;
+
 import java.util.List;
 
-/**
- * Puerto de salida para obtener categorías desde el microservicio de categorías.
- */
 public interface CategoryServicePort {
-    List<String> getCategories();
+    List<CategoryResponse> getCategories();
 }

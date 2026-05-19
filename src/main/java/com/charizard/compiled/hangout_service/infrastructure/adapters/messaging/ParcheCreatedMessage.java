@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * RabbitMQ payload for the parche.created routing key on hangout.events exchange.
@@ -24,10 +25,10 @@ import java.time.LocalDateTime;
 public class ParcheCreatedMessage {
 
     /** UUID of the captain who created the parche. */
-    private String captainId;
+    private UUID captainId;
 
     /** UUID of the newly created parche. */
-    private String parcheId;
+    private UUID parcheId;
 
     /**
      * Date and time the parche is scheduled for.

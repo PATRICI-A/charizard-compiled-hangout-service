@@ -49,4 +49,32 @@ public interface ParcheEventPublisherPort {
      */
     void publishMemberJoined(UUID parcheId, String parcheNombre,
                              UUID ownerId, UUID estudianteId);
+
+    /**
+     * Publishes the fact that a student rejected an invitation.
+     * Consumed by: Notification service (notifies the inviter).
+     *
+     * @param inviterId ID of the member who sent the invitation
+     */
+    void publishInvitationRejected(UUID invitationId, UUID parcheId,
+                                   UUID invitedStudentId, UUID inviterId);
+
+    /**
+     * Publishes the fact that a parche was dissolved (closed/archived).
+     * Consumed by: Notification service (notifies all members).
+     *
+     * @param memberIds IDs of all members at the time of dissolution
+     */
+    void publishParcheDissolved(UUID parcheId, String parcheNombre,
+                                java.util.List<UUID> memberIds);
+
+    /**
+     * Publishes the fact that a member left a parche.
+     * Consumed by: Notification service (notifies all remaining members).
+     *
+     * @param studentId ID of the member who left
+     * @param memberIds IDs of the remaining members after the student left
+     */
+    void publishMemberLeft(UUID parcheId, String parcheNombre,
+                           UUID studentId, java.util.List<UUID> memberIds);
 }

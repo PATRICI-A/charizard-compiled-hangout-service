@@ -30,6 +30,15 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
     @Value("${rabbitmq.routing-key.member-joined:member.joined}")
     private String memberJoinedKey;
 
+    @Value("${rabbitmq.routing-key.invitation-rejected:invitation.rejected}")
+    private String invitationRejectedKey;
+
+    @Value("${rabbitmq.routing-key.parche-dissolved:parche.dissolved}")
+    private String parcheDissolvedKey;
+
+    @Value("${rabbitmq.routing-key.member-left:member.left}")
+    private String memberLeftKey;
+
     public RabbitMQEventPublisher(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
@@ -38,8 +47,8 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
     public void publishParcheCreated(UUID parcheId, UUID ownerId,
                                      LocalDateTime scheduledAt, int totalParchesCreated) {
         ParcheCreatedMessage message = ParcheCreatedMessage.builder()
-                .captainId(ownerId.toString())
-                .parcheId(parcheId.toString())
+                .captainId(ownerId)
+                .parcheId(parcheId)
                 .parcheScheduledAt(scheduledAt)
                 .totalParchesCreated(totalParchesCreated)
                 .build();
@@ -54,10 +63,10 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
     public void publishInvitationAccepted(UUID invitationId, UUID parcheId,
                                           UUID studentId, UUID inviterId) {
         InvitationAcceptedMessage message = InvitationAcceptedMessage.builder()
-                .invitationId(invitationId.toString())
-                .parcheId(parcheId.toString())
-                .studentId(studentId.toString())
-                .inviterId(inviterId.toString())
+                .invitationId(invitationId)
+                .parcheId(parcheId)
+                .studentId(studentId)
+                .inviterId(inviterId)
                 .occurredAt(LocalDateTime.now())
                 .build();
 
@@ -71,10 +80,10 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
     public void publishInvitationSent(UUID invitationId, UUID parcheId,
                                       UUID invitedStudentId, UUID inviterId) {
         InvitationSentMessage message = InvitationSentMessage.builder()
-                .invitationId(invitationId.toString())
-                .parcheId(parcheId.toString())
-                .invitedStudentId(invitedStudentId.toString())
-                .captainId(inviterId.toString())
+                .invitationId(invitationId)
+                .parcheId(parcheId)
+                .invitedStudentId(invitedStudentId)
+                .captainId(inviterId)
                 .build();
 
         rabbitTemplate.convertAndSend(hangoutExchange, invitationSentKey, message);
@@ -87,8 +96,8 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
     public void publishMemberJoined(UUID parcheId, String parcheNombre,
                                     UUID ownerId, UUID estudianteId) {
         MemberJoinedMessage message = MemberJoinedMessage.builder()
-                .ownerId(ownerId.toString())
-                .estudianteId(estudianteId.toString())
+                .ownerId(ownerId)
+                .estudianteId(estudianteId)
                 .nombreParche(parcheNombre)
                 .timestamp(LocalDateTime.now())
                 .build();
@@ -97,5 +106,52 @@ public class RabbitMQEventPublisher implements ParcheEventPublisherPort {
 
         log.info("[RabbitMQ] Published member.joined → estudianteId={} parcheId={}",
                 estudianteId, parcheId);
+    }
+
+    @Override
+    public void publishInvitationRejected(UUID invitationId, UUID parcheId,
+                                          UUID invitedStudentId, UUID inviterId) {
+        InvitationRejectedMessage message = InvitationRejectedMessage.builder()
+                .invitationId(invitationId)
+                .parcheId(parcheId)
+                .invitedStudentId(invitedStudentId)
+                .inviterId(inviterId)
+                .build();
+
+        rabbitTemplate.convertAndSend(hangoutExchange, invitationRejectedKey, message);
+
+        log.info("[RabbitMQ] Published invitation.rejected → invitationId={} inviterId={}",
+                invitationId, inviterId);
+    }
+
+    @Override
+    public void publishParcheDissolved(UUID parcheId, String parcheNombre,
+                                       java.util.List<UUID> memberIds) {
+        ParcheDissolvedMessage message = ParcheDissolvedMessage.builder()
+                .parcheId(parcheId)
+                .parcheNombre(parcheNombre)
+                .memberIds(memberIds)
+                .build();
+
+        rabbitTemplate.convertAndSend(hangoutExchange, parcheDissolvedKey, message);
+
+        log.info("[RabbitMQ] Published parche.dissolved → parcheId={} members={}",
+                parcheId, memberIds.size());
+    }
+
+    @Override
+    public void publishMemberLeft(UUID parcheId, String parcheNombre,
+                                  UUID studentId, java.util.List<UUID> memberIds) {
+        MemberLeftMessage message = MemberLeftMessage.builder()
+                .parcheId(parcheId)
+                .parcheNombre(parcheNombre)
+                .studentId(studentId)
+                .memberIds(memberIds)
+                .build();
+
+        rabbitTemplate.convertAndSend(hangoutExchange, memberLeftKey, message);
+
+        log.info("[RabbitMQ] Published member.left → studentId={} parcheId={}",
+                studentId, parcheId);
     }
 }

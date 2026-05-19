@@ -28,4 +28,16 @@ public class NoOpParcheEventPublisher implements ParcheEventPublisherPort {
 
     @Override
     public void publishMemberJoined(UUID parcheId, String parcheNombre, UUID ownerId, UUID estudianteId) {}
+
+    @Override
+    public void publishInvitationRejected(UUID invitationId, UUID parcheId,
+                                          UUID invitedStudentId, UUID inviterId) {}
+
+    @Override
+    public void publishParcheDissolved(UUID parcheId, String parcheNombre,
+                                       java.util.List<UUID> memberIds) {}
+
+    @Override
+    public void publishMemberLeft(UUID parcheId, String parcheNombre,
+                                  UUID studentId, java.util.List<UUID> memberIds) {}
 }
