@@ -32,7 +32,7 @@ public class NotificacionEventListener {
                 event.capitanId(), event.estudianteId(), event.nombreParche());
 
         MemberJoinedMessage message = MemberJoinedMessage.builder()
-                .capitanId(event.capitanId().toString())
+                .ownerId(event.capitanId().toString())
                 .estudianteId(event.estudianteId().toString())
                 .nombreParche(event.nombreParche())
                 .timestamp(event.timestamp())

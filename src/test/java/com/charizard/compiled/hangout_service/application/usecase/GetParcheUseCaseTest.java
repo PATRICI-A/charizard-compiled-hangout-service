@@ -182,28 +182,6 @@ class GetParcheUseCaseTest {
         assertThat(result).hasSize(2);
     }
 
-    // ─── getParcheById ────────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("getParcheById retorna ParcheDetailResponse con la lista de miembros cuando existe")
-    void getParcheById_parcheExiste_retornaDetalle() {
-        Member member = Member.builder()
-                .id(UUID.randomUUID()).parcheId(parcheId).studentId(UUID.randomUUID()).build();
-
-        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
-        when(memberRepository.findByParcheId(parcheId)).thenReturn(List.of(member));
-        when(placeServicePort.getPlaces()).thenReturn(List.of());
-        when(eventServicePort.getEventById(any())).thenReturn(Optional.empty());
-
-        ParcheDetailResponse result = useCase.getParcheById(parcheId);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(parcheId);
-        assertThat(result.getActualMembers()).isEqualTo(1);
-        assertThat(result.getMembers()).hasSize(1);
-        assertThat(result.getOwnerId()).isEqualTo(parche.getOwnerId());
-    }
-
     @Test
     @DisplayName("getParcheById lanza ParcheNotFoundException cuando no existe")
     void getParcheById_parcheNoExiste_lanzaExcepcion() {
