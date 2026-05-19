@@ -11,11 +11,11 @@ import java.util.UUID;
  */
 public interface CreateParcheInputPort {
     /**
-     * Crea un nuevo parche y registra al creador como capitán.
+     * Crea un nuevo parche y registra al creador como owner y primer miembro.
      *
-     * @param request   datos del parche a crear
-     * @param captainId ID del estudiante que crea el parche
+     * @param request datos del parche a crear
+     * @param ownerId ID del estudiante que crea el parche
      * @return respuesta con los datos del parche creado
      */
-    ParcheResponse createParche(CreateParcheRequest request, UUID captainId);
+    ParcheResponse createParche(CreateParcheRequest request, UUID ownerId);
 }

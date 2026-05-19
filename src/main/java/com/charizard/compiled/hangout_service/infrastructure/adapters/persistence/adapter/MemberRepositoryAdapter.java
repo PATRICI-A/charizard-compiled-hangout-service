@@ -1,7 +1,6 @@
 package com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.adapter;
 
 import com.charizard.compiled.hangout_service.domain.model.Member;
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.mapper.MemberEntityMapper;
@@ -9,6 +8,7 @@ import com.charizard.compiled.hangout_service.infrastructure.adapters.persistenc
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -29,11 +29,6 @@ public class MemberRepositoryAdapter implements MemberRepositoryPort {
     }
 
     @Override
-    public boolean existsByParcheIdAndStudentIdAndMemberRole(UUID parcheId, UUID studentId, MemberRole role) {
-        return memberRepository.existsByParcheIdAndStudentIdAndMemberRole(parcheId, studentId, role);
-    }
-
-    @Override
     public int countParchesActivosByStudentId(UUID studentId) {
         return memberRepository.countParchesActivosByStudentIdAndStatus(studentId, ParcheStatus.ACTIVE);
     }
@@ -41,6 +36,17 @@ public class MemberRepositoryAdapter implements MemberRepositoryPort {
     @Override
     public int countByParcheId(UUID parcheId) {
         return memberRepository.countByParcheId(parcheId);
+    }
+
+    @Override
+    public List<Member> findByParcheId(UUID parcheId) {
+        return memberRepository.findByParcheId(parcheId).stream()
+                .map(mapper::toDomain).toList();
+    }
+
+    @Override
+    public List<UUID> findParcheIdsByStudentId(UUID studentId) {
+        return memberRepository.findParcheIdsByStudentId(studentId);
     }
 
     @Override

@@ -7,7 +7,6 @@ import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundEx
 import com.charizard.compiled.hangout_service.domain.exceptions.StudentAlreadyMemberException;
 import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.ports.in.JoinParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
@@ -57,17 +56,15 @@ public class JoinParcheUseCase implements JoinParcheInputPort {
         Member saved = memberRepository.save(Member.builder()
                 .parcheId(parcheId)
                 .studentId(studentId)
-                .memberRole(MemberRole.STUDENT)
                 .build());
 
         parcheEventPublisher.publishMemberJoined(
-                parcheId, parche.getName(), parche.getCaptainId(), studentId);
+                parcheId, parche.getName(), parche.getOwnerId(), studentId);
 
         return MemberResponse.builder()
                 .id(saved.getId())
                 .parcheId(saved.getParcheId())
                 .studentId(saved.getStudentId())
-                .memberRole(saved.getMemberRole())
                 .unionDate(saved.getUnionDate())
                 .build();
     }

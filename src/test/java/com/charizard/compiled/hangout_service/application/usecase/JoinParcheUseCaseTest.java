@@ -7,7 +7,6 @@ import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundEx
 import com.charizard.compiled.hangout_service.domain.exceptions.StudentAlreadyMemberException;
 import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
@@ -52,7 +51,7 @@ class JoinParcheUseCaseTest {
                 .maximumQuota(10)
                 .status(ParcheStatus.ACTIVE)
                 .type(ParcheType.PUBLIC)
-                .captainId(UUID.randomUUID())
+                .ownerId(UUID.randomUUID())
                 .build();
     }
 
@@ -120,13 +119,12 @@ class JoinParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("unirseAParche guarda member con rol STUDENT cuando todas las validaciones pasan")
-    void unirseAParche_valido_guardaMemberConRolStudent() {
+    @DisplayName("unirseAParche guarda member sin rol cuando todas las validaciones pasan")
+    void unirseAParche_valido_guardaMemberSinRol() {
         Member savedMember = Member.builder()
                 .id(UUID.randomUUID())
                 .parcheId(parcheId)
                 .studentId(studentId)
-                .memberRole(MemberRole.STUDENT)
                 .build();
 
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
@@ -140,15 +138,13 @@ class JoinParcheUseCaseTest {
         assertThat(result).isNotNull();
         assertThat(result.getParcheId()).isEqualTo(parcheId);
         assertThat(result.getStudentId()).isEqualTo(studentId);
-        assertThat(result.getMemberRole()).isEqualTo(MemberRole.STUDENT);
     }
 
     @Test
     @DisplayName("unirseAParche permite unirse cuando el student tiene exactamente 4 activos")
     void unirseAParche_estudianteCon4Activos_permiteUnirse() {
         Member savedMember = Member.builder()
-                .id(UUID.randomUUID()).parcheId(parcheId).studentId(studentId)
-                .memberRole(MemberRole.STUDENT).build();
+                .id(UUID.randomUUID()).parcheId(parcheId).studentId(studentId).build();
 
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
@@ -158,5 +154,23 @@ class JoinParcheUseCaseTest {
 
         assertThatCode(() -> useCase.unirseAParche(parcheId, studentId))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("unirseAParche publica evento memberJoined con ownerId del parche")
+    void unirseAParche_valido_publicaEventoMemberJoined() {
+        UUID ownerId = parche.getOwnerId();
+        Member savedMember = Member.builder()
+                .id(UUID.randomUUID()).parcheId(parcheId).studentId(studentId).build();
+
+        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
+        when(memberRepository.countByParcheId(parcheId)).thenReturn(1);
+        when(memberRepository.countParchesActivosByStudentId(studentId)).thenReturn(0);
+        when(memberRepository.save(any())).thenReturn(savedMember);
+
+        useCase.unirseAParche(parcheId, studentId);
+
+        verify(parcheEventPublisher).publishMemberJoined(parcheId, parche.getName(), ownerId, studentId);
     }
 }

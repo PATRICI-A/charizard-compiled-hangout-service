@@ -30,9 +30,9 @@ public class Parche {
     private String name;
     /** Descripción opcional del encuentro */
     private String description;
-    /** Lugar donde se realizará el encuentro */
+    /** Lugar donde se realizará el encuentro (ID del lugar en el microservicio de Places) */
     private String place;
-    /** Categoría temática (música, programación, deportes, etc.) */
+    /** Categoría temática (viene del microservicio de categorías) */
     private String category;
     /** Tipo de acceso: público (libre) o privado (por invitación) */
     private ParcheType type;
@@ -40,16 +40,18 @@ public class Parche {
     private LocalDate date;
     /** Hora de inicio del parche */
     private LocalTime hour;
-    /** Cupo máximo de participantes (2-30) */
+    /** Cupo máximo de participantes (1-30) */
     private int maximumQuota;
     /** Estado actual: activo o archivado */
     private ParcheStatus status = ParcheStatus.ACTIVE;
-    /** ID del estudiante que creó el parche (capitán) */
-    private UUID captainId;
+    /** ID del estudiante que es dueño/creador del parche */
+    private UUID ownerId;
     /** Fecha y hora de creación del parche */
     private LocalDateTime creationDate;
     /** Lista de miembros que pertenecen al parche */
     private List<Member> members;
     /** ID opcional de evento externo asociado */
     private UUID eventId;
+    /** URL de la imagen del parche (opcional, gestionada por el front) */
+    private String imageUrl;
 }

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -40,20 +41,20 @@ class InvitationUseCaseTest {
     @InjectMocks InvitationUseCase useCase;
 
     private UUID parcheId;
-    private UUID captainId;
+    private UUID inviterId;
     private UUID studentId;
     private Parche parche;
 
     @BeforeEach
     void setUp() {
         parcheId = UUID.randomUUID();
-        captainId = UUID.randomUUID();
+        inviterId = UUID.randomUUID();
         studentId = UUID.randomUUID();
 
         parche = Parche.builder()
                 .id(parcheId)
                 .name("Parche Privado")
-                .captainId(captainId)
+                .ownerId(UUID.randomUUID())
                 .status(ParcheStatus.ACTIVE)
                 .type(ParcheType.PRIVATE)
                 .build();
@@ -64,21 +65,22 @@ class InvitationUseCaseTest {
     void sendInvitation_parcheNoExiste_lanzaExcepcion() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> useCase.sendInvitation(parcheId, captainId, studentId))
+        assertThatThrownBy(() -> useCase.sendInvitation(parcheId, inviterId, studentId))
                 .isInstanceOf(ParcheNotFoundException.class);
 
         verify(invitationRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("sendInvitation lanza ResponseStatusException 403 cuando el solicitante no es el capitán")
-    void sendInvitation_noEsCaptain_lanzaForbidden() {
-        UUID otroUsuario = UUID.randomUUID();
+    @DisplayName("sendInvitation lanza ResponseStatusException 403 cuando el invitador no es miembro del parche")
+    void sendInvitation_noEsMiembro_lanzaForbidden() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.existsByParcheIdAndStudentId(parcheId, inviterId)).thenReturn(false);
 
-        assertThatThrownBy(() -> useCase.sendInvitation(parcheId, otroUsuario, studentId))
+        assertThatThrownBy(() -> useCase.sendInvitation(parcheId, inviterId, studentId))
                 .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("captain");
+                .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode())
+                        .isEqualTo(HttpStatus.FORBIDDEN));
 
         verify(invitationRepository, never()).save(any());
     }
@@ -87,9 +89,10 @@ class InvitationUseCaseTest {
     @DisplayName("sendInvitation lanza StudentAlreadyMemberException cuando el invitado ya es miembro")
     void sendInvitation_estudianteYaMiembro_lanzaExcepcion() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.existsByParcheIdAndStudentId(parcheId, inviterId)).thenReturn(true);
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(true);
 
-        assertThatThrownBy(() -> useCase.sendInvitation(parcheId, captainId, studentId))
+        assertThatThrownBy(() -> useCase.sendInvitation(parcheId, inviterId, studentId))
                 .isInstanceOf(StudentAlreadyMemberException.class);
 
         verify(invitationRepository, never()).save(any());
@@ -106,11 +109,12 @@ class InvitationUseCaseTest {
                 .build();
 
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.existsByParcheIdAndStudentId(parcheId, inviterId)).thenReturn(true);
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
         when(invitationRepository.findByParcheIdAndInvitedStudentId(parcheId, studentId))
                 .thenReturn(Optional.of(pending));
 
-        assertThatThrownBy(() -> useCase.sendInvitation(parcheId, captainId, studentId))
+        assertThatThrownBy(() -> useCase.sendInvitation(parcheId, inviterId, studentId))
                 .isInstanceOf(DuplicateInvitationException.class);
 
         verify(invitationRepository, never()).save(any());
@@ -122,18 +126,19 @@ class InvitationUseCaseTest {
         Invitation saved = Invitation.builder()
                 .id(UUID.randomUUID())
                 .parcheId(parcheId)
-                .captainId(captainId)
+                .inviterId(inviterId)
                 .invitedStudentId(studentId)
                 .status(InvitationStatus.PENDING)
                 .build();
 
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.existsByParcheIdAndStudentId(parcheId, inviterId)).thenReturn(true);
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
         when(invitationRepository.findByParcheIdAndInvitedStudentId(parcheId, studentId))
                 .thenReturn(Optional.empty());
         when(invitationRepository.save(any())).thenReturn(saved);
 
-        InvitationResponse result = useCase.sendInvitation(parcheId, captainId, studentId);
+        InvitationResponse result = useCase.sendInvitation(parcheId, inviterId, studentId);
 
         assertThat(result).isNotNull();
         assertThat(result.getStatus()).isEqualTo(InvitationStatus.PENDING);
@@ -154,20 +159,44 @@ class InvitationUseCaseTest {
         Invitation saved = Invitation.builder()
                 .id(UUID.randomUUID())
                 .parcheId(parcheId)
-                .captainId(captainId)
+                .inviterId(inviterId)
                 .invitedStudentId(studentId)
                 .status(InvitationStatus.PENDING)
                 .build();
 
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.existsByParcheIdAndStudentId(parcheId, inviterId)).thenReturn(true);
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
         when(invitationRepository.findByParcheIdAndInvitedStudentId(parcheId, studentId))
                 .thenReturn(Optional.of(rejected));
         when(invitationRepository.save(any())).thenReturn(saved);
 
-        InvitationResponse result = useCase.sendInvitation(parcheId, captainId, studentId);
+        InvitationResponse result = useCase.sendInvitation(parcheId, inviterId, studentId);
 
         assertThat(result.getStatus()).isEqualTo(InvitationStatus.PENDING);
+    }
+
+    @Test
+    @DisplayName("cualquier miembro (no solo el owner) puede enviar invitación")
+    void sendInvitation_cualquierMiembroPuedeInvitar() {
+        UUID nonOwnerMemberId = UUID.randomUUID(); // distinto al parche.ownerId
+        Invitation saved = Invitation.builder()
+                .id(UUID.randomUUID())
+                .parcheId(parcheId)
+                .inviterId(nonOwnerMemberId)
+                .invitedStudentId(studentId)
+                .status(InvitationStatus.PENDING)
+                .build();
+
+        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.existsByParcheIdAndStudentId(parcheId, nonOwnerMemberId)).thenReturn(true);
+        when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
+        when(invitationRepository.findByParcheIdAndInvitedStudentId(parcheId, studentId))
+                .thenReturn(Optional.empty());
+        when(invitationRepository.save(any())).thenReturn(saved);
+
+        assertThatCode(() -> useCase.sendInvitation(parcheId, nonOwnerMemberId, studentId))
+                .doesNotThrowAnyException();
     }
 
     @Test
@@ -175,7 +204,7 @@ class InvitationUseCaseTest {
     void sendInvitation_parcheNoExiste_noPublicaEvento() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> useCase.sendInvitation(parcheId, captainId, studentId))
+        assertThatThrownBy(() -> useCase.sendInvitation(parcheId, inviterId, studentId))
                 .isInstanceOf(ParcheNotFoundException.class);
 
         verify(parcheEventPublisher, never()).publishInvitationSent(any(), any(), any(), any());

@@ -56,8 +56,8 @@ public class CreateParcheRequest {
     @Schema(example = "14:00:00", description = "Hour in ISO format (HH:mm:ss)")
     private LocalTime hour;
 
-    /** Cupo máximo de participantes (2-30) */
-    @Min(value = 2, message = "Maximum quota must be at least 2")
+    /** Cupo máximo de participantes (1-30) */
+    @Min(value = 1, message = "Maximum quota must be at least 1")
     @Max(value = 30, message = "Maximum quota cannot exceed 30")
     @Schema(example = "10")
     private int maximumQuota;
@@ -70,5 +70,9 @@ public class CreateParcheRequest {
     /** ID opcional de evento externo asociado */
     @Schema(example = "123e4567-e89b-12d3-a456-426614174000")
     private UUID eventId;
+
+    /** URL de imagen del parche (opcional, el front la sube al storage y envía la URL) */
+    @Schema(example = "https://storage.example.com/parches/imagen.jpg")
+    private String imageUrl;
 
 }

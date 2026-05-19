@@ -6,7 +6,6 @@ import com.charizard.compiled.hangout_service.domain.model.Invitation;
 import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.domain.ports.out.InvitationRepositoryPort;
@@ -56,7 +55,7 @@ class RespondInvitationUseCaseTest {
         pendingInvitation = Invitation.builder()
                 .id(invitationId)
                 .parcheId(parcheId)
-                .captainId(UUID.randomUUID())
+                .inviterId(UUID.randomUUID())
                 .invitedStudentId(studentId)
                 .status(InvitationStatus.PENDING)
                 .build();
@@ -67,6 +66,7 @@ class RespondInvitationUseCaseTest {
                 .maximumQuota(10)
                 .status(ParcheStatus.ACTIVE)
                 .type(ParcheType.PRIVATE)
+                .ownerId(UUID.randomUUID())
                 .build();
     }
 
@@ -133,7 +133,7 @@ class RespondInvitationUseCaseTest {
     void respondInvitation_accepted_valido_creaMemberYPublicaEvento() {
         Invitation savedInvitation = Invitation.builder()
                 .id(invitationId).parcheId(parcheId)
-                .captainId(pendingInvitation.getCaptainId())
+                .inviterId(pendingInvitation.getInviterId())
                 .invitedStudentId(studentId).status(InvitationStatus.ACCEPTED)
                 .build();
 
@@ -148,7 +148,6 @@ class RespondInvitationUseCaseTest {
 
         assertThat(result.getStatus()).isEqualTo(InvitationStatus.ACCEPTED);
         verify(memberRepository).save(argThat(m ->
-                m.getMemberRole() == MemberRole.STUDENT &&
                 m.getStudentId().equals(studentId)
         ));
         verify(notificacionPort).notificarNuevoMiembro(any(), eq(studentId), anyString());
@@ -160,7 +159,7 @@ class RespondInvitationUseCaseTest {
     void respondInvitation_accepted_publicaEventoExactamenteUnaVez() {
         Invitation savedInvitation = Invitation.builder()
                 .id(invitationId).parcheId(parcheId)
-                .captainId(pendingInvitation.getCaptainId())
+                .inviterId(pendingInvitation.getInviterId())
                 .invitedStudentId(studentId).status(InvitationStatus.ACCEPTED)
                 .build();
 
@@ -196,7 +195,7 @@ class RespondInvitationUseCaseTest {
     void respondInvitation_rejected_noCreaMemberYGuardaRejected() {
         Invitation savedInvitation = Invitation.builder()
                 .id(invitationId).parcheId(parcheId)
-                .captainId(pendingInvitation.getCaptainId())
+                .inviterId(pendingInvitation.getInviterId())
                 .invitedStudentId(studentId).status(InvitationStatus.REJECTED)
                 .build();
 

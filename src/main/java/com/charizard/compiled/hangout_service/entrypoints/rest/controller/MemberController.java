@@ -1,5 +1,6 @@
 package com.charizard.compiled.hangout_service.entrypoints.rest.controller;
 
+import com.charizard.compiled.hangout_service.application.dto.request.LeaveParcheRequest;
 import com.charizard.compiled.hangout_service.application.dto.response.MemberResponse;
 import com.charizard.compiled.hangout_service.domain.ports.in.JoinParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.LeaveParcheInputPort;
@@ -54,20 +55,24 @@ public class MemberController {
 
     @Operation(
         summary = "Leave a hangout",
-        description = "Allows a student to voluntarily leave a hangout. The captain must transfer leadership before leaving."
+        description = "Leave a hangout. If the caller is the owner and there are other members, " +
+                      "newOwnerId is required in the request body. If the owner is the only member, " +
+                      "the hangout is archived automatically."
     )
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Successfully left the hangout"),
-        @ApiResponse(responseCode = "400", description = "Hangout is archived or student is the captain"),
+        @ApiResponse(responseCode = "400", description = "Hangout is archived, or owner must provide newOwnerId"),
         @ApiResponse(responseCode = "404", description = "Hangout not found or student is not a member")
     })
-    @DeleteMapping
+    @PostMapping("/leave")
     public ResponseEntity<Void> salirDeParche(
             @Parameter(description = "Hangout ID", required = true)
             @PathVariable UUID parcheId,
-            @AuthenticationPrincipal UUID studentId) {
+            @AuthenticationPrincipal UUID studentId,
+            @RequestBody(required = false) LeaveParcheRequest body) {
 
-        leaveParcheService.salirDeParche(parcheId, studentId);
+        UUID newOwnerId = (body != null) ? body.getNewOwnerId() : null;
+        leaveParcheService.salirDeParche(parcheId, studentId, newOwnerId);
         return ResponseEntity.noContent().build();
     }
 }

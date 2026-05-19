@@ -23,6 +23,6 @@ public class InvitationAcceptedMessage {
     private String invitationId;
     private String parcheId;
     private String studentId;
-    private String captainId;
+    private String inviterId;
     private LocalDateTime occurredAt;
 }

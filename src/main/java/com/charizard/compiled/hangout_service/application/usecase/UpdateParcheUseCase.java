@@ -34,19 +34,27 @@ public class UpdateParcheUseCase implements UpdateParcheInputPort {
         Parche parche = parcheRepository.findById(id)
                 .orElseThrow(() -> new ParcheNotFoundException("Parche not found with id: " + id));
 
-        if (!parche.getCaptainId().equals(solicitanteId)) {
-            throw new AccessDeniedException("Only the captain can edit this parche");
+        if (!parche.getOwnerId().equals(solicitanteId)) {
+            throw new AccessDeniedException("Only the owner can edit this parche");
         }
 
-        if (req.getName() != null)         parche.setName(req.getName());
+        // name is immutable — not updated
         if (req.getDescription() != null)  parche.setDescription(req.getDescription());
         if (req.getPlace() != null)        parche.setPlace(req.getPlace());
         if (req.getCategory() != null)     parche.setCategory(req.getCategory());
         if (req.getType() != null)         parche.setType(req.getType());
-        if (req.getMaximumQuota() != null) parche.setMaximumQuota(req.getMaximumQuota());
+        if (req.getMaximumQuota() != null) {
+            int currentMembers = memberRepository.countByParcheId(id);
+            if (req.getMaximumQuota() < currentMembers) {
+                throw new IllegalArgumentException(
+                        "New quota (" + req.getMaximumQuota() + ") cannot be less than current member count (" + currentMembers + ")");
+            }
+            parche.setMaximumQuota(req.getMaximumQuota());
+        }
         if (req.getEventId() != null)      parche.setEventId(req.getEventId());
         if (req.getDate() != null)         parche.setDate(req.getDate());
         if (req.getHour() != null)         parche.setHour(req.getHour());
+        if (req.getImageUrl() != null)     parche.setImageUrl(req.getImageUrl());
 
         Parche updated = parcheRepository.save(parche);
         return parcheMapper.toResponse(updated, memberRepository.countByParcheId(id));

@@ -2,6 +2,7 @@ package com.charizard.compiled.hangout_service.entrypoints.rest.controller;
 
 import com.charizard.compiled.hangout_service.application.dto.request.CreateParcheRequest;
 import com.charizard.compiled.hangout_service.application.dto.request.UpdateParcheRequest;
+import com.charizard.compiled.hangout_service.application.dto.response.ParcheDetailResponse;
 import com.charizard.compiled.hangout_service.application.dto.response.ParcheResponse;
 import com.charizard.compiled.hangout_service.domain.exceptions.AccessDeniedException;
 import com.charizard.compiled.hangout_service.domain.exceptions.MaxHangoutsReachedException;
@@ -57,6 +58,7 @@ class ParcheControllerTest {
 
     private UUID parcheId;
     private ParcheResponse parcheResponse;
+    private ParcheDetailResponse parcheDetailResponse;
 
     @BeforeEach
     void setUp() {
@@ -76,9 +78,20 @@ class ParcheControllerTest {
                 .status(ParcheStatus.ACTIVE)
                 .maximumQuota(10)
                 .actualMembers(3)
-                .captainId(UUID.randomUUID())
+                .ownerId(UUID.randomUUID())
                 .date(LocalDate.of(2026, 6, 15))
                 .hour(LocalTime.of(15, 30))
+                .build();
+
+        parcheDetailResponse = ParcheDetailResponse.builder()
+                .id(parcheId)
+                .name("Parche de fútbol")
+                .type(ParcheType.PUBLIC)
+                .status(ParcheStatus.ACTIVE)
+                .maximumQuota(10)
+                .actualMembers(3)
+                .ownerId(UUID.randomUUID())
+                .members(List.of())
                 .build();
     }
 
@@ -98,7 +111,7 @@ class ParcheControllerTest {
     @Test
     @DisplayName("GET /parches sin filtros retorna 200 con lista de parches")
     void getParches_sinFiltros_retorna200ConLista() throws Exception {
-        when(getParcheUseCase.getParches(null, null, null, null, null))
+        when(getParcheUseCase.getParches(null, null, null, null))
                 .thenReturn(List.of(parcheResponse));
 
         mockMvc.perform(get("/api/v1/parches"))
@@ -111,7 +124,7 @@ class ParcheControllerTest {
     @Test
     @DisplayName("GET /parches?nombre=futbol filtra por nombre")
     void getParches_conNombre_filtraPorNombre() throws Exception {
-        when(getParcheUseCase.getParches(null, null, "futbol", null, null))
+        when(getParcheUseCase.getParches(eq("futbol"), any(), any(), any()))
                 .thenReturn(List.of(parcheResponse));
 
         mockMvc.perform(get("/api/v1/parches").param("nombre", "futbol"))
@@ -122,7 +135,7 @@ class ParcheControllerTest {
     @Test
     @DisplayName("GET /parches?fecha=2026-06-15 filtra por fecha")
     void getParches_conFecha_filtraPorFecha() throws Exception {
-        when(getParcheUseCase.getParches(null, null, null, LocalDate.of(2026, 6, 15), null))
+        when(getParcheUseCase.getParches(any(), eq(LocalDate.of(2026, 6, 15)), any(), any()))
                 .thenReturn(List.of(parcheResponse));
 
         mockMvc.perform(get("/api/v1/parches").param("fecha", "2026-06-15"))
@@ -131,9 +144,20 @@ class ParcheControllerTest {
     }
 
     @Test
+    @DisplayName("GET /parches?categoria=Deportes filtra por categoria")
+    void getParches_conCategoria_filtraPorCategoria() throws Exception {
+        when(getParcheUseCase.getParches(any(), any(), eq("Deportes"), any()))
+                .thenReturn(List.of(parcheResponse));
+
+        mockMvc.perform(get("/api/v1/parches").param("categoria", "Deportes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(parcheId.toString()));
+    }
+
+    @Test
     @DisplayName("GET /parches?cupoDisponible=true filtra parches con espacio disponible")
     void getParches_conCupoDisponibleTrue_filtraParchesConEspacio() throws Exception {
-        when(getParcheUseCase.getParches(null, null, null, null, true))
+        when(getParcheUseCase.getParches(any(), any(), any(), eq(true)))
                 .thenReturn(List.of(parcheResponse));
 
         mockMvc.perform(get("/api/v1/parches").param("cupoDisponible", "true"))
@@ -142,40 +166,9 @@ class ParcheControllerTest {
     }
 
     @Test
-    @DisplayName("GET /parches?tipo=PUBLIC&estado=ACTIVE filtra por tipo y estado")
-    void getParches_conTipoYEstado_filtraPorAmbos() throws Exception {
-        when(getParcheUseCase.getParches(ParcheType.PUBLIC, ParcheStatus.ACTIVE, null, null, null))
-                .thenReturn(List.of(parcheResponse));
-
-        mockMvc.perform(get("/api/v1/parches")
-                        .param("tipo", "PUBLIC")
-                        .param("estado", "ACTIVE"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].status").value("ACTIVE"));
-    }
-
-    @Test
-    @DisplayName("GET /parches con todos los filtros activos retorna 200")
-    void getParches_conTodosLosFiltros_retorna200() throws Exception {
-        when(getParcheUseCase.getParches(
-                ParcheType.PUBLIC, ParcheStatus.ACTIVE, "futbol",
-                LocalDate.of(2026, 6, 15), true))
-                .thenReturn(List.of(parcheResponse));
-
-        mockMvc.perform(get("/api/v1/parches")
-                        .param("tipo", "PUBLIC")
-                        .param("estado", "ACTIVE")
-                        .param("nombre", "futbol")
-                        .param("fecha", "2026-06-15")
-                        .param("cupoDisponible", "true"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Parche de fútbol"));
-    }
-
-    @Test
     @DisplayName("GET /parches sin resultados retorna 200 con lista vacía")
     void getParches_sinResultados_retorna200ListaVacia() throws Exception {
-        when(getParcheUseCase.getParches(any(), any(), any(), any(), any()))
+        when(getParcheUseCase.getParches(any(), any(), any(), any()))
                 .thenReturn(List.of());
 
         mockMvc.perform(get("/api/v1/parches").param("nombre", "inexistente"))
@@ -186,9 +179,9 @@ class ParcheControllerTest {
     // ─── GET /parches/{id} ────────────────────────────────────────────────
 
     @Test
-    @DisplayName("GET /parches/{id} retorna 200 con el parche cuando existe")
-    void getParcheById_existe_retorna200ConParche() throws Exception {
-        when(getParcheUseCase.getParcheById(parcheId)).thenReturn(parcheResponse);
+    @DisplayName("GET /parches/{id} retorna 200 con el detalle del parche cuando existe")
+    void getParcheById_existe_retorna200ConDetalle() throws Exception {
+        when(getParcheUseCase.getParcheById(parcheId)).thenReturn(parcheDetailResponse);
 
         mockMvc.perform(get("/api/v1/parches/{id}", parcheId))
                 .andExpect(status().isOk())
@@ -207,13 +200,28 @@ class ParcheControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    // ─── GET /parches/me ──────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("GET /parches/me retorna 200 con los parches del usuario autenticado")
+    void getMyParches_usuarioAutenticado_retorna200() throws Exception {
+        UUID userId = UUID.randomUUID();
+        setAuthentication(userId);
+
+        when(getParcheUseCase.getMyParches(userId)).thenReturn(List.of(parcheResponse));
+
+        mockMvc.perform(get("/api/v1/parches/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Parche de fútbol"));
+    }
+
     // ─── POST /parches ────────────────────────────────────────────────────
 
     @Test
     @DisplayName("POST /parches retorna 201 con el parche creado")
     void createParche_valido_retorna201ConParche() throws Exception {
-        UUID captainId = UUID.randomUUID();
-        setAuthentication(captainId);
+        UUID ownerId = UUID.randomUUID();
+        setAuthentication(ownerId);
 
         CreateParcheRequest req = CreateParcheRequest.builder()
                 .name("Parche nuevo")
@@ -225,7 +233,7 @@ class ParcheControllerTest {
                 .type(ParcheType.PUBLIC)
                 .build();
 
-        when(createParcheUseCase.createParche(any(), eq(captainId))).thenReturn(parcheResponse);
+        when(createParcheUseCase.createParche(any(), eq(ownerId))).thenReturn(parcheResponse);
 
         mockMvc.perform(post("/api/v1/parches")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -235,17 +243,17 @@ class ParcheControllerTest {
     }
 
     @Test
-    @DisplayName("POST /parches retorna 409 cuando el captain alcanzó el límite de 5 parches")
+    @DisplayName("POST /parches retorna 409 cuando el owner alcanzó el límite de 5 parches")
     void createParche_limiteAlcanzado_retorna409() throws Exception {
-        UUID captainId = UUID.randomUUID();
-        setAuthentication(captainId);
+        UUID ownerId = UUID.randomUUID();
+        setAuthentication(ownerId);
 
         CreateParcheRequest req = CreateParcheRequest.builder()
                 .name("Parche nuevo").place("Parque").category("MUSIC")
                 .date(LocalDate.of(2027, 1, 1)).hour(LocalTime.of(14, 0))
                 .maximumQuota(10).type(ParcheType.PUBLIC).build();
 
-        when(createParcheUseCase.createParche(any(), eq(captainId)))
+        when(createParcheUseCase.createParche(any(), eq(ownerId)))
                 .thenThrow(new MaxHangoutsReachedException());
 
         mockMvc.perform(post("/api/v1/parches")
@@ -262,7 +270,7 @@ class ParcheControllerTest {
         UUID solicitanteId = UUID.randomUUID();
         setAuthentication(solicitanteId);
 
-        UpdateParcheRequest req = UpdateParcheRequest.builder().name("Nombre Actualizado").build();
+        UpdateParcheRequest req = UpdateParcheRequest.builder().description("Nueva descripción").build();
 
         when(updateParcheUseCase.updateParche(eq(parcheId), any(), eq(solicitanteId)))
                 .thenReturn(parcheResponse);
@@ -274,15 +282,15 @@ class ParcheControllerTest {
     }
 
     @Test
-    @DisplayName("PATCH /parches/{id} retorna 403 cuando el solicitante no es el capitán")
-    void updateParche_noEsCaptain_retorna403() throws Exception {
+    @DisplayName("PATCH /parches/{id} retorna 403 cuando el solicitante no es el owner")
+    void updateParche_noEsOwner_retorna403() throws Exception {
         UUID solicitanteId = UUID.randomUUID();
         setAuthentication(solicitanteId);
 
-        UpdateParcheRequest req = UpdateParcheRequest.builder().name("Nombre").build();
+        UpdateParcheRequest req = UpdateParcheRequest.builder().description("Desc").build();
 
         when(updateParcheUseCase.updateParche(eq(parcheId), any(), eq(solicitanteId)))
-                .thenThrow(new AccessDeniedException("Only the captain can edit this parche"));
+                .thenThrow(new AccessDeniedException("Only the owner can edit this parche"));
 
         mockMvc.perform(patch("/api/v1/parches/{id}", parcheId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -290,45 +298,26 @@ class ParcheControllerTest {
                 .andExpect(status().isForbidden());
     }
 
-    // ─── DELETE /parches/{id} ─────────────────────────────────────────────
+    // ─── DELETE /parches/{id} — admin only ───────────────────────────────
 
     @Test
-    @DisplayName("DELETE /parches/{id} retorna 204 cuando el capitán cierra el parche")
-    void deleteParche_captainCierra_retorna204() throws Exception {
-        UUID captainId = UUID.randomUUID();
-        setAuthentication(captainId);
-
-        doNothing().when(closeParcheUseCase).closeParche(parcheId, captainId);
+    @DisplayName("DELETE /parches/{id} retorna 204 cuando el admin archiva el parche")
+    void deleteParche_admin_retorna204() throws Exception {
+        doNothing().when(closeParcheUseCase).closeParche(parcheId);
 
         mockMvc.perform(delete("/api/v1/parches/{id}", parcheId))
                 .andExpect(status().isNoContent());
 
-        verify(closeParcheUseCase).closeParche(parcheId, captainId);
+        verify(closeParcheUseCase).closeParche(parcheId);
     }
 
     @Test
     @DisplayName("DELETE /parches/{id} retorna 404 cuando el parche no existe")
     void deleteParche_noExiste_retorna404() throws Exception {
-        UUID captainId = UUID.randomUUID();
-        setAuthentication(captainId);
-
         doThrow(new ParcheNotFoundException("Parche not found with id: " + parcheId))
-                .when(closeParcheUseCase).closeParche(parcheId, captainId);
+                .when(closeParcheUseCase).closeParche(parcheId);
 
         mockMvc.perform(delete("/api/v1/parches/{id}", parcheId))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @DisplayName("DELETE /parches/{id} retorna 403 cuando el solicitante no es el capitán")
-    void deleteParche_noEsCaptain_retorna403() throws Exception {
-        UUID solicitanteId = UUID.randomUUID();
-        setAuthentication(solicitanteId);
-
-        doThrow(new AccessDeniedException("Only the captain can delete this parche"))
-                .when(closeParcheUseCase).closeParche(parcheId, solicitanteId);
-
-        mockMvc.perform(delete("/api/v1/parches/{id}", parcheId))
-                .andExpect(status().isForbidden());
     }
 }

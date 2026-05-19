@@ -54,20 +54,23 @@ public class ParcheEntity {
     private LocalTime hour;
 
     @Column(nullable = false)
-    @Min(2) @Max(30)
+    @Min(1) @Max(30)
     private int maximumQuota;
 
     @Enumerated(EnumType.STRING)
     private ParcheStatus status;
 
-    @Column(nullable = false)
-    private UUID captainId;
+    @Column(name = "captain_id", nullable = false)
+    private UUID ownerId;
 
     @Column(nullable = false)
     private LocalDateTime creationDate;
 
     @Column(nullable = true)
     private UUID eventId;
+
+    @Column(name = "image_url", nullable = true, length = 500)
+    private String imageUrl;
 
     @PrePersist
     public void prePersist() {

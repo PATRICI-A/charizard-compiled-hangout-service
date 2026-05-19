@@ -1,6 +1,5 @@
 package com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.repository;
 
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.MemberEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -24,12 +24,15 @@ public interface MemberRepository extends JpaRepository<MemberEntity, UUID> {
 
     boolean existsByParcheIdAndStudentId(UUID parcheId, UUID studentId);
 
-    boolean existsByParcheIdAndStudentIdAndMemberRole(UUID parcheId, UUID studentId, MemberRole memberRole);
+    List<MemberEntity> findByParcheId(UUID parcheId);
 
     @Query("SELECT COUNT(m) FROM MemberEntity m WHERE m.studentId = :studentId " +
            "AND EXISTS (SELECT p FROM ParcheEntity p WHERE p.id = m.parcheId AND p.status = :status)")
     int countParchesActivosByStudentIdAndStatus(@Param("studentId") UUID studentId,
                                                 @Param("status") ParcheStatus status);
+
+    @Query("SELECT DISTINCT m.parcheId FROM MemberEntity m WHERE m.studentId = :studentId")
+    List<UUID> findParcheIdsByStudentId(@Param("studentId") UUID studentId);
 
     @Modifying
     @Transactional

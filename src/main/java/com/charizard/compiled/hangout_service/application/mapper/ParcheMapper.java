@@ -28,16 +28,16 @@ public interface ParcheMapper {
 
     /**
      * Convierte un {@link CreateParcheRequest} a un {@link Parche} de dominio.
-     * Asigna el capitán por defecto y establece el estado inicial como ACTIVE.
+     * Asigna el owner y establece el estado inicial como ACTIVE.
      *
-     * @param request   datos de solicitud
-     * @param captainId ID del estudiante que crea el parche
+     * @param request  datos de solicitud
+     * @param ownerId  ID del estudiante que crea el parche
      * @return entidad de dominio del parche
      */
-    @Mapping(source = "captainId", target = "captainId")
+    @Mapping(source = "ownerId", target = "ownerId")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", expression = "java(ParcheStatus.ACTIVE)")
     @Mapping(target = "creationDate", ignore = true)
     @Mapping(target = "members", ignore = true)
-    Parche toDomain(CreateParcheRequest request, UUID captainId);
+    Parche toDomain(CreateParcheRequest request, UUID ownerId);
 }

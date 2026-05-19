@@ -34,13 +34,13 @@ public class InvitationController {
     private final RespondInvitationInputPort respondInvitationService;
 
     @Operation(
-        summary = "Send invitation to a private hangout",
-        description = "Sends an invitation to a student for a private hangout. Only the captain can send invitations."
+        summary = "Send invitation to a hangout",
+        description = "Any member of the hangout can send an invitation to a student."
     )
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Invitation sent successfully",
             content = @Content(schema = @Schema(implementation = InvitationResponse.class))),
-        @ApiResponse(responseCode = "403", description = "User is not the captain of this hangout"),
+        @ApiResponse(responseCode = "403", description = "User is not a member of this hangout"),
         @ApiResponse(responseCode = "409", description = "Student is already a member or has a pending invitation")
     })
     @PostMapping("/parches/{parcheId}/invitaciones/{studentId}")
@@ -49,10 +49,10 @@ public class InvitationController {
             @PathVariable UUID parcheId,
             @Parameter(description = "Student ID to invite", required = true)
             @PathVariable UUID studentId,
-            @Parameter(hidden = true) @AuthenticationPrincipal UUID captainId) {
+            @Parameter(hidden = true) @AuthenticationPrincipal UUID inviterId) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(invitationService.sendInvitation(parcheId, captainId, studentId));
+                .body(invitationService.sendInvitation(parcheId, inviterId, studentId));
     }
 
     @Operation(

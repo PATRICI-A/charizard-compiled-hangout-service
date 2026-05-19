@@ -33,8 +33,8 @@ public class InvitationEntity {
     @Column(name = "parche_id", nullable = false)
     private UUID parcheId;
 
-    @Column(name = "captain_id", nullable = false)
-    private UUID captainId;
+    @Column(name = "inviter_id", nullable = false)
+    private UUID inviterId;
 
     @Column(name = "invited_student_id", nullable = false)
     private UUID invitedStudentId;

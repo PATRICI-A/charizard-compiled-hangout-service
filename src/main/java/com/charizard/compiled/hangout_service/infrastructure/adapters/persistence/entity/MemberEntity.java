@@ -1,6 +1,5 @@
 package com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity;
 
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,9 +36,6 @@ public class MemberEntity {
 
     @Column(nullable = false)
     private LocalDateTime unionDate;
-
-    @Enumerated(EnumType.STRING)
-    private MemberRole memberRole;
 
     @PrePersist
     private void prePersist() {

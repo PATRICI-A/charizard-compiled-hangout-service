@@ -4,14 +4,14 @@ import java.util.UUID;
 
 /**
  * Puerto de entrada para el caso de uso de archivado manual de parches.
- * Permite al capitán cambiar el estado de un parche de ACTIVE a FILED.
+ * Solo un administrador (ROLE_ADMIN) puede archivar manualmente un parche.
  */
 public interface CloseParcheInputPort {
     /**
-     * Archiva un parche (soft delete). Solo el capitán puede ejecutar esta acción.
+     * Archiva un parche (soft delete). Solo ROLE_ADMIN puede ejecutar esta acción.
+     * La verificación de rol se hace en el controlador via @PreAuthorize.
      *
-     * @param id        ID del parche a archivar
-     * @param captainId ID del capitán que solicita el archivado
+     * @param id ID del parche a archivar
      */
-    void closeParche(UUID id, UUID captainId);
+    void closeParche(UUID id);
 }

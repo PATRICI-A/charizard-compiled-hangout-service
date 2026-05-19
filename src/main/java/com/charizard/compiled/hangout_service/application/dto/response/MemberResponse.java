@@ -1,6 +1,5 @@
 package com.charizard.compiled.hangout_service.application.dto.response;
 
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,8 +22,6 @@ public class MemberResponse {
     private UUID parcheId;
     /** ID del estudiante miembro */
     private UUID studentId;
-    /** Rol del miembro (CAPTAIN / STUDENT) */
-    private MemberRole memberRole;
     /** Fecha y hora de ingreso al parche */
     private LocalDateTime unionDate;
 }

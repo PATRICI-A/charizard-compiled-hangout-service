@@ -1,7 +1,6 @@
 package com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.adapter;
 
 import com.charizard.compiled.hangout_service.domain.model.Member;
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.entity.MemberEntity;
 import com.charizard.compiled.hangout_service.infrastructure.adapters.persistence.mapper.MemberEntityMapper;
@@ -40,7 +39,6 @@ class MemberRepositoryAdapterTest {
                 .id(UUID.randomUUID())
                 .parcheId(parcheId)
                 .studentId(studentId)
-                .memberRole(MemberRole.STUDENT)
                 .build();
         memberEntity = new MemberEntity();
     }
@@ -59,16 +57,6 @@ class MemberRepositoryAdapterTest {
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(false);
 
         assertThat(adapter.existsByParcheIdAndStudentId(parcheId, studentId)).isFalse();
-    }
-
-    @Test
-    @DisplayName("existsByParcheIdAndStudentIdAndMemberRole delega correctamente en el repositorio")
-    void existsByParcheIdAndStudentIdAndMemberRole_delegaEnRepositorio() {
-        when(memberRepository.existsByParcheIdAndStudentIdAndMemberRole(parcheId, studentId, MemberRole.CAPTAIN))
-                .thenReturn(true);
-
-        assertThat(adapter.existsByParcheIdAndStudentIdAndMemberRole(parcheId, studentId, MemberRole.CAPTAIN)).isTrue();
-        verify(memberRepository).existsByParcheIdAndStudentIdAndMemberRole(parcheId, studentId, MemberRole.CAPTAIN);
     }
 
     @Test

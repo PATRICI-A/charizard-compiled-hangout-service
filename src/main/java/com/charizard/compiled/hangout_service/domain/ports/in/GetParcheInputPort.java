@@ -1,8 +1,7 @@
 package com.charizard.compiled.hangout_service.domain.ports.in;
 
+import com.charizard.compiled.hangout_service.application.dto.response.ParcheDetailResponse;
 import com.charizard.compiled.hangout_service.application.dto.response.ParcheResponse;
-import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
-import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,21 +13,29 @@ import java.util.UUID;
  */
 public interface GetParcheInputPort {
     /**
-     * Busca parches aplicando filtros opcionales.
+     * Busca parches PUBLIC + ACTIVE aplicando filtros opcionales.
      *
-     * @param tipo           filtro por tipo (PUBLIC / PRIVATE)
-     * @param estado         filtro por estado (ACTIVE / FILED)
      * @param nombre         filtro por nombre (búsqueda parcial, case-insensitive)
      * @param fecha          filtro por fecha (yyyy-MM-dd)
+     * @param categoria      filtro por categoría
      * @param cupoDisponible filtro por disponibilidad de cupo (true = hay espacio)
      * @return lista de parches que coinciden con los filtros
      */
-    List<ParcheResponse> getParches(ParcheType tipo, ParcheStatus estado, String nombre, LocalDate fecha, Boolean cupoDisponible);
+    List<ParcheResponse> getParches(String nombre, LocalDate fecha, String categoria, Boolean cupoDisponible);
+
     /**
-     * Busca un parche por su ID.
+     * Busca un parche por su ID, enriquecido con members, place y event.
      *
      * @param id identificador único del parche
-     * @return datos del parche encontrado
+     * @return datos detallados del parche
      */
-    ParcheResponse getParcheById(UUID id);
+    ParcheDetailResponse getParcheById(UUID id);
+
+    /**
+     * Retorna los parches activos (PUBLIC o PRIVATE) donde el usuario es miembro.
+     *
+     * @param userId ID del usuario autenticado
+     * @return lista de parches activos del usuario
+     */
+    List<ParcheResponse> getMyParches(UUID userId);
 }

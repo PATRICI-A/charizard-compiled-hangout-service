@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
  * Field names match notification-service's MemberJoinedEventDto exactly.
  * Note: notification-service declares "nombreParche" as UUID (likely a typo on their side —
  * should be String). Jackson will deserialize our String value into their field regardless.
+ *
+ * ownerId replaces capitanId — the owner is the current owner of the parche.
  */
 @Data
 @Builder
@@ -20,7 +22,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MemberJoinedMessage {
 
-    private String capitanId;
+    private String ownerId;
     private String estudianteId;
     private String nombreParche;
     private LocalDateTime timestamp;

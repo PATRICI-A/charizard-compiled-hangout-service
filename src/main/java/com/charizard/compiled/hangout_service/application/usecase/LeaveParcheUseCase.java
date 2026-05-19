@@ -1,6 +1,7 @@
 package com.charizard.compiled.hangout_service.application.usecase;
 
 import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundException;
+import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.ports.in.LeaveParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
@@ -15,8 +16,11 @@ import java.util.UUID;
 
 /**
  * Caso de uso para que un estudiante abandone un parche voluntariamente.
- * Valida que sea miembro, que el parche esté activo y que no sea el capitán
- * (el capitán debe transferir el liderazgo antes de irse).
+ * Si el caller es el owner:
+ *   - Si es el único miembro: el parche se archiva (FILED).
+ *   - Si hay más miembros: newOwnerId es obligatorio y debe ser un miembro actual.
+ *     El ownership se transfiere y el owner abandona el parche.
+ * Si el caller no es el owner: simplemente sale del parche.
  */
 @Service
 @RequiredArgsConstructor
@@ -27,8 +31,8 @@ public class LeaveParcheUseCase implements LeaveParcheInputPort {
     private final MemberRepositoryPort memberRepository;
 
     @Override
-    public void salirDeParche(UUID parcheId, UUID studentId) {
-        var parche = parcheRepository.findById(parcheId)
+    public void salirDeParche(UUID parcheId, UUID studentId, UUID newOwnerId) {
+        Parche parche = parcheRepository.findById(parcheId)
                 .orElseThrow(() -> new ParcheNotFoundException("Parche not found with id: " + parcheId));
 
         if (!memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)) {
@@ -39,10 +43,31 @@ public class LeaveParcheUseCase implements LeaveParcheInputPort {
             throw new IllegalArgumentException("Cannot leave an archived parche");
         }
 
-        if (parche.getCaptainId().equals(studentId)) {
-            throw new IllegalArgumentException("Captain cannot leave without transferring leadership first");
-        }
+        boolean isOwner = parche.getOwnerId().equals(studentId);
 
-        memberRepository.deleteByParcheIdAndStudentId(parcheId, studentId);
+        if (isOwner) {
+            int memberCount = memberRepository.countByParcheId(parcheId);
+            if (memberCount == 1) {
+                // Único miembro: archivar el parche
+                parche.setStatus(ParcheStatus.FILED);
+                parcheRepository.save(parche);
+                memberRepository.deleteByParcheIdAndStudentId(parcheId, studentId);
+            } else {
+                // Hay más miembros: newOwnerId es obligatorio
+                if (newOwnerId == null) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "newOwnerId is required when the owner leaves a parche with other members");
+                }
+                if (!memberRepository.existsByParcheIdAndStudentId(parcheId, newOwnerId)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The new owner must already be a member of this parche");
+                }
+                parche.setOwnerId(newOwnerId);
+                parcheRepository.save(parche);
+                memberRepository.deleteByParcheIdAndStudentId(parcheId, studentId);
+            }
+        } else {
+            memberRepository.deleteByParcheIdAndStudentId(parcheId, studentId);
+        }
     }
 }
