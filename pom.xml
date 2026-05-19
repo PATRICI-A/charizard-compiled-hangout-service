@@ -236,7 +236,8 @@
 						<exclude>**/events/**</exclude>
 						<exclude>**/messaging/**</exclude>
 						<exclude>**/repository/**</exclude>
-						<exclude>**/notification/NoOpNotificacionAdapter.*</exclude>
+						<exclude>**/notification/**</exclude>
+						<exclude>**/out/feign/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
