@@ -1,9 +1,11 @@
 package com.charizard.compiled.hangout_service.application.usecase;
 
 import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundException;
+import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.ParcheEventPublisherPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,6 +30,7 @@ class LeaveParcheUseCaseTest {
 
     @Mock ParcheRepositoryPort parcheRepository;
     @Mock MemberRepositoryPort memberRepository;
+    @Mock ParcheEventPublisherPort parcheEventPublisher;
 
     @InjectMocks LeaveParcheUseCase useCase;
 
@@ -89,15 +93,21 @@ class LeaveParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("salirDeParche (no-owner) elimina el member sin necesitar newOwnerId")
+    @DisplayName("salirDeParche (no-owner) elimina el member y publica member.left")
     void salirDeParche_noOwner_eliminaMemberDirectamente() {
+        UUID remaining = UUID.randomUUID();
+        Member remainingMember = Member.builder().studentId(remaining).parcheId(parcheId).build();
+
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)).thenReturn(true);
+        when(memberRepository.findByParcheId(parcheId)).thenReturn(List.of(remainingMember));
 
         useCase.salirDeParche(parcheId, studentId, null);
 
         verify(memberRepository).deleteByParcheIdAndStudentId(parcheId, studentId);
         verify(parcheRepository, never()).save(any());
+        verify(parcheEventPublisher).publishMemberLeft(
+                eq(parcheId), eq("Parche Test"), eq(studentId), eq(List.of(remaining)));
     }
 
     @Test
