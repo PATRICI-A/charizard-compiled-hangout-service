@@ -23,8 +23,8 @@ public class Invitation {
     private UUID id;
     /** ID del parche al que se invita */
     private UUID parcheId;
-    /** ID del capitán que envió la invitación */
-    private UUID captainId;
+    /** ID del miembro que envió la invitación (puede ser cualquier miembro del parche) */
+    private UUID inviterId;
     /** ID del estudiante invitado */
     private UUID invitedStudentId;
     /** Estado actual de la invitación (PENDING, ACCEPTED, REJECTED) */

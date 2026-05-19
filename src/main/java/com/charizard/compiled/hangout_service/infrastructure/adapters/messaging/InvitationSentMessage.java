@@ -5,11 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 /**
  * RabbitMQ payload for the invitation.sent routing key.
- *
- * Field names match notification-service's InvitationSentEventDto exactly
- * (including the typo "capatinId").
+ * Consumed by: notification-service.
  */
 @Data
 @Builder
@@ -17,8 +17,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class InvitationSentMessage {
 
-    private String invitationId;
-    private String parcheId;
-    private String invitedStudentId;
-    private String captainId;
+    private UUID invitationId;
+    private UUID parcheId;
+    private UUID invitedStudentId;
+    private UUID captainId;
 }

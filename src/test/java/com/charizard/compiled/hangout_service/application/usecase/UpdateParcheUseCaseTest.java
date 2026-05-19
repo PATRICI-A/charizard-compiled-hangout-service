@@ -37,13 +37,13 @@ class UpdateParcheUseCaseTest {
     @InjectMocks UpdateParcheUseCase useCase;
 
     private UUID parcheId;
-    private UUID captainId;
+    private UUID ownerId;
     private Parche parche;
 
     @BeforeEach
     void setUp() {
         parcheId = UUID.randomUUID();
-        captainId = UUID.randomUUID();
+        ownerId = UUID.randomUUID();
 
         parche = Parche.builder()
                 .id(parcheId)
@@ -53,7 +53,7 @@ class UpdateParcheUseCaseTest {
                 .maximumQuota(10)
                 .status(ParcheStatus.ACTIVE)
                 .type(ParcheType.PUBLIC)
-                .captainId(captainId)
+                .ownerId(ownerId)
                 .build();
     }
 
@@ -62,7 +62,7 @@ class UpdateParcheUseCaseTest {
     void updateParche_parcheNoExiste_lanzaExcepcion() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> useCase.updateParche(parcheId, UpdateParcheRequest.builder().build(), captainId))
+        assertThatThrownBy(() -> useCase.updateParche(parcheId, UpdateParcheRequest.builder().build(), ownerId))
                 .isInstanceOf(ParcheNotFoundException.class)
                 .hasMessageContaining(parcheId.toString());
     }
@@ -80,20 +80,21 @@ class UpdateParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("updateParche actualiza el nombre cuando se provee en el request")
-    void updateParche_conNombre_actualizaNombre() {
-        UpdateParcheRequest req = UpdateParcheRequest.builder().name("Nuevo Nombre").build();
-        ParcheResponse response = ParcheResponse.builder().id(parcheId).name("Nuevo Nombre").build();
+    @DisplayName("updateParche no modifica el nombre (es inmutable)")
+    void updateParche_nombreEsInmutable() {
+        // name field no longer exists in UpdateParcheRequest — test that name stays unchanged
+        UpdateParcheRequest req = UpdateParcheRequest.builder().description("Nueva desc").build();
+        ParcheResponse response = ParcheResponse.builder().id(parcheId).name("Original").build();
 
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
         when(parcheRepository.save(parche)).thenReturn(parche);
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
         when(parcheMapper.toResponse(parche, 3)).thenReturn(response);
 
-        ParcheResponse result = useCase.updateParche(parcheId, req, captainId);
+        ParcheResponse result = useCase.updateParche(parcheId, req, ownerId);
 
-        assertThat(parche.getName()).isEqualTo("Nuevo Nombre");
-        assertThat(result.getName()).isEqualTo("Nuevo Nombre");
+        assertThat(parche.getName()).isEqualTo("Original"); // name unchanged
+        assertThat(result.getName()).isEqualTo("Original");
     }
 
     @Test
@@ -108,7 +109,7 @@ class UpdateParcheUseCaseTest {
         when(memberRepository.countByParcheId(parcheId)).thenReturn(1);
         when(parcheMapper.toResponse(any(), anyInt())).thenReturn(ParcheResponse.builder().id(parcheId).build());
 
-        useCase.updateParche(parcheId, req, captainId);
+        useCase.updateParche(parcheId, req, ownerId);
 
         assertThat(parche.getDate()).isEqualTo(fecha);
         assertThat(parche.getHour()).isEqualTo(hora);
@@ -124,7 +125,7 @@ class UpdateParcheUseCaseTest {
         when(memberRepository.countByParcheId(parcheId)).thenReturn(1);
         when(parcheMapper.toResponse(any(), anyInt())).thenReturn(ParcheResponse.builder().id(parcheId).build());
 
-        useCase.updateParche(parcheId, req, captainId);
+        useCase.updateParche(parcheId, req, ownerId);
 
         assertThat(parche.getName()).isEqualTo("Original");
         assertThat(parche.getMaximumQuota()).isEqualTo(10);
@@ -135,7 +136,6 @@ class UpdateParcheUseCaseTest {
     @DisplayName("updateParche actualiza todos los campos cuando se proveen en el request")
     void updateParche_conTodosLosCampos_actualizaTodo() {
         UpdateParcheRequest req = UpdateParcheRequest.builder()
-                .name("Nuevo")
                 .description("Nueva desc")
                 .place("Nuevo lugar")
                 .maximumQuota(20)
@@ -147,9 +147,9 @@ class UpdateParcheUseCaseTest {
         when(memberRepository.countByParcheId(parcheId)).thenReturn(2);
         when(parcheMapper.toResponse(any(), anyInt())).thenReturn(ParcheResponse.builder().id(parcheId).build());
 
-        useCase.updateParche(parcheId, req, captainId);
+        useCase.updateParche(parcheId, req, ownerId);
 
-        assertThat(parche.getName()).isEqualTo("Nuevo");
+        assertThat(parche.getName()).isEqualTo("Original"); // name is immutable
         assertThat(parche.getDescription()).isEqualTo("Nueva desc");
         assertThat(parche.getPlace()).isEqualTo("Nuevo lugar");
         assertThat(parche.getMaximumQuota()).isEqualTo(20);

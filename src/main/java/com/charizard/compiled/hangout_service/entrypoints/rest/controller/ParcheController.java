@@ -2,9 +2,8 @@ package com.charizard.compiled.hangout_service.entrypoints.rest.controller;
 
 import com.charizard.compiled.hangout_service.application.dto.request.CreateParcheRequest;
 import com.charizard.compiled.hangout_service.application.dto.request.UpdateParcheRequest;
+import com.charizard.compiled.hangout_service.application.dto.response.ParcheDetailResponse;
 import com.charizard.compiled.hangout_service.application.dto.response.ParcheResponse;
-import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
-import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.domain.ports.in.CloseParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.CreateParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.GetParcheInputPort;
@@ -20,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +35,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/parches")
 @RequiredArgsConstructor
 @Tag(name = "Parche", description = "Parche Management")
-public class    ParcheController {
+public class ParcheController {
 
     private final CreateParcheInputPort createParcheUseCase;
     private final GetParcheInputPort getParcheUseCase;
@@ -44,7 +44,7 @@ public class    ParcheController {
 
     @PostMapping
     @Operation(summary = "Create parche", parameters = {
-            @Parameter(name = "X-User-Id", description = "User UUID (who becomes captain)", required = true, in = ParameterIn.HEADER)
+            @Parameter(name = "X-User-Id", description = "User UUID (who becomes the owner)", required = true, in = ParameterIn.HEADER)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Parche created successfully"),
@@ -53,40 +53,49 @@ public class    ParcheController {
     })
     public ResponseEntity<ParcheResponse> createParche(
             @Valid @RequestBody CreateParcheRequest req,
-            @Parameter(hidden = true) @AuthenticationPrincipal UUID captainId) {
+            @Parameter(hidden = true) @AuthenticationPrincipal UUID ownerId) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(createParcheUseCase.createParche(req, captainId));
+                .body(createParcheUseCase.createParche(req, ownerId));
     }
 
     @GetMapping
-    @Operation(summary = "Search parches with optional filters")
+    @Operation(summary = "Search PUBLIC + ACTIVE parches with optional filters")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "List of parches returned")
     })
     public ResponseEntity<List<ParcheResponse>> getParches(
-            @Parameter(description = "Filter by parche type") @RequestParam(required = false) ParcheType tipo,
-            @Parameter(description = "Filter by parche status") @RequestParam(required = false) ParcheStatus estado,
-            @Parameter(description = "Filter by name (partial match, case-insensitive)") @RequestParam(required = false) String nombre,
-            @Parameter(description = "Filter by date (format: yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
-            @Parameter(description = "Filter by available spots (true = has space, false = full)") @RequestParam(required = false) Boolean cupoDisponible) {
-        return ResponseEntity.ok(getParcheUseCase.getParches(tipo, estado, nombre, fecha, cupoDisponible));
+            @Parameter(description = "Filter by name (partial, case-insensitive)") @RequestParam(required = false) String nombre,
+            @Parameter(description = "Filter by date (yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+            @Parameter(description = "Filter by category") @RequestParam(required = false) String categoria,
+            @Parameter(description = "true = has space, false = full") @RequestParam(required = false) Boolean cupoDisponible) {
+        return ResponseEntity.ok(getParcheUseCase.getParches(nombre, fecha, categoria, cupoDisponible));
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Get my active parches (PUBLIC and PRIVATE where I am a member)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "List of active parches for the authenticated user")
+    })
+    public ResponseEntity<List<ParcheResponse>> getMyParches(
+            @Parameter(hidden = true) @AuthenticationPrincipal UUID userId) {
+        return ResponseEntity.ok(getParcheUseCase.getMyParches(userId));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get parche by ID")
+    @Operation(summary = "Get parche detail by ID (enriched with members, place, event)")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Parche found"),
+            @ApiResponse(responseCode = "200", description = "Parche detail found"),
             @ApiResponse(responseCode = "404", description = "Parche not found")
     })
-    public ResponseEntity<ParcheResponse> getParcheById(@PathVariable UUID id) {
+    public ResponseEntity<ParcheDetailResponse> getParcheById(@PathVariable UUID id) {
         return ResponseEntity.ok(getParcheUseCase.getParcheById(id));
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Update parche")
+    @Operation(summary = "Update parche (owner only)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Parche updated"),
-            @ApiResponse(responseCode = "403", description = "Only captain can update"),
+            @ApiResponse(responseCode = "403", description = "Only the owner can update"),
             @ApiResponse(responseCode = "404", description = "Parche not found")
     })
     public ResponseEntity<ParcheResponse> updateParche(
@@ -97,16 +106,15 @@ public class    ParcheController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete parche (soft delete)")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Archive parche (admin only — soft delete)")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Parche archived"),
-            @ApiResponse(responseCode = "403", description = "Only captain can delete"),
+            @ApiResponse(responseCode = "403", description = "Only ADMIN can archive a parche"),
             @ApiResponse(responseCode = "404", description = "Parche not found")
     })
-    public ResponseEntity<Void> deleteParche(
-            @PathVariable UUID id,
-            @AuthenticationPrincipal UUID captainId) {
-        closeParcheUseCase.closeParche(id, captainId);
+    public ResponseEntity<Void> deleteParche(@PathVariable UUID id) {
+        closeParcheUseCase.closeParche(id);
         return ResponseEntity.noContent().build();
     }
 }

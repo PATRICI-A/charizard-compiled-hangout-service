@@ -1,19 +1,35 @@
 package com.charizard.compiled.hangout_service.infrastructure.config;
 
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuración mínima de RabbitMQ para hangout-service.
+ * RabbitMQ configuration for hangout-service.
  *
- * Solo publica eventos — no declara exchanges ni queues porque
- * notification-service ya se encarga de la topología.
+ * Hangout publishes events to its own exchange (hangout.events).
+ * Notification-service and Gamification-service bind their own queues to it.
+ * Hangout does not consume any queues.
  */
-// @Configuration
+@Configuration
 public class RabbitMQConfig {
+
+    @Value("${rabbitmq.exchange.hangout:hangout.events}")
+    private String hangoutExchange;
+
+    /**
+     * Declares the hangout.events TopicExchange.
+     * Durable=true so it survives broker restarts.
+     * Auto-delete=false so it persists even when no consumers are bound.
+     */
+    @Bean
+    public TopicExchange hangoutExchange() {
+        return new TopicExchange(hangoutExchange, true, false);
+    }
 
     @Bean
     public Jackson2JsonMessageConverter messageConverter() {

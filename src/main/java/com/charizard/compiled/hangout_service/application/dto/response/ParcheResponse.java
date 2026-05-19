@@ -39,10 +39,12 @@ public class ParcheResponse {
     private int maximumQuota;
     /** Número actual de miembros inscritos */
     private int actualMembers;
-    /** ID del estudiante capitán */
-    private UUID captainId;
+    /** ID del estudiante dueño del parche */
+    private UUID ownerId;
     /** Fecha de realización */
     private LocalDate date;
     /** Hora de inicio */
     private LocalTime hour;
+    /** URL de la imagen del parche (puede ser null) */
+    private String imageUrl;
 }

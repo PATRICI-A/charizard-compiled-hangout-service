@@ -38,7 +38,7 @@ class ParcheEntityTest {
                 .date(LocalDate.now().plusDays(1))
                 .hour(LocalTime.of(15, 0))
                 .status(ParcheStatus.ACTIVE)
-                .captainId(UUID.randomUUID())
+                .ownerId(UUID.randomUUID())
                 .build();
     }
 
@@ -53,10 +53,44 @@ class ParcheEntityTest {
     }
 
     @Test
-    @DisplayName("maximumQuota menor a 2 genera violación de constraint")
-    void maximumQuota_menorDos_violaConstraint() {
+    @DisplayName("maximumQuota igual a 1 es válido (mínimo reducido a 1)")
+    void maximumQuota_igualUno_esValido() {
         ParcheEntity parche = buildValidParche();
         parche.setMaximumQuota(1);
+
+        Set<ConstraintViolation<ParcheEntity>> violations = validator.validate(parche);
+
+        assertThat(violations).noneMatch(v -> v.getPropertyPath().toString().equals("maximumQuota"));
+    }
+
+    @Test
+    @DisplayName("maximumQuota igual a 0 genera violación de constraint")
+    void maximumQuota_cero_violaConstraint() {
+        ParcheEntity parche = buildValidParche();
+        parche.setMaximumQuota(0);
+
+        Set<ConstraintViolation<ParcheEntity>> violations = validator.validate(parche);
+
+        assertThat(violations).isNotEmpty();
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("maximumQuota"));
+    }
+
+    @Test
+    @DisplayName("maximumQuota igual a 2 es válido")
+    void maximumQuota_igualDos_esValido() {
+        ParcheEntity parche = buildValidParche();
+        parche.setMaximumQuota(2);
+
+        Set<ConstraintViolation<ParcheEntity>> violations = validator.validate(parche);
+
+        assertThat(violations).noneMatch(v -> v.getPropertyPath().toString().equals("maximumQuota"));
+    }
+
+    @Test
+    @DisplayName("maximumQuota mayor a 30 genera violación de constraint")
+    void maximumQuota_mayorTreinta_violaConstraint() {
+        ParcheEntity parche = buildValidParche();
+        parche.setMaximumQuota(31);
 
         Set<ConstraintViolation<ParcheEntity>> violations = validator.validate(parche);
 
@@ -74,16 +108,5 @@ class ParcheEntityTest {
 
         assertThat(violations).isNotEmpty();
         assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("name"));
-    }
-
-    @Test
-    @DisplayName("maximumQuota igual a 2 es válido")
-    void maximumQuota_igualDos_esValido() {
-        ParcheEntity parche = buildValidParche();
-        parche.setMaximumQuota(2);
-
-        Set<ConstraintViolation<ParcheEntity>> violations = validator.validate(parche);
-
-        assertThat(violations).noneMatch(v -> v.getPropertyPath().toString().equals("maximumQuota"));
     }
 }

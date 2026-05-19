@@ -49,17 +49,17 @@ class InvitationControllerTest {
     ObjectMapper objectMapper;
 
     private UUID parcheId;
-    private UUID captainId;
+    private UUID inviterId;
     private UUID studentId;
 
     @BeforeEach
     void setUp() {
         parcheId = UUID.randomUUID();
-        captainId = UUID.randomUUID();
+        inviterId = UUID.randomUUID();
         studentId = UUID.randomUUID();
 
         SecurityContext context = org.springframework.security.core.context.SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(captainId, null, List.of()));
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(inviterId, null, List.of()));
         SecurityContextHolder.setContext(context);
 
         mockMvc = MockMvcBuilders.standaloneSetup(invitationController)
@@ -86,7 +86,7 @@ class InvitationControllerTest {
                 .sentAt(LocalDateTime.now())
                 .build();
 
-        when(invitationService.sendInvitation(eq(parcheId), eq(captainId), eq(studentId)))
+        when(invitationService.sendInvitation(eq(parcheId), eq(inviterId), eq(studentId)))
                 .thenReturn(response);
 
         mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
@@ -99,7 +99,7 @@ class InvitationControllerTest {
     @Test
     @DisplayName("POST /parches/{id}/invitaciones/{studentId} retorna 404 cuando el parche no existe")
     void sendInvitation_parcheNoExiste_retorna404() throws Exception {
-        when(invitationService.sendInvitation(eq(parcheId), eq(captainId), eq(studentId)))
+        when(invitationService.sendInvitation(eq(parcheId), eq(inviterId), eq(studentId)))
                 .thenThrow(new ParcheNotFoundException("Parche not found with id: " + parcheId));
 
         mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
@@ -108,10 +108,10 @@ class InvitationControllerTest {
     }
 
     @Test
-    @DisplayName("POST /parches/{id}/invitaciones/{studentId} retorna 403 cuando el solicitante no es el capitán")
-    void sendInvitation_noEsCaptain_retorna403() throws Exception {
-        when(invitationService.sendInvitation(eq(parcheId), eq(captainId), eq(studentId)))
-                .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not the captain of this hangout"));
+    @DisplayName("POST /parches/{id}/invitaciones/{studentId} retorna 403 cuando el solicitante no es miembro")
+    void sendInvitation_noEsMiembro_retorna403() throws Exception {
+        when(invitationService.sendInvitation(eq(parcheId), eq(inviterId), eq(studentId)))
+                .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not a member of this hangout"));
 
         mockMvc.perform(post("/api/v1/parches/{parcheId}/invitaciones/{studentId}", parcheId, studentId)
                         .contentType(MediaType.APPLICATION_JSON))

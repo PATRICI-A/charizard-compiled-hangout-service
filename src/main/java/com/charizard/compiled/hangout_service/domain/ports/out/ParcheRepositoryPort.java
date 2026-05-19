@@ -2,7 +2,6 @@ package com.charizard.compiled.hangout_service.domain.ports.out;
 
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
-import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -20,8 +19,13 @@ public interface ParcheRepositoryPort {
     Optional<Parche> findById(UUID id);
     /** Guarda o actualiza un parche en la base de datos */
     Parche save(Parche parche);
-    /** Busca parches aplicando filtros opcionales */
-    List<Parche> findByFilters(ParcheType type, ParcheStatus status, String nombre, LocalDate fecha);
+    /**
+     * Busca parches públicos activos aplicando filtros opcionales.
+     * Siempre fuerza PUBLIC + ACTIVE para la búsqueda pública.
+     */
+    List<Parche> findByFilters(String nombre, LocalDate fecha, String categoria);
     /** Busca parches activos cuya fecha de realización ya expiró */
     List<Parche> findArchivables(ParcheStatus status, LocalDate thresholdDate, LocalTime thresholdTime);
+    /** Busca parches activos (PUBLIC o PRIVATE) donde el usuario es miembro */
+    List<Parche> findActiveByIds(List<UUID> parcheIds);
 }

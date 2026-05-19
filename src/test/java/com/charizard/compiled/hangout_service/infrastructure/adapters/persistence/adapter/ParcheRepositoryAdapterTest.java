@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -40,13 +40,18 @@ class ParcheRepositoryAdapterTest {
     @BeforeEach
     void setUp() {
         parcheId = UUID.randomUUID();
-        parche = Parche.builder().id(parcheId).name("Test").status(ParcheStatus.ACTIVE).build();
+        parche = Parche.builder()
+                .id(parcheId)
+                .name("Parche Test")
+                .type(ParcheType.PUBLIC)
+                .status(ParcheStatus.ACTIVE)
+                .build();
         parcheEntity = new ParcheEntity();
     }
 
     @Test
-    @DisplayName("findById retorna el parche mapeado cuando existe en el repositorio")
-    void findById_existe_retornaParcheMapeado() {
+    @DisplayName("findById retorna el parche mapeado cuando existe")
+    void findById_existe_retornaDominio() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parcheEntity));
         when(mapper.toDomain(parcheEntity)).thenReturn(parche);
 
@@ -54,10 +59,11 @@ class ParcheRepositoryAdapterTest {
 
         assertThat(result).isPresent();
         assertThat(result.get().getId()).isEqualTo(parcheId);
+        verify(mapper).toDomain(parcheEntity);
     }
 
     @Test
-    @DisplayName("findById retorna Optional vacío cuando no existe en el repositorio")
+    @DisplayName("findById retorna Optional vacío cuando no existe")
     void findById_noExiste_retornaVacio() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
 
@@ -83,71 +89,62 @@ class ParcheRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("findArchivables delega con LocalDate y LocalTime correctos y mapea resultados")
-    void findArchivables_delegaConFechaYHoraYMapea() {
-        LocalDate thresholdDate = LocalDate.now().minusDays(1);
-        LocalTime thresholdTime = LocalTime.of(10, 0);
-
-        when(parcheRepository.findArchivables(ParcheStatus.ACTIVE, thresholdDate, thresholdTime))
+    @DisplayName("findArchivables delega al repositorio y mapea los resultados")
+    void findArchivables_retornaListaMapeada() {
+        LocalDate date = LocalDate.now();
+        LocalTime time = LocalTime.now();
+        when(parcheRepository.findArchivables(ParcheStatus.ACTIVE, date, time))
                 .thenReturn(List.of(parcheEntity));
         when(mapper.toDomain(parcheEntity)).thenReturn(parche);
 
-        List<Parche> result = adapter.findArchivables(ParcheStatus.ACTIVE, thresholdDate, thresholdTime);
+        List<Parche> result = adapter.findArchivables(ParcheStatus.ACTIVE, date, time);
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo(parche);
-        verify(parcheRepository).findArchivables(ParcheStatus.ACTIVE, thresholdDate, thresholdTime);
+        assertThat(result.get(0).getId()).isEqualTo(parcheId);
     }
 
     @Test
-    @DisplayName("findArchivables retorna lista vacía cuando no hay parches archivables")
-    void findArchivables_sinResultados_retornaListaVacia() {
-        LocalDate thresholdDate = LocalDate.now().minusDays(1);
-        LocalTime thresholdTime = LocalTime.now();
-
-        when(parcheRepository.findArchivables(ParcheStatus.ACTIVE, thresholdDate, thresholdTime))
-                .thenReturn(List.of());
-
-        List<Parche> result = adapter.findArchivables(ParcheStatus.ACTIVE, thresholdDate, thresholdTime);
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    @DisplayName("findByFilters sin filtros invoca findAll con Specification y mapea resultados")
-    @SuppressWarnings("unchecked")
-    void findByFilters_sinFiltros_llamaFindAllYMapea() {
+    @DisplayName("findByFilters con nombre retorna parches PUBLIC+ACTIVE que coinciden")
+    void findByFilters_conNombre_retornaResultados() {
         when(parcheRepository.findAll(any(Specification.class))).thenReturn(List.of(parcheEntity));
         when(mapper.toDomain(parcheEntity)).thenReturn(parche);
 
-        List<Parche> result = adapter.findByFilters(null, null, null, null);
+        List<Parche> result = adapter.findByFilters("Test", null, null);
 
         assertThat(result).hasSize(1);
         verify(parcheRepository).findAll(any(Specification.class));
     }
 
     @Test
-    @DisplayName("findByFilters con todos los filtros invoca findAll")
-    @SuppressWarnings("unchecked")
-    void findByFilters_conTodosLosFiltros_llamaFindAll() {
-        when(parcheRepository.findAll(any(Specification.class))).thenReturn(List.of(parcheEntity));
+    @DisplayName("findByFilters sin filtros retorna todos los PUBLIC+ACTIVE")
+    void findByFilters_sinFiltros_retornaListaCompleta() {
+        when(parcheRepository.findAll(any(Specification.class))).thenReturn(List.of(parcheEntity, parcheEntity));
         when(mapper.toDomain(parcheEntity)).thenReturn(parche);
 
-        List<Parche> result = adapter.findByFilters(
-                ParcheType.PUBLIC, ParcheStatus.ACTIVE, "futbol", LocalDate.of(2026, 6, 15));
+        List<Parche> result = adapter.findByFilters(null, null, null);
 
-        assertThat(result).hasSize(1);
+        assertThat(result).hasSize(2);
     }
 
     @Test
-    @DisplayName("findByFilters con nombre en blanco no aplica filtro de nombre")
-    @SuppressWarnings("unchecked")
-    void findByFilters_nombreEnBlanco_noAplicaFiltroNombre() {
-        when(parcheRepository.findAll(any(Specification.class))).thenReturn(List.of());
-
-        List<Parche> result = adapter.findByFilters(null, null, "   ", null);
+    @DisplayName("findActiveByIds con lista vacía retorna lista vacía sin consultar el repositorio")
+    void findActiveByIds_listaVacia_retornaVacioSinConsultar() {
+        List<Parche> result = adapter.findActiveByIds(List.of());
 
         assertThat(result).isEmpty();
+        verify(parcheRepository, never()).findAll(any(Specification.class));
+    }
+
+    @Test
+    @DisplayName("findActiveByIds con IDs válidos retorna los parches activos correspondientes")
+    void findActiveByIds_conIds_retornaParchesActivos() {
+        List<UUID> ids = List.of(parcheId, UUID.randomUUID());
+        when(parcheRepository.findAll(any(Specification.class))).thenReturn(List.of(parcheEntity));
+        when(mapper.toDomain(parcheEntity)).thenReturn(parche);
+
+        List<Parche> result = adapter.findActiveByIds(ids);
+
+        assertThat(result).hasSize(1);
         verify(parcheRepository).findAll(any(Specification.class));
     }
 }

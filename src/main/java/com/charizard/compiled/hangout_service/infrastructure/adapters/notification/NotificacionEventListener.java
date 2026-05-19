@@ -32,8 +32,8 @@ public class NotificacionEventListener {
                 event.capitanId(), event.estudianteId(), event.nombreParche());
 
         MemberJoinedMessage message = MemberJoinedMessage.builder()
-                .capitanId(event.capitanId().toString())
-                .estudianteId(event.estudianteId().toString())
+                .ownerId(event.capitanId())
+                .estudianteId(event.estudianteId())
                 .nombreParche(event.nombreParche())
                 .timestamp(event.timestamp())
                 .build();

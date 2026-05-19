@@ -23,10 +23,6 @@ import java.util.UUID;
  */
 public class UpdateParcheRequest {
 
-    /** Nuevo nombre del parche (opcional) */
-    @Schema(example = "Parche de estudio actualizado")
-    private String name;
-
     /** Nueva descripción (opcional) */
     @Schema(example = "Descripción actualizada")
     private String description;
@@ -47,9 +43,9 @@ public class UpdateParcheRequest {
     @Schema(example = "16:00", description = "Hour in ISO format (HH:mm)")
     private LocalTime hour;
 
-    /** Nuevo cupo máximo (2-50, opcional) */
-    @Min(value = 2, message = "Maximum quota must be at least 2")
-    @Max(value = 50, message = "Maximum quota cannot exceed 50")
+    /** Nuevo cupo máximo (1-30, opcional) */
+    @Min(value = 1, message = "Maximum quota must be at least 1")
+    @Max(value = 30, message = "Maximum quota cannot exceed 30")
     @Schema(example = "15")
     private Integer maximumQuota;
 
@@ -60,5 +56,9 @@ public class UpdateParcheRequest {
     /** Nuevo ID de evento externo (opcional) */
     @Schema(example = "123e4567-e89b-12d3-a456-426614174000")
     private UUID eventId;
+
+    /** Nueva URL de imagen (opcional) */
+    @Schema(example = "https://storage.example.com/parches/imagen.jpg")
+    private String imageUrl;
 
 }

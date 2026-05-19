@@ -20,10 +20,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.UUID;
 
 /**
- * Caso de uso para enviar invitaciones a parches privados.
- * El capitán puede invitar estudiantes; valida que no sean ya miembros
- * y que no tengan una invitación pendiente duplicada. Publica eventos
- * de dominio para notificaciones.
+ * Caso de uso para enviar invitaciones a parches.
+ * Cualquier miembro puede invitar a otros estudiantes (no solo el owner).
+ * Valida que el invitador sea miembro, que el invitado no sea ya miembro
+ * y que no haya una invitación pendiente duplicada.
  */
 @Service
 @RequiredArgsConstructor
@@ -36,12 +36,13 @@ public class InvitationUseCase implements InvitationInputPort {
     private final ParcheEventPublisherPort parcheEventPublisher;
 
     @Override
-    public InvitationResponse sendInvitation(UUID parcheId, UUID captainId, UUID studentId) {
+    public InvitationResponse sendInvitation(UUID parcheId, UUID inviterId, UUID studentId) {
         var parche = parcheRepository.findById(parcheId)
                 .orElseThrow(() -> new ParcheNotFoundException("Parche not found with id: " + parcheId));
 
-        if (!parche.getCaptainId().equals(captainId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not the captain of this hangout");
+        // El invitador debe ser miembro del parche
+        if (!memberRepository.existsByParcheIdAndStudentId(parcheId, inviterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You must be a member of this hangout to send invitations");
         }
 
         if (memberRepository.existsByParcheIdAndStudentId(parcheId, studentId)) {
@@ -55,7 +56,7 @@ public class InvitationUseCase implements InvitationInputPort {
 
         Invitation newInvitation = Invitation.builder()
                 .parcheId(parcheId)
-                .captainId(captainId)
+                .inviterId(inviterId)
                 .invitedStudentId(studentId)
                 .status(InvitationStatus.PENDING)
                 .build();
@@ -66,7 +67,7 @@ public class InvitationUseCase implements InvitationInputPort {
                 saved.getId(),
                 saved.getParcheId(),
                 saved.getInvitedStudentId(),
-                saved.getCaptainId()
+                saved.getInviterId()
         );
 
         return toResponse(saved);

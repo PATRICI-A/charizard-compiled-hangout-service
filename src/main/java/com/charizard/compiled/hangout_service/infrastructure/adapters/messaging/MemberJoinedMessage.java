@@ -6,13 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * RabbitMQ payload for the member.joined routing key.
- *
- * Field names match notification-service's MemberJoinedEventDto exactly.
- * Note: notification-service declares "nombreParche" as UUID (likely a typo on their side —
- * should be String). Jackson will deserialize our String value into their field regardless.
+ * Consumed by: notification-service.
  */
 @Data
 @Builder
@@ -20,8 +18,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MemberJoinedMessage {
 
-    private String capitanId;
-    private String estudianteId;
+    private UUID ownerId;
+    private UUID estudianteId;
     private String nombreParche;
     private LocalDateTime timestamp;
 }

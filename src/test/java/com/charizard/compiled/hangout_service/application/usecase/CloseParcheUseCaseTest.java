@@ -1,9 +1,11 @@
 package com.charizard.compiled.hangout_service.application.usecase;
 
-import com.charizard.compiled.hangout_service.domain.exceptions.AccessDeniedException;
 import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundException;
+import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
+import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.ParcheEventPublisherPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,70 +27,43 @@ import static org.mockito.Mockito.*;
 class CloseParcheUseCaseTest {
 
     @Mock ParcheRepositoryPort parcheRepository;
+    @Mock MemberRepositoryPort memberRepository;
+    @Mock ParcheEventPublisherPort parcheEventPublisher;
 
     @InjectMocks CloseParcheUseCase useCase;
 
     private UUID parcheId;
-    private UUID captainId;
     private Parche parche;
 
     @BeforeEach
     void setUp() {
         parcheId = UUID.randomUUID();
-        captainId = UUID.randomUUID();
 
         parche = Parche.builder()
                 .id(parcheId)
                 .name("Parche Test")
-                .captainId(captainId)
+                .ownerId(UUID.randomUUID())
                 .status(ParcheStatus.ACTIVE)
                 .build();
     }
 
     @Test
-    @DisplayName("closeParche lanza ParcheNotFoundException cuando el parche no existe")
-    void closeParche_parcheNoExiste_lanzaExcepcion() {
-        when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
+    @DisplayName("closeParche cambia el status a FILED, guarda y publica parche.dissolved")
+    void closeParche_adminPuede_cambiaStatusYGuarda() {
+        UUID miembro1 = UUID.randomUUID();
+        UUID miembro2 = UUID.randomUUID();
 
-        assertThatThrownBy(() -> useCase.closeParche(parcheId, captainId))
-                .isInstanceOf(ParcheNotFoundException.class)
-                .hasMessageContaining(parcheId.toString());
+        Member m1 = Member.builder().studentId(miembro1).parcheId(parcheId).build();
+        Member m2 = Member.builder().studentId(miembro2).parcheId(parcheId).build();
 
-        verify(parcheRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("closeParche lanza AccessDeniedException cuando el solicitante no es el capitán")
-    void closeParche_noEsCaptain_lanzaAccessDenied() {
-        UUID otroUsuario = UUID.randomUUID();
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
+        when(memberRepository.findByParcheId(parcheId)).thenReturn(List.of(m1, m2));
 
-        assertThatThrownBy(() -> useCase.closeParche(parcheId, otroUsuario))
-                .isInstanceOf(AccessDeniedException.class);
-
-        verify(parcheRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("closeParche cambia el status a FILED y guarda cuando el capitán es correcto")
-    void closeParche_captainCorrecto_cambiaStatusYGuarda() {
-        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
-
-        useCase.closeParche(parcheId, captainId);
+        useCase.closeParche(parcheId);
 
         assertThat(parche.getStatus()).isEqualTo(ParcheStatus.FILED);
         verify(parcheRepository).save(parche);
-    }
-
-    @Test
-    @DisplayName("closeParche no cambia el status cuando el solicitante no es el capitán")
-    void closeParche_noEsCaptain_noModificaStatus() {
-        UUID otroUsuario = UUID.randomUUID();
-        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
-
-        assertThatThrownBy(() -> useCase.closeParche(parcheId, otroUsuario))
-                .isInstanceOf(AccessDeniedException.class);
-
-        assertThat(parche.getStatus()).isEqualTo(ParcheStatus.ACTIVE);
+        verify(parcheEventPublisher).publishParcheDissolved(
+                eq(parcheId), eq("Parche Test"), eq(List.of(miembro1, miembro2)));
     }
 }

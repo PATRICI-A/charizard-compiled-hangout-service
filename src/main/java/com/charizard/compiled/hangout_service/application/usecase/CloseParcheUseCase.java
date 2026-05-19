@@ -1,21 +1,24 @@
 package com.charizard.compiled.hangout_service.application.usecase;
 
-import com.charizard.compiled.hangout_service.domain.exceptions.AccessDeniedException;
 import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundException;
+import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.ports.in.CloseParcheInputPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.ParcheEventPublisherPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
  * Caso de uso para archivar manualmente un parche (soft delete).
  * Cambia el estado del parche de ACTIVE a FILED.
- * Solo el capitán puede ejecutar esta acción.
+ * Solo ROLE_ADMIN puede ejecutar esta acción (verificación en el controlador).
  */
 @Service
 @RequiredArgsConstructor
@@ -23,17 +26,21 @@ import java.util.UUID;
 public class CloseParcheUseCase implements CloseParcheInputPort {
 
     private final ParcheRepositoryPort parcheRepository;
+    private final MemberRepositoryPort memberRepository;
+    private final ParcheEventPublisherPort parcheEventPublisher;
 
     @Override
-    public void closeParche(UUID id, UUID captainId) {
+    public void closeParche(UUID id) {
         Parche parche = parcheRepository.findById(id)
                 .orElseThrow(() -> new ParcheNotFoundException("Parche not found with id: " + id));
 
-        if (!parche.getCaptainId().equals(captainId)) {
-            throw new AccessDeniedException("Only the captain can delete this parche");
-        }
+        List<UUID> memberIds = memberRepository.findByParcheId(id).stream()
+                .map(Member::getStudentId)
+                .toList();
 
         parche.setStatus(ParcheStatus.FILED);
         parcheRepository.save(parche);
+
+        parcheEventPublisher.publishParcheDissolved(id, parche.getName(), memberIds);
     }
 }

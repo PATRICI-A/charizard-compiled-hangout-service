@@ -1,14 +1,17 @@
 package com.charizard.compiled.hangout_service.application.usecase;
 
+import com.charizard.compiled.hangout_service.application.dto.response.MemberResponse;
+import com.charizard.compiled.hangout_service.application.dto.response.ParcheDetailResponse;
 import com.charizard.compiled.hangout_service.application.dto.response.ParcheResponse;
 import com.charizard.compiled.hangout_service.application.mapper.ParcheMapper;
 import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundException;
+import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
-import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
-import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.domain.ports.in.GetParcheInputPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.EventServicePort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.PlaceServicePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +22,9 @@ import java.util.UUID;
 
 /**
  * Caso de uso para consultar parches.
- * Permite buscar parches por filtros (tipo, estado, nombre, fecha, cupo disponible)
- * y obtener un parche específico por su ID.
+ * Búsqueda pública: solo PUBLIC + ACTIVE; filtros: nombre, fecha, categoria, cupoDisponible.
+ * Detalle (/{id}): enriquecido con members, place y event via OpenFeign.
+ * Mis parches: parches activos (PUBLIC o PRIVATE) donde el usuario es miembro.
  */
 @Service
 @RequiredArgsConstructor
@@ -30,10 +34,12 @@ public class GetParcheUseCase implements GetParcheInputPort {
     private final ParcheRepositoryPort parcheRepository;
     private final MemberRepositoryPort memberRepository;
     private final ParcheMapper parcheMapper;
+    private final PlaceServicePort placeServicePort;
+    private final EventServicePort eventServicePort;
 
     @Override
-    public List<ParcheResponse> getParches(ParcheType tipo, ParcheStatus estado, String nombre, LocalDate fecha, Boolean cupoDisponible) {
-        return parcheRepository.findByFilters(tipo, estado, nombre, fecha).stream()
+    public List<ParcheResponse> getParches(String nombre, LocalDate fecha, String categoria, Boolean cupoDisponible) {
+        return parcheRepository.findByFilters(nombre, fecha, categoria).stream()
                 .filter(p -> {
                     if (cupoDisponible == null) return true;
                     boolean hayEspacio = memberRepository.countByParcheId(p.getId()) < p.getMaximumQuota();
@@ -44,9 +50,57 @@ public class GetParcheUseCase implements GetParcheInputPort {
     }
 
     @Override
-    public ParcheResponse getParcheById(UUID id) {
+    public ParcheDetailResponse getParcheById(UUID id) {
         Parche parche = parcheRepository.findById(id)
                 .orElseThrow(() -> new ParcheNotFoundException("Parche not found with id: " + id));
-        return parcheMapper.toResponse(parche, memberRepository.countByParcheId(id));
+
+        List<Member> members = memberRepository.findByParcheId(id);
+        int memberCount = members.size();
+
+        List<MemberResponse> memberResponses = members.stream()
+                .map(m -> MemberResponse.builder()
+                        .id(m.getId())
+                        .parcheId(m.getParcheId())
+                        .studentId(m.getStudentId())
+                        .unionDate(m.getUnionDate())
+                        .build())
+                .toList();
+
+        // Enrich with place from OpenFeign (null if not configured)
+        var placeResponse = placeServicePort.getPlaces().stream()
+                .filter(p -> p.getName() != null && p.getName().equals(parche.getPlace()))
+                .findFirst()
+                .orElse(null);
+
+        // Enrich with event from OpenFeign (null if no eventId or service unavailable)
+        var eventResponse = (parche.getEventId() != null)
+                ? eventServicePort.getEventById(parche.getEventId()).orElse(null)
+                : null;
+
+        return ParcheDetailResponse.builder()
+                .id(parche.getId())
+                .name(parche.getName())
+                .description(parche.getDescription())
+                .category(parche.getCategory())
+                .type(parche.getType())
+                .status(parche.getStatus())
+                .maximumQuota(parche.getMaximumQuota())
+                .actualMembers(memberCount)
+                .ownerId(parche.getOwnerId())
+                .date(parche.getDate())
+                .hour(parche.getHour())
+                .imageUrl(parche.getImageUrl())
+                .place(placeResponse)
+                .event(eventResponse)
+                .members(memberResponses)
+                .build();
+    }
+
+    @Override
+    public List<ParcheResponse> getMyParches(UUID userId) {
+        List<UUID> parcheIds = memberRepository.findParcheIdsByStudentId(userId);
+        return parcheRepository.findActiveByIds(parcheIds).stream()
+                .map(p -> parcheMapper.toResponse(p, memberRepository.countByParcheId(p.getId())))
+                .toList();
     }
 }

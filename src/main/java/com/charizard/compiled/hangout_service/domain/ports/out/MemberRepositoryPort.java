@@ -1,8 +1,8 @@
 package com.charizard.compiled.hangout_service.domain.ports.out;
 
 import com.charizard.compiled.hangout_service.domain.model.Member;
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -13,12 +13,14 @@ import java.util.UUID;
 public interface MemberRepositoryPort {
     /** Verifica si un estudiante ya es miembro de un parche */
     boolean existsByParcheIdAndStudentId(UUID parcheId, UUID studentId);
-    /** Verifica si un estudiante tiene un rol específico en un parche */
-    boolean existsByParcheIdAndStudentIdAndMemberRole(UUID parcheId, UUID studentId, MemberRole role);
     /** Cuenta los parches activos de un estudiante (límite: 5) */
     int countParchesActivosByStudentId(UUID studentId);
     /** Cuenta los miembros actuales de un parche */
     int countByParcheId(UUID parcheId);
+    /** Retorna todos los miembros de un parche */
+    List<Member> findByParcheId(UUID parcheId);
+    /** Retorna los IDs de parches donde el estudiante es miembro */
+    List<UUID> findParcheIdsByStudentId(UUID studentId);
     /** Guarda o actualiza una membresía */
     Member save(Member member);
     /** Elimina la membresía de un estudiante en un parche */

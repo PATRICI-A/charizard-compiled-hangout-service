@@ -6,10 +6,10 @@ import com.charizard.compiled.hangout_service.application.mapper.ParcheMapper;
 import com.charizard.compiled.hangout_service.domain.exceptions.MaxHangoutsReachedException;
 import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.ParcheEventPublisherPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,17 +31,18 @@ class CreateParcheUseCaseTest {
     @Mock ParcheRepositoryPort parcheRepository;
     @Mock MemberRepositoryPort memberRepository;
     @Mock ParcheMapper parcheMapper;
+    @Mock ParcheEventPublisherPort parcheEventPublisher;
 
     @InjectMocks CreateParcheUseCase useCase;
 
-    private UUID captainId;
+    private UUID ownerId;
     private CreateParcheRequest request;
     private Parche domainParche;
     private ParcheResponse parcheResponse;
 
     @BeforeEach
     void setUp() {
-        captainId = UUID.randomUUID();
+        ownerId = UUID.randomUUID();
 
         request = CreateParcheRequest.builder()
                 .name("Parche de estudio")
@@ -55,7 +56,7 @@ class CreateParcheUseCaseTest {
                 .name("Parche de estudio")
                 .maximumQuota(10)
                 .status(ParcheStatus.ACTIVE)
-                .captainId(captainId)
+                .ownerId(ownerId)
                 .build();
 
         parcheResponse = ParcheResponse.builder()
@@ -68,12 +69,12 @@ class CreateParcheUseCaseTest {
     @Test
     @DisplayName("createParche con menos de 5 activos crea parche y retorna respuesta")
     void createParche_menosDe5Activos_creaYRetorna() {
-        when(memberRepository.countParchesActivosByStudentId(captainId)).thenReturn(4);
-        when(parcheMapper.toDomain(request, captainId)).thenReturn(domainParche);
+        when(memberRepository.countParchesActivosByStudentId(ownerId)).thenReturn(4);
+        when(parcheMapper.toDomain(request, ownerId)).thenReturn(domainParche);
         when(parcheRepository.save(domainParche)).thenReturn(domainParche);
         when(parcheMapper.toResponse(domainParche, 1)).thenReturn(parcheResponse);
 
-        ParcheResponse result = useCase.createParche(request, captainId);
+        ParcheResponse result = useCase.createParche(request, ownerId);
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(domainParche.getId());
@@ -83,12 +84,12 @@ class CreateParcheUseCaseTest {
     @Test
     @DisplayName("createParche con 0 activos permite crear")
     void createParche_ceroActivos_permiteCrear() {
-        when(memberRepository.countParchesActivosByStudentId(captainId)).thenReturn(0);
-        when(parcheMapper.toDomain(request, captainId)).thenReturn(domainParche);
+        when(memberRepository.countParchesActivosByStudentId(ownerId)).thenReturn(0);
+        when(parcheMapper.toDomain(request, ownerId)).thenReturn(domainParche);
         when(parcheRepository.save(any())).thenReturn(domainParche);
         when(parcheMapper.toResponse(domainParche, 1)).thenReturn(parcheResponse);
 
-        ParcheResponse result = useCase.createParche(request, captainId);
+        ParcheResponse result = useCase.createParche(request, ownerId);
 
         assertThat(result).isNotNull();
     }
@@ -96,9 +97,9 @@ class CreateParcheUseCaseTest {
     @Test
     @DisplayName("createParche con 5 activos lanza MaxHangoutsReachedException y no persiste")
     void createParche_con5Activos_lanzaExcepcionSinPersistir() {
-        when(memberRepository.countParchesActivosByStudentId(captainId)).thenReturn(5);
+        when(memberRepository.countParchesActivosByStudentId(ownerId)).thenReturn(5);
 
-        assertThatThrownBy(() -> useCase.createParche(request, captainId))
+        assertThatThrownBy(() -> useCase.createParche(request, ownerId))
                 .isInstanceOf(MaxHangoutsReachedException.class);
 
         verify(parcheRepository, never()).save(any());
@@ -106,18 +107,17 @@ class CreateParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("createParche guarda member con rol CAPTAIN, studentId y parcheId correctos")
-    void createParche_guardaMemberCaptainConDatosCorrectos() {
-        when(memberRepository.countParchesActivosByStudentId(captainId)).thenReturn(0);
-        when(parcheMapper.toDomain(request, captainId)).thenReturn(domainParche);
+    @DisplayName("createParche guarda member con studentId y parcheId correctos (sin memberRole)")
+    void createParche_guardaMemberOwnerConDatosCorrectos() {
+        when(memberRepository.countParchesActivosByStudentId(ownerId)).thenReturn(0);
+        when(parcheMapper.toDomain(request, ownerId)).thenReturn(domainParche);
         when(parcheRepository.save(domainParche)).thenReturn(domainParche);
         when(parcheMapper.toResponse(domainParche, 1)).thenReturn(parcheResponse);
 
-        useCase.createParche(request, captainId);
+        useCase.createParche(request, ownerId);
 
         verify(memberRepository).save(argThat(m ->
-                m.getMemberRole() == MemberRole.CAPTAIN &&
-                m.getStudentId().equals(captainId) &&
+                m.getStudentId().equals(ownerId) &&
                 m.getParcheId().equals(domainParche.getId())
         ));
     }
@@ -125,12 +125,12 @@ class CreateParcheUseCaseTest {
     @Test
     @DisplayName("createParche guarda el parche antes de guardar el member")
     void createParche_guardaParcheAntesQueElMember() {
-        when(memberRepository.countParchesActivosByStudentId(captainId)).thenReturn(0);
-        when(parcheMapper.toDomain(request, captainId)).thenReturn(domainParche);
+        when(memberRepository.countParchesActivosByStudentId(ownerId)).thenReturn(0);
+        when(parcheMapper.toDomain(request, ownerId)).thenReturn(domainParche);
         when(parcheRepository.save(domainParche)).thenReturn(domainParche);
         when(parcheMapper.toResponse(domainParche, 1)).thenReturn(parcheResponse);
 
-        useCase.createParche(request, captainId);
+        useCase.createParche(request, ownerId);
 
         var inOrder = inOrder(parcheRepository, memberRepository);
         inOrder.verify(parcheRepository).save(domainParche);

@@ -24,7 +24,7 @@ public interface ParcheRepository extends JpaRepository<ParcheEntity, UUID>, Jpa
 
     List<ParcheEntity> findByStatus(ParcheStatus status);
 
-    List<ParcheEntity> findByCaptainId(UUID captainId);
+    List<ParcheEntity> findByOwnerId(UUID ownerId);
 
     List<ParcheEntity> findByType(ParcheType type);
 

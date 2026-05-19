@@ -1,6 +1,5 @@
 package com.charizard.compiled.hangout_service.domain.model;
 
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,8 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 /**
  * Entidad de dominio que representa la membresía de un estudiante en un parche.
- * Un miembro puede tener rol {@link MemberRole#CAPTAIN} (creador del parche)
- * o {@link MemberRole#STUDENT} (participante invitado o que se unió voluntariamente).
+ * El ownership se almacena en el campo ownerId del Parche, no aquí.
  */
 public class Member {
 
@@ -28,7 +26,5 @@ public class Member {
     private UUID studentId;
     /** Fecha y hora en que el estudiante se unió al parche */
     private LocalDateTime unionDate;
-    /** Rol del miembro dentro del parche (capitán o estudiante) */
-    private MemberRole memberRole;
 
 }

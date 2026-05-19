@@ -7,7 +7,6 @@ import com.charizard.compiled.hangout_service.domain.model.Invitation;
 import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.InvitationStatus;
-import com.charizard.compiled.hangout_service.domain.model.enums.MemberRole;
 import com.charizard.compiled.hangout_service.domain.ports.in.RespondInvitationInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.InvitationRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
@@ -79,17 +78,20 @@ public class RespondInvitationUseCase implements RespondInvitationInputPort {
             Member newMember = Member.builder()
                     .parcheId(invitation.getParcheId())
                     .studentId(studentId)
-                    .memberRole(MemberRole.STUDENT)
                     .build();
             memberRepository.save(newMember);
 
-            notificacionPort.notificarNuevoMiembro(invitation.getCaptainId(), studentId, parche.getName());
+            notificacionPort.notificarNuevoMiembro(invitation.getInviterId(), studentId, parche.getName());
 
             parcheEventPublisher.publishInvitationAccepted(
-                    invitationId, invitation.getParcheId(), studentId, invitation.getCaptainId());
+                    invitationId, invitation.getParcheId(), studentId, invitation.getInviterId());
 
             parcheEventPublisher.publishMemberJoined(
-                    invitation.getParcheId(), parche.getName(), invitation.getCaptainId(), studentId);
+                    invitation.getParcheId(), parche.getName(), parche.getOwnerId(), studentId);
+
+        } else if (answer == InvitationStatus.REJECTED) {
+            parcheEventPublisher.publishInvitationRejected(
+                    invitationId, invitation.getParcheId(), studentId, invitation.getInviterId());
         }
 
         invitation.setStatus(answer);
