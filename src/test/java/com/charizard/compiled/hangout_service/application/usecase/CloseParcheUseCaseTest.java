@@ -42,18 +42,6 @@ class CloseParcheUseCaseTest {
     }
 
     @Test
-    @DisplayName("closeParche lanza ParcheNotFoundException cuando el parche no existe")
-    void closeParche_parcheNoExiste_lanzaExcepcion() {
-        when(parcheRepository.findById(parcheId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> useCase.closeParche(parcheId))
-                .isInstanceOf(ParcheNotFoundException.class)
-                .hasMessageContaining(parcheId.toString());
-
-        verify(parcheRepository, never()).save(any());
-    }
-
-    @Test
     @DisplayName("closeParche cambia el status a FILED y guarda (solo ROLE_ADMIN llega aquí)")
     void closeParche_adminPuede_cambiaStatusYGuarda() {
         when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));

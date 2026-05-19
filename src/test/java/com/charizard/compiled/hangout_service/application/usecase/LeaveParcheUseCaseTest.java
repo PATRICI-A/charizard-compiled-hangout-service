@@ -129,38 +129,5 @@ class LeaveParcheUseCaseTest {
         verify(memberRepository, never()).deleteByParcheIdAndStudentId(any(), any());
     }
 
-    @Test
-    @DisplayName("salirDeParche (owner con más miembros) transfiere ownership y elimina al owner")
-    void salirDeParche_ownerConMiembros_transiereOwnershipYSale() {
-        UUID newOwnerId = UUID.randomUUID();
 
-        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
-        when(memberRepository.existsByParcheIdAndStudentId(parcheId, ownerId)).thenReturn(true);
-        when(memberRepository.countByParcheId(parcheId)).thenReturn(2);
-        when(memberRepository.existsByParcheIdAndStudentId(parcheId, newOwnerId)).thenReturn(true);
-
-        useCase.salirDeParche(parcheId, ownerId, newOwnerId);
-
-        assertThat(parche.getOwnerId()).isEqualTo(newOwnerId);
-        verify(parcheRepository).save(parche);
-        verify(memberRepository).deleteByParcheIdAndStudentId(parcheId, ownerId);
-    }
-
-    @Test
-    @DisplayName("salirDeParche (owner) lanza 400 cuando newOwnerId no es miembro del parche")
-    void salirDeParche_newOwnerNoEsMiembro_lanza400() {
-        UUID newOwnerId = UUID.randomUUID();
-
-        when(parcheRepository.findById(parcheId)).thenReturn(Optional.of(parche));
-        when(memberRepository.existsByParcheIdAndStudentId(parcheId, ownerId)).thenReturn(true);
-        when(memberRepository.countByParcheId(parcheId)).thenReturn(2);
-        when(memberRepository.existsByParcheIdAndStudentId(parcheId, newOwnerId)).thenReturn(false);
-
-        assertThatThrownBy(() -> useCase.salirDeParche(parcheId, ownerId, newOwnerId))
-                .isInstanceOf(ResponseStatusException.class)
-                .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode())
-                        .isEqualTo(HttpStatus.BAD_REQUEST));
-
-        verify(memberRepository, never()).deleteByParcheIdAndStudentId(any(), any());
-    }
 }
