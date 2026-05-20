@@ -58,7 +58,7 @@ class MemberControllerTest {
         objectMapper = new ObjectMapper();
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(studentId, null, List.of()));
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(studentId.toString(), null, List.of()));
         SecurityContextHolder.setContext(context);
 
         mockMvc = MockMvcBuilders
