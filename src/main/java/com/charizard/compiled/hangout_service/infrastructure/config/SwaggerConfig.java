@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
 
-    private static final String SECURITY_SCHEME_NAME = "X-User-Id";
+    private static final String SECURITY_SCHEME_NAME = "bearerAuth";
 
     @Bean
     public OpenAPI hangoutServiceOpenAPI() {
@@ -36,8 +36,9 @@ public class SwaggerConfig {
                         .addSecuritySchemes(SECURITY_SCHEME_NAME,
                                 new SecurityScheme()
                                         .name(SECURITY_SCHEME_NAME)
-                                        .type(SecurityScheme.Type.APIKEY)
-                                        .in(SecurityScheme.In.HEADER)
-                                        .description("Enter the user UUID. Example: 00000000-0000-0000-0000-000000000001")));
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                                        .description("Ingresa el JWT token generado. No incluyas 'Bearer ', Swagger lo agrega automáticamente.")));
     }
 }
