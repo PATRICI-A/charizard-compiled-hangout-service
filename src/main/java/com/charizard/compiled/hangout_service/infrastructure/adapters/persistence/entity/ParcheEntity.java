@@ -60,7 +60,7 @@ public class ParcheEntity {
     @Enumerated(EnumType.STRING)
     private ParcheStatus status;
 
-    @Column(name = "captain_id", nullable = false)
+    @Column(name = "owner_id", nullable = false)
     private UUID ownerId;
 
     @Column(nullable = false)
