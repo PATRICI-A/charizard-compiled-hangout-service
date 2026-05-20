@@ -49,10 +49,10 @@ public class InvitationController {
             @PathVariable UUID parcheId,
             @Parameter(description = "Student ID to invite", required = true)
             @PathVariable UUID studentId,
-            @Parameter(hidden = true) @AuthenticationPrincipal UUID inviterId) {
+            @Parameter(hidden = true) @AuthenticationPrincipal String inviterIdStr) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(invitationService.sendInvitation(parcheId, inviterId, studentId));
+                .body(invitationService.sendInvitation(parcheId, UUID.fromString(inviterIdStr), studentId));
     }
 
     @Operation(
@@ -71,10 +71,10 @@ public class InvitationController {
             @Parameter(description = "Invitation ID", required = true)
             @PathVariable UUID invitationId,
             @Valid @RequestBody RespondInvitationRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal UUID studentId) {
+            @Parameter(hidden = true) @AuthenticationPrincipal String studentIdStr) {
 
         return ResponseEntity.ok(
-                respondInvitationService.respondInvitation(invitationId, studentId, request.getAnswer()));
+                respondInvitationService.respondInvitation(invitationId, UUID.fromString(studentIdStr), request.getAnswer()));
     }
 
     @Operation(summary = "Accept an invitation", description = "The student accepts an invitation to join a hangout.")
@@ -89,9 +89,9 @@ public class InvitationController {
     public ResponseEntity<InvitationResponse> acceptInvitation(
             @Parameter(description = "Invitation ID", required = true)
             @PathVariable UUID invitationId,
-            @Parameter(hidden = true) @AuthenticationPrincipal UUID studentId) {
+            @Parameter(hidden = true) @AuthenticationPrincipal String studentIdStr) {
 
-        return ResponseEntity.ok(respondInvitationService.acceptInvitation(invitationId, studentId));
+        return ResponseEntity.ok(respondInvitationService.acceptInvitation(invitationId, UUID.fromString(studentIdStr)));
     }
 
     @Operation(summary = "Reject an invitation", description = "The student rejects an invitation to join a hangout.")
@@ -106,8 +106,8 @@ public class InvitationController {
     public ResponseEntity<InvitationResponse> rejectInvitation(
             @Parameter(description = "Invitation ID", required = true)
             @PathVariable UUID invitationId,
-            @Parameter(hidden = true) @AuthenticationPrincipal UUID studentId) {
+            @Parameter(hidden = true) @AuthenticationPrincipal String studentIdStr) {
 
-        return ResponseEntity.ok(respondInvitationService.rejectInvitation(invitationId, studentId));
+        return ResponseEntity.ok(respondInvitationService.rejectInvitation(invitationId, UUID.fromString(studentIdStr)));
     }
 }

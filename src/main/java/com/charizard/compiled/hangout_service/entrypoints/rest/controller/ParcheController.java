@@ -53,9 +53,9 @@ public class ParcheController {
     })
     public ResponseEntity<ParcheResponse> createParche(
             @Valid @RequestBody CreateParcheRequest req,
-            @Parameter(hidden = true) @AuthenticationPrincipal UUID ownerId) {
+            @Parameter(hidden = true) @AuthenticationPrincipal String ownerIdStr) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(createParcheUseCase.createParche(req, ownerId));
+                .body(createParcheUseCase.createParche(req, UUID.fromString(ownerIdStr)));
     }
 
     @GetMapping
@@ -77,8 +77,8 @@ public class ParcheController {
             @ApiResponse(responseCode = "200", description = "List of active parches for the authenticated user")
     })
     public ResponseEntity<List<ParcheResponse>> getMyParches(
-            @Parameter(hidden = true) @AuthenticationPrincipal UUID userId) {
-        return ResponseEntity.ok(getParcheUseCase.getMyParches(userId));
+            @Parameter(hidden = true) @AuthenticationPrincipal String userIdStr) {
+        return ResponseEntity.ok(getParcheUseCase.getMyParches(UUID.fromString(userIdStr)));
     }
 
     @GetMapping("/{id}")
@@ -101,8 +101,8 @@ public class ParcheController {
     public ResponseEntity<ParcheResponse> updateParche(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateParcheRequest req,
-            @AuthenticationPrincipal UUID solicitanteId) {
-        return ResponseEntity.ok(updateParcheUseCase.updateParche(id, req, solicitanteId));
+            @AuthenticationPrincipal String solicitanteIdStr) {
+        return ResponseEntity.ok(updateParcheUseCase.updateParche(id, req, UUID.fromString(solicitanteIdStr)));
     }
 
     @DeleteMapping("/{id}")
