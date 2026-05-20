@@ -59,7 +59,7 @@ class InvitationControllerTest {
         studentId = UUID.randomUUID();
 
         SecurityContext context = org.springframework.security.core.context.SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(inviterId, null, List.of()));
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(inviterId.toString(), null, List.of()));
         SecurityContextHolder.setContext(context);
 
         mockMvc = MockMvcBuilders.standaloneSetup(invitationController)

@@ -47,10 +47,10 @@ public class MemberController {
     public ResponseEntity<MemberResponse> unirseAParche(
             @Parameter(description = "Hangout ID", required = true)
             @PathVariable UUID parcheId,
-            @AuthenticationPrincipal UUID studentId) {
+            @AuthenticationPrincipal String studentIdStr) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(joinParcheService.unirseAParche(parcheId, studentId));
+                .body(joinParcheService.unirseAParche(parcheId, UUID.fromString(studentIdStr)));
     }
 
     @Operation(
@@ -68,11 +68,11 @@ public class MemberController {
     public ResponseEntity<Void> salirDeParche(
             @Parameter(description = "Hangout ID", required = true)
             @PathVariable UUID parcheId,
-            @AuthenticationPrincipal UUID studentId,
+            @AuthenticationPrincipal String studentIdStr,
             @RequestBody(required = false) LeaveParcheRequest body) {
 
         UUID newOwnerId = (body != null) ? body.getNewOwnerId() : null;
-        leaveParcheService.salirDeParche(parcheId, studentId, newOwnerId);
+        leaveParcheService.salirDeParche(parcheId, UUID.fromString(studentIdStr), newOwnerId);
         return ResponseEntity.noContent().build();
     }
 }

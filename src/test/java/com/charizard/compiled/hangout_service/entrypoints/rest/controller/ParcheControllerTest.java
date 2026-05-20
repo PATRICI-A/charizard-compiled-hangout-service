@@ -102,7 +102,7 @@ class ParcheControllerTest {
 
     private void setAuthentication(UUID userId) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(userId, null, List.of()));
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(userId.toString(), null, List.of()));
         SecurityContextHolder.setContext(context);
     }
 
