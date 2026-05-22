@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -39,7 +38,10 @@ public class SecurityConfig {
                     "/actuator/health/**"
                 ).permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/parches").permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/api/v1/parches/*/miembros/*/check", "GET")).permitAll()
+                .requestMatchers(req ->
+                    "GET".equals(req.getMethod()) &&
+                    req.getRequestURI().matches("/api/v1/parches/[^/]+/miembros/[^/]+/check")
+                ).permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(kongAuthFilter, UsernamePasswordAuthenticationFilter.class);
