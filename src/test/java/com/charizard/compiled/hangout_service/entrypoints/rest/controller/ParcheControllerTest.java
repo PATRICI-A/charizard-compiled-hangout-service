@@ -113,7 +113,7 @@ class ParcheControllerTest {
     @Test
     @DisplayName("GET /parches sin filtros retorna 200 con lista de parches")
     void getParches_sinFiltros_retorna200ConLista() throws Exception {
-        when(getParcheUseCase.getParches(null, null, null, null))
+        when(getParcheUseCase.getParches(null, null, null, null, null))
                 .thenReturn(List.of(parcheResponse));
 
         mockMvc.perform(get("/api/v1/parches"))
@@ -126,7 +126,7 @@ class ParcheControllerTest {
     @Test
     @DisplayName("GET /parches?nombre=futbol filtra por nombre")
     void getParches_conNombre_filtraPorNombre() throws Exception {
-        when(getParcheUseCase.getParches(eq("futbol"), any(), any(), any()))
+        when(getParcheUseCase.getParches(eq("futbol"), any(), any(), any(), any()))
                 .thenReturn(List.of(parcheResponse));
 
         mockMvc.perform(get("/api/v1/parches").param("nombre", "futbol"))
@@ -137,7 +137,7 @@ class ParcheControllerTest {
     @Test
     @DisplayName("GET /parches?fecha=2026-06-15 filtra por fecha")
     void getParches_conFecha_filtraPorFecha() throws Exception {
-        when(getParcheUseCase.getParches(any(), eq(LocalDate.of(2026, 6, 15)), any(), any()))
+        when(getParcheUseCase.getParches(any(), eq(LocalDate.of(2026, 6, 15)), any(), any(), any()))
                 .thenReturn(List.of(parcheResponse));
 
         mockMvc.perform(get("/api/v1/parches").param("fecha", "2026-06-15"))
@@ -148,7 +148,7 @@ class ParcheControllerTest {
     @Test
     @DisplayName("GET /parches?categoria=Deportes filtra por categoria")
     void getParches_conCategoria_filtraPorCategoria() throws Exception {
-        when(getParcheUseCase.getParches(any(), any(), eq("Deportes"), any()))
+        when(getParcheUseCase.getParches(any(), any(), eq("Deportes"), any(), any()))
                 .thenReturn(List.of(parcheResponse));
 
         mockMvc.perform(get("/api/v1/parches").param("categoria", "Deportes"))
@@ -159,7 +159,7 @@ class ParcheControllerTest {
     @Test
     @DisplayName("GET /parches?cupoDisponible=true filtra parches con espacio disponible")
     void getParches_conCupoDisponibleTrue_filtraParchesConEspacio() throws Exception {
-        when(getParcheUseCase.getParches(any(), any(), any(), eq(true)))
+        when(getParcheUseCase.getParches(any(), any(), any(), any(), eq(true)))
                 .thenReturn(List.of(parcheResponse));
 
         mockMvc.perform(get("/api/v1/parches").param("cupoDisponible", "true"))
@@ -170,7 +170,7 @@ class ParcheControllerTest {
     @Test
     @DisplayName("GET /parches sin resultados retorna 200 con lista vacía")
     void getParches_sinResultados_retorna200ListaVacia() throws Exception {
-        when(getParcheUseCase.getParches(any(), any(), any(), any()))
+        when(getParcheUseCase.getParches(any(), any(), any(), any(), any()))
                 .thenReturn(List.of());
 
         mockMvc.perform(get("/api/v1/parches").param("nombre", "inexistente"))

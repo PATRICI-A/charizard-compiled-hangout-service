@@ -36,8 +36,8 @@ public class GetParcheUseCase implements GetParcheInputPort {
     private final PlaceServicePort placeServicePort;
 
     @Override
-    public List<ParcheResponse> getParches(String nombre, LocalDate fecha, String categoria, Boolean cupoDisponible) {
-        return parcheRepository.findByFilters(nombre, fecha, categoria).stream()
+    public List<ParcheResponse> getParches(String nombre, LocalDate fecha, String categoria, UUID placeId, Boolean cupoDisponible) {
+        return parcheRepository.findByFilters(nombre, fecha, categoria, placeId).stream()
                 .filter(p -> {
                     if (cupoDisponible == null) return true;
                     boolean hayEspacio = memberRepository.countByParcheId(p.getId()) < p.getMaximumQuota();
