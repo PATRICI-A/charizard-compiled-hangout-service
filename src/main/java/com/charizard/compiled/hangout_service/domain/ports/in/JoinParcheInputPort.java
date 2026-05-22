@@ -27,4 +27,13 @@ public interface JoinParcheInputPort {
      * @return true si es miembro activo, false en caso contrario
      */
     boolean isMember(UUID parcheId, UUID studentId);
+
+    /**
+     * Returns the total number of parches a student has joined.
+     * Used by AnalyticsService via OpenFeign.
+     *
+     * @param userId the student's UUID
+     * @return count of parches the student belongs to
+     */
+    int getUserParcheCount(UUID userId);
 }
