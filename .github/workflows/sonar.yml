@@ -57,7 +57,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/hangoutdb
           SPRING_DATASOURCE_USERNAME: postgres
@@ -68,6 +67,6 @@ jobs:
           mvn clean verify sonar:sonar -B \
             -Dsonar.projectKey=charizard-compiled-hangout-service \
             -Dsonar.organization=${SONAR_ORGANIZATION} \
-            -Dsonar.host.url=${SONAR_HOST_URL} \
+            -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=${SONAR_TOKEN} \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
