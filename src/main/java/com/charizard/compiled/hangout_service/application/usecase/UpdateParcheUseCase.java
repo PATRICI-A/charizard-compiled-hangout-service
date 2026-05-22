@@ -40,7 +40,7 @@ public class UpdateParcheUseCase implements UpdateParcheInputPort {
 
         // name is immutable — not updated
         if (req.getDescription() != null)  parche.setDescription(req.getDescription());
-        if (req.getPlaceId() != null)      parche.setPlaceId(req.getPlaceId());
+        if (req.getLugar() != null)        parche.setLugar(req.getLugar());
         if (req.getCategory() != null)     parche.setCategory(req.getCategory());
         if (req.getType() != null)         parche.setType(req.getType());
         if (req.getMaximumQuota() != null) {

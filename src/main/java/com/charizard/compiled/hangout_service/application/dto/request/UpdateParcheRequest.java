@@ -27,9 +27,9 @@ public class UpdateParcheRequest {
     @Schema(example = "Descripción actualizada")
     private String description;
 
-    /** Nuevo ID del lugar de encuentro (opcional, UUID del place-service) */
-    @Schema(example = "123e4567-e89b-12d3-a456-426614174000")
-    private UUID placeId;
+    /** Nuevo código de lugar del campus (opcional, ej: "ED_A") */
+    @Schema(example = "ED_A")
+    private String lugar;
 
     /** Nueva categoría (opcional) */
     @Schema(example = "MUSIC")

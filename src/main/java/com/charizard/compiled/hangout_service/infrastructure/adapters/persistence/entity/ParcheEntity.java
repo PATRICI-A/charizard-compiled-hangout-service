@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
+
 /**
  * Entidad JPA que mapea la tabla {@code parches} en PostgreSQL.
  * Representa la persistencia de un parche con sus datos completos.
@@ -39,8 +40,8 @@ public class ParcheEntity {
     @Column(nullable = true, length = 500)
     private String description;
 
-    @Column(name = "place_id", nullable = true)
-    private UUID placeId;
+    @Column(name = "lugar", nullable = true, length = 50)
+    private String lugar;
 
     private String category;
 

@@ -49,7 +49,7 @@ public class ParcheRepositoryAdapter implements ParcheRepositoryPort {
      * Búsqueda pública: siempre PUBLIC + ACTIVE, con filtros opcionales de nombre, fecha y categoría.
      */
     @Override
-    public List<Parche> findByFilters(String nombre, LocalDate fecha, String categoria, UUID placeId) {
+    public List<Parche> findByFilters(String nombre, LocalDate fecha, String categoria, String lugar) {
         Specification<ParcheEntity> spec = (root, query, cb) -> cb.conjunction();
 
         // Siempre PUBLIC y ACTIVE para la búsqueda pública
@@ -67,8 +67,8 @@ public class ParcheRepositoryAdapter implements ParcheRepositoryPort {
             spec = spec.and((root, query, cb) ->
                     cb.equal(cb.lower(root.get("category")), categoria.toLowerCase().trim()));
         }
-        if (placeId != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("placeId"), placeId));
+        if (lugar != null && !lugar.isBlank()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("lugar"), lugar));
         }
 
         return parcheRepository.findAll(spec).stream().map(mapper::toDomain).toList();

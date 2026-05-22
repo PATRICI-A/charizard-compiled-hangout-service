@@ -27,8 +27,8 @@ public class ParcheResponse {
     private String name;
     /** Descripción del parche */
     private String description;
-    /** ID del lugar de encuentro (UUID del place-service) */
-    private UUID placeId;
+    /** Código del lugar del campus (de geo-service) */
+    private String lugar;
     /** Categoría temática */
     private String category;
     /** Tipo de acceso (PUBLIC / PRIVATE) */

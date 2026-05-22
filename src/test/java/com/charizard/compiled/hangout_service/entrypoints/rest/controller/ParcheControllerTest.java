@@ -227,7 +227,7 @@ class ParcheControllerTest {
 
         CreateParcheRequest req = CreateParcheRequest.builder()
                 .name("Parche nuevo")
-                .placeId(UUID.randomUUID())
+                .lugar("ED_A")
                 .category("MUSIC")
                 .date(LocalDate.of(2027, 1, 1))
                 .hour(LocalTime.of(14, 0))
@@ -251,7 +251,7 @@ class ParcheControllerTest {
         setAuthentication(ownerId);
 
         CreateParcheRequest req = CreateParcheRequest.builder()
-                .name("Parche nuevo").placeId(UUID.randomUUID()).category("MUSIC")
+                .name("Parche nuevo").lugar("ED_A").category("MUSIC")
                 .date(LocalDate.of(2027, 1, 1)).hour(LocalTime.of(14, 0))
                 .maximumQuota(10).type(ParcheType.PUBLIC).build();
 
