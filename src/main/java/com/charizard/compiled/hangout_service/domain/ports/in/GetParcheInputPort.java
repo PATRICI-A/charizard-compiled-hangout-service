@@ -18,10 +18,11 @@ public interface GetParcheInputPort {
      * @param nombre         filtro por nombre (búsqueda parcial, case-insensitive)
      * @param fecha          filtro por fecha (yyyy-MM-dd)
      * @param categoria      filtro por categoría
+     * @param placeId        filtro por UUID del lugar (place-service)
      * @param cupoDisponible filtro por disponibilidad de cupo (true = hay espacio)
      * @return lista de parches que coinciden con los filtros
      */
-    List<ParcheResponse> getParches(String nombre, LocalDate fecha, String categoria, Boolean cupoDisponible);
+    List<ParcheResponse> getParches(String nombre, LocalDate fecha, String categoria, UUID placeId, Boolean cupoDisponible);
 
     /**
      * Busca un parche por su ID, enriquecido con members, place y event.

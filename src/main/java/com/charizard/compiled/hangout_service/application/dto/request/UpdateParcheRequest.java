@@ -27,9 +27,9 @@ public class UpdateParcheRequest {
     @Schema(example = "Descripción actualizada")
     private String description;
 
-    /** Nuevo lugar de encuentro (opcional) */
-    @Schema(example = "Café del edificio Bernardo")
-    private String place;
+    /** Nuevo ID del lugar de encuentro (opcional, UUID del place-service) */
+    @Schema(example = "123e4567-e89b-12d3-a456-426614174000")
+    private UUID placeId;
 
     /** Nueva categoría (opcional) */
     @Schema(example = "MUSIC")

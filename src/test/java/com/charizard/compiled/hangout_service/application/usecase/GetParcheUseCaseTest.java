@@ -8,7 +8,6 @@ import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
-import com.charizard.compiled.hangout_service.domain.ports.out.EventServicePort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.PlaceServicePort;
@@ -37,7 +36,6 @@ class GetParcheUseCaseTest {
     @Mock MemberRepositoryPort memberRepository;
     @Mock ParcheMapper parcheMapper;
     @Mock PlaceServicePort placeServicePort;
-    @Mock EventServicePort eventServicePort;
 
     @InjectMocks GetParcheUseCase useCase;
 
@@ -75,55 +73,55 @@ class GetParcheUseCaseTest {
     @Test
     @DisplayName("getParches sin filtros pasa todos los filtros como null al repositorio")
     void getParches_sinFiltros_pasaNullsAlRepositorio() {
-        when(parcheRepository.findByFilters(null, null, null)).thenReturn(List.of(parche));
+        when(parcheRepository.findByFilters(null, null, null, null)).thenReturn(List.of(parche));
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
         when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
 
-        List<ParcheResponse> result = useCase.getParches(null, null, null, null);
+        List<ParcheResponse> result = useCase.getParches(null, null, null, null, null);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(parcheId);
-        verify(parcheRepository).findByFilters(null, null, null);
+        verify(parcheRepository).findByFilters(null, null, null, null);
     }
 
     @Test
     @DisplayName("getParches con nombre pasa el filtro de nombre al repositorio")
     void getParches_conNombre_pasaNombreAlRepositorio() {
-        when(parcheRepository.findByFilters("fútbol", null, null)).thenReturn(List.of(parche));
+        when(parcheRepository.findByFilters("fútbol", null, null, null)).thenReturn(List.of(parche));
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
         when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
 
-        List<ParcheResponse> result = useCase.getParches("fútbol", null, null, null);
+        List<ParcheResponse> result = useCase.getParches("fútbol", null, null, null, null);
 
         assertThat(result).hasSize(1);
-        verify(parcheRepository).findByFilters("fútbol", null, null);
+        verify(parcheRepository).findByFilters("fútbol", null, null, null);
     }
 
     @Test
     @DisplayName("getParches con fecha pasa el filtro de fecha al repositorio")
     void getParches_conFecha_pasaFechaAlRepositorio() {
         LocalDate fecha = LocalDate.of(2026, 6, 15);
-        when(parcheRepository.findByFilters(null, fecha, null)).thenReturn(List.of(parche));
+        when(parcheRepository.findByFilters(null, fecha, null, null)).thenReturn(List.of(parche));
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
         when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
 
-        List<ParcheResponse> result = useCase.getParches(null, fecha, null, null);
+        List<ParcheResponse> result = useCase.getParches(null, fecha, null, null, null);
 
         assertThat(result).hasSize(1);
-        verify(parcheRepository).findByFilters(null, fecha, null);
+        verify(parcheRepository).findByFilters(null, fecha, null, null);
     }
 
     @Test
     @DisplayName("getParches con categoria pasa el filtro de categoria al repositorio")
     void getParches_conCategoria_pasaCategoriaAlRepositorio() {
-        when(parcheRepository.findByFilters(null, null, "Deportes")).thenReturn(List.of(parche));
+        when(parcheRepository.findByFilters(null, null, "Deportes", null)).thenReturn(List.of(parche));
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
         when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
 
-        List<ParcheResponse> result = useCase.getParches(null, null, "Deportes", null);
+        List<ParcheResponse> result = useCase.getParches(null, null, "Deportes", null, null);
 
         assertThat(result).hasSize(1);
-        verify(parcheRepository).findByFilters(null, null, "Deportes");
+        verify(parcheRepository).findByFilters(null, null, "Deportes", null);
     }
 
     @Test
@@ -132,13 +130,13 @@ class GetParcheUseCaseTest {
         UUID idLleno = UUID.randomUUID();
         Parche parcheLleno = Parche.builder().id(idLleno).name("Parche lleno").maximumQuota(2).build();
 
-        when(parcheRepository.findByFilters(null, null, null))
+        when(parcheRepository.findByFilters(null, null, null, null))
                 .thenReturn(List.of(parche, parcheLleno));
         when(memberRepository.countByParcheId(parche.getId())).thenReturn(3);    // 3/10 → hay espacio
         when(memberRepository.countByParcheId(parcheLleno.getId())).thenReturn(2); // 2/2 → lleno
         when(parcheMapper.toResponse(eq(parche), anyInt())).thenReturn(parcheResponse);
 
-        List<ParcheResponse> result = useCase.getParches(null, null, null, true);
+        List<ParcheResponse> result = useCase.getParches(null, null, null, null, true);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(parcheId);
@@ -151,13 +149,13 @@ class GetParcheUseCaseTest {
         Parche parcheLleno = Parche.builder().id(idLleno).name("Parche lleno").maximumQuota(2).build();
         ParcheResponse responseLleno = ParcheResponse.builder().id(idLleno).maximumQuota(2).actualMembers(2).build();
 
-        when(parcheRepository.findByFilters(null, null, null))
+        when(parcheRepository.findByFilters(null, null, null, null))
                 .thenReturn(List.of(parche, parcheLleno));
         when(memberRepository.countByParcheId(parche.getId())).thenReturn(3);       // 3/10 → hay espacio
         when(memberRepository.countByParcheId(parcheLleno.getId())).thenReturn(2);  // 2/2 → lleno
         when(parcheMapper.toResponse(eq(parcheLleno), anyInt())).thenReturn(responseLleno);
 
-        List<ParcheResponse> result = useCase.getParches(null, null, null, false);
+        List<ParcheResponse> result = useCase.getParches(null, null, null, null, false);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(idLleno);
@@ -170,14 +168,14 @@ class GetParcheUseCaseTest {
         Parche parcheLleno = Parche.builder().id(idLleno).name("Parche lleno").maximumQuota(2).build();
         ParcheResponse responseLleno = ParcheResponse.builder().id(idLleno).build();
 
-        when(parcheRepository.findByFilters(null, null, null))
+        when(parcheRepository.findByFilters(null, null, null, null))
                 .thenReturn(List.of(parche, parcheLleno));
         when(memberRepository.countByParcheId(parche.getId())).thenReturn(3);
         when(memberRepository.countByParcheId(parcheLleno.getId())).thenReturn(2);
         when(parcheMapper.toResponse(eq(parche), anyInt())).thenReturn(parcheResponse);
         when(parcheMapper.toResponse(eq(parcheLleno), anyInt())).thenReturn(responseLleno);
 
-        List<ParcheResponse> result = useCase.getParches(null, null, null, null);
+        List<ParcheResponse> result = useCase.getParches(null, null, null, null, null);
 
         assertThat(result).hasSize(2);
     }

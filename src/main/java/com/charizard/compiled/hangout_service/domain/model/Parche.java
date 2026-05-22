@@ -30,8 +30,8 @@ public class Parche {
     private String name;
     /** Descripción opcional del encuentro */
     private String description;
-    /** Lugar donde se realizará el encuentro (ID del lugar en el microservicio de Places) */
-    private String place;
+    /** ID del lugar donde se realizará el encuentro (referencia al microservicio de Places) */
+    private UUID placeId;
     /** Categoría temática (viene del microservicio de categorías) */
     private String category;
     /** Tipo de acceso: público (libre) o privado (por invitación) */

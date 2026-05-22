@@ -23,7 +23,7 @@ public interface ParcheRepositoryPort {
      * Busca parches públicos activos aplicando filtros opcionales.
      * Siempre fuerza PUBLIC + ACTIVE para la búsqueda pública.
      */
-    List<Parche> findByFilters(String nombre, LocalDate fecha, String categoria);
+    List<Parche> findByFilters(String nombre, LocalDate fecha, String categoria, UUID placeId);
     /** Busca parches activos cuya fecha de realización ya expiró */
     List<Parche> findArchivables(ParcheStatus status, LocalDate thresholdDate, LocalTime thresholdTime);
     /** Busca parches activos (PUBLIC o PRIVATE) donde el usuario es miembro */

@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Adaptador que implementa {@link PlaceServicePort} delegando en {@link PlaceClient}.
@@ -19,5 +21,10 @@ public class PlaceServiceAdapter implements PlaceServicePort {
     @Override
     public List<PlaceResponse> getPlaces() {
         return placeClient.getPlaces();
+    }
+
+    @Override
+    public Optional<PlaceResponse> getPlaceById(UUID placeId) {
+        return placeClient.getPlaceById(placeId);
     }
 }
