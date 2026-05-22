@@ -8,10 +8,8 @@ import com.charizard.compiled.hangout_service.domain.exceptions.ParcheNotFoundEx
 import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.ports.in.GetParcheInputPort;
-import com.charizard.compiled.hangout_service.domain.ports.out.EventServicePort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
-import com.charizard.compiled.hangout_service.domain.ports.out.PlaceServicePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +32,6 @@ public class GetParcheUseCase implements GetParcheInputPort {
     private final ParcheRepositoryPort parcheRepository;
     private final MemberRepositoryPort memberRepository;
     private final ParcheMapper parcheMapper;
-    private final PlaceServicePort placeServicePort;
-    private final EventServicePort eventServicePort;
 
     @Override
     public List<ParcheResponse> getParches(String nombre, LocalDate fecha, String categoria, Boolean cupoDisponible) {
@@ -66,17 +62,6 @@ public class GetParcheUseCase implements GetParcheInputPort {
                         .build())
                 .toList();
 
-        // Enrich with place from OpenFeign (null if not configured)
-        var placeResponse = placeServicePort.getPlaces().stream()
-                .filter(p -> p.getName() != null && p.getName().equals(parche.getPlace()))
-                .findFirst()
-                .orElse(null);
-
-        // Enrich with event from OpenFeign (null if no eventId or service unavailable)
-        var eventResponse = (parche.getEventId() != null)
-                ? eventServicePort.getEventById(parche.getEventId()).orElse(null)
-                : null;
-
         return ParcheDetailResponse.builder()
                 .id(parche.getId())
                 .name(parche.getName())
@@ -90,8 +75,8 @@ public class GetParcheUseCase implements GetParcheInputPort {
                 .date(parche.getDate())
                 .hour(parche.getHour())
                 .imageUrl(parche.getImageUrl())
-                .place(placeResponse)
-                .event(eventResponse)
+                .place(null)
+                .event(null)
                 .members(memberResponses)
                 .build();
     }

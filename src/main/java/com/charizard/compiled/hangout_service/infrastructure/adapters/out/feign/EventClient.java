@@ -5,6 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,6 +14,9 @@ import java.util.UUID;
  */
 @FeignClient(name = "event-service", url = "${services.events.url:}", fallback = EventClientFallback.class)
 public interface EventClient {
+
+    @GetMapping("/api/v1/events")
+    List<EventResponse> getEventos();
 
     @GetMapping("/api/v1/events/{eventId}")
     Optional<EventResponse> getEventById(@PathVariable UUID eventId);

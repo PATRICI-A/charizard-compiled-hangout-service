@@ -2,10 +2,14 @@ package com.charizard.compiled.hangout_service.entrypoints.rest.controller;
 
 import com.charizard.compiled.hangout_service.application.dto.request.CreateParcheRequest;
 import com.charizard.compiled.hangout_service.application.dto.request.UpdateParcheRequest;
+import com.charizard.compiled.hangout_service.application.dto.response.CategoryResponse;
+import com.charizard.compiled.hangout_service.application.dto.response.EventResponse;
 import com.charizard.compiled.hangout_service.application.dto.response.ParcheDetailResponse;
 import com.charizard.compiled.hangout_service.application.dto.response.ParcheResponse;
+import com.charizard.compiled.hangout_service.application.dto.response.PlaceResponse;
 import com.charizard.compiled.hangout_service.domain.ports.in.CloseParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.CreateParcheInputPort;
+import com.charizard.compiled.hangout_service.domain.ports.in.GetOpcionesInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.GetParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.UpdateParcheInputPort;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -41,6 +45,7 @@ public class ParcheController {
     private final GetParcheInputPort getParcheUseCase;
     private final UpdateParcheInputPort updateParcheUseCase;
     private final CloseParcheInputPort closeParcheUseCase;
+    private final GetOpcionesInputPort getOpcionesUseCase;
 
     @PostMapping
     @Operation(summary = "Create parche", parameters = {
@@ -116,5 +121,34 @@ public class ParcheController {
     public ResponseEntity<Void> deleteParche(@PathVariable UUID id) {
         closeParcheUseCase.closeParche(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ── Opciones para formularios de creación / edición ──────────────────────
+
+    @GetMapping("/opciones/categorias")
+    @Operation(summary = "List available categories for parche creation/edit form")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Categories list (empty if category-service unavailable)")
+    })
+    public ResponseEntity<List<CategoryResponse>> getCategorias() {
+        return ResponseEntity.ok(getOpcionesUseCase.getCategorias());
+    }
+
+    @GetMapping("/opciones/lugares")
+    @Operation(summary = "List available places for parche creation/edit form")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Places list (empty if place-service unavailable)")
+    })
+    public ResponseEntity<List<PlaceResponse>> getLugares() {
+        return ResponseEntity.ok(getOpcionesUseCase.getLugares());
+    }
+
+    @GetMapping("/opciones/eventos")
+    @Operation(summary = "List available events for parche creation/edit form")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Events list (empty if event-service unavailable)")
+    })
+    public ResponseEntity<List<EventResponse>> getEventos() {
+        return ResponseEntity.ok(getOpcionesUseCase.getEventos());
     }
 }

@@ -4,6 +4,7 @@ import com.charizard.compiled.hangout_service.application.dto.response.EventResp
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,6 +14,12 @@ import java.util.UUID;
 @Slf4j
 @Component
 public class EventClientFallback implements EventClient {
+
+    @Override
+    public List<EventResponse> getEventos() {
+        log.warn("[Feign fallback] event-service not available — returning empty list");
+        return List.of();
+    }
 
     @Override
     public Optional<EventResponse> getEventById(UUID eventId) {
