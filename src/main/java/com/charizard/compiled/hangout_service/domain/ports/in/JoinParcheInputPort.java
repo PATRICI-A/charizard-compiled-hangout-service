@@ -17,4 +17,14 @@ public interface JoinParcheInputPort {
      * @return datos de la membresía creada
      */
     MemberResponse unirseAParche(UUID parcheId, UUID studentId);
+
+    /**
+     * Verifica si un estudiante es miembro activo de un parche.
+     * Usado por servicios internos (ChatService) vía OpenFeign.
+     *
+     * @param parcheId  ID del parche
+     * @param studentId ID del estudiante
+     * @return true si es miembro activo, false en caso contrario
+     */
+    boolean isMember(UUID parcheId, UUID studentId);
 }

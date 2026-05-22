@@ -68,4 +68,10 @@ public class JoinParcheUseCase implements JoinParcheInputPort {
                 .unionDate(saved.getUnionDate())
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isMember(UUID parcheId, UUID studentId) {
+        return memberRepository.existsByParcheIdAndStudentId(parcheId, studentId);
+    }
 }
