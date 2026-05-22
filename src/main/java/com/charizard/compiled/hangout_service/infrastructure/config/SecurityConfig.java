@@ -38,7 +38,7 @@ public class SecurityConfig {
                     "/actuator/health/**"
                 ).permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/parches").permitAll()
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/parches/*/miembros/*/check").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/parches/**/check").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(kongAuthFilter, UsernamePasswordAuthenticationFilter.class);
