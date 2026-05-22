@@ -35,10 +35,10 @@ public class CreateParcheRequest {
     @Schema(example = "Repaso grupal de matemáticas")
     private String description;
 
-    /** Lugar de encuentro (obligatorio, no vacío) */
-    @NotBlank(message = "Place cannot be blank")
-    @Schema(example = "Café del edificio Bernardo")
-    private String place;
+    /** ID del lugar de encuentro (obligatorio, UUID del place-service) */
+    @NotNull(message = "Place is required")
+    @Schema(example = "123e4567-e89b-12d3-a456-426614174000")
+    private UUID placeId;
 
     /** Categoría temática del parche (obligatorio) */
     @NotBlank(message = "Category is required")

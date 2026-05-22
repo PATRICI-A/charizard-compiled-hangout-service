@@ -39,8 +39,8 @@ public class ParcheEntity {
     @Column(nullable = true, length = 500)
     private String description;
 
-    @Column(nullable = false)
-    private String place;
+    @Column(name = "place_id", nullable = true)
+    private UUID placeId;
 
     private String category;
 

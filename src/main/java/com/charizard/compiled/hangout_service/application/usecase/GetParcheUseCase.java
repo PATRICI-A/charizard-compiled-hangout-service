@@ -10,6 +10,7 @@ import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.ports.in.GetParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
+import com.charizard.compiled.hangout_service.domain.ports.out.PlaceServicePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ public class GetParcheUseCase implements GetParcheInputPort {
     private final ParcheRepositoryPort parcheRepository;
     private final MemberRepositoryPort memberRepository;
     private final ParcheMapper parcheMapper;
+    private final PlaceServicePort placeServicePort;
 
     @Override
     public List<ParcheResponse> getParches(String nombre, LocalDate fecha, String categoria, Boolean cupoDisponible) {
@@ -62,6 +64,10 @@ public class GetParcheUseCase implements GetParcheInputPort {
                         .build())
                 .toList();
 
+        var placeResponse = (parche.getPlaceId() != null)
+                ? placeServicePort.getPlaceById(parche.getPlaceId()).orElse(null)
+                : null;
+
         return ParcheDetailResponse.builder()
                 .id(parche.getId())
                 .name(parche.getName())
@@ -75,7 +81,7 @@ public class GetParcheUseCase implements GetParcheInputPort {
                 .date(parche.getDate())
                 .hour(parche.getHour())
                 .imageUrl(parche.getImageUrl())
-                .place(null)
+                .place(placeResponse)
                 .event(null)
                 .members(memberResponses)
                 .build();
