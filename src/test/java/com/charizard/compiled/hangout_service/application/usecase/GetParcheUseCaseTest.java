@@ -91,7 +91,7 @@ class GetParcheUseCaseTest {
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
         when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
 
-        List<ParcheResponse> result = useCase.getParches("fútbol", null, null, null);
+        List<ParcheResponse> result = useCase.getParches("fútbol", null, null, null, null);
 
         assertThat(result).hasSize(1);
         verify(parcheRepository).findByFilters("fútbol", null, null, null);
@@ -105,7 +105,7 @@ class GetParcheUseCaseTest {
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
         when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
 
-        List<ParcheResponse> result = useCase.getParches(null, fecha, null, null);
+        List<ParcheResponse> result = useCase.getParches(null, fecha, null, null, null);
 
         assertThat(result).hasSize(1);
         verify(parcheRepository).findByFilters(null, fecha, null, null);
@@ -118,10 +118,10 @@ class GetParcheUseCaseTest {
         when(memberRepository.countByParcheId(parcheId)).thenReturn(3);
         when(parcheMapper.toResponse(parche, 3)).thenReturn(parcheResponse);
 
-        List<ParcheResponse> result = useCase.getParches(null, null, "Deportes", null);
+        List<ParcheResponse> result = useCase.getParches(null, null, "Deportes", null, null);
 
         assertThat(result).hasSize(1);
-        verify(parcheRepository).findByFilters(null, null, "Deportes");
+        verify(parcheRepository).findByFilters(null, null, "Deportes", null);
     }
 
     @Test

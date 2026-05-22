@@ -109,7 +109,7 @@ class ParcheRepositoryAdapterTest {
         when(parcheRepository.findAll(any(Specification.class))).thenReturn(List.of(parcheEntity));
         when(mapper.toDomain(parcheEntity)).thenReturn(parche);
 
-        List<Parche> result = adapter.findByFilters("Test", null, null);
+        List<Parche> result = adapter.findByFilters("Test", null, null, null);
 
         assertThat(result).hasSize(1);
         verify(parcheRepository).findAll(any(Specification.class));
@@ -121,7 +121,7 @@ class ParcheRepositoryAdapterTest {
         when(parcheRepository.findAll(any(Specification.class))).thenReturn(List.of(parcheEntity, parcheEntity));
         when(mapper.toDomain(parcheEntity)).thenReturn(parche);
 
-        List<Parche> result = adapter.findByFilters(null, null, null);
+        List<Parche> result = adapter.findByFilters(null, null, null, null);
 
         assertThat(result).hasSize(2);
     }
