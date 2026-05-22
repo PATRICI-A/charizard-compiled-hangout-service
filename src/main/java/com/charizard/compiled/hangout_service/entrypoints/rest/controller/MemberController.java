@@ -53,6 +53,22 @@ public class MemberController {
                 .body(joinParcheService.unirseAParche(parcheId, UUID.fromString(studentIdStr)));
     }
 
+    @GetMapping("/{userId}/check")
+    @Operation(
+        summary = "Check hangout membership (inter-service)",
+        description = "Returns true if the student is an active member of the hangout. Used by ChatService via OpenFeign."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Membership status returned")
+    })
+    public ResponseEntity<Boolean> isMember(
+            @Parameter(description = "Hangout ID", required = true)
+            @PathVariable UUID parcheId,
+            @Parameter(description = "Student ID to check", required = true)
+            @PathVariable UUID userId) {
+        return ResponseEntity.ok(joinParcheService.isMember(parcheId, userId));
+    }
+
     @Operation(
         summary = "Leave a hangout",
         description = "Leave a hangout. If the caller is the owner and there are other members, " +
