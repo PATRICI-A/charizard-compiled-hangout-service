@@ -42,6 +42,10 @@ public class SecurityConfig {
                     "GET".equals(req.getMethod()) &&
                     req.getRequestURI().matches("/api/v1/parches/[^/]+/miembros/[^/]+/check")
                 ).permitAll()
+                .requestMatchers(req ->
+                    "GET".equals(req.getMethod()) &&
+                    req.getRequestURI().startsWith("/api/v1/parches/internal/")
+                ).permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(kongAuthFilter, UsernamePasswordAuthenticationFilter.class);

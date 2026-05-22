@@ -74,4 +74,10 @@ public class JoinParcheUseCase implements JoinParcheInputPort {
     public boolean isMember(UUID parcheId, UUID studentId) {
         return memberRepository.existsByParcheIdAndStudentId(parcheId, studentId);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int getUserParcheCount(UUID userId) {
+        return memberRepository.findParcheIdsByStudentId(userId).size();
+    }
 }
