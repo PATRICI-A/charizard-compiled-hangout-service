@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,10 +36,10 @@ public class CreateParcheRequest {
     @Schema(example = "Repaso grupal de matemáticas")
     private String description;
 
-    /** ID del lugar de encuentro (obligatorio, UUID del place-service) */
-    @NotNull(message = "Place is required")
-    @Schema(example = "123e4567-e89b-12d3-a456-426614174000")
-    private UUID placeId;
+    /** Código del lugar del campus (obligatorio, obtenido de geo-service, ej: "ED_A") */
+    @NotBlank(message = "Place is required")
+    @Schema(example = "ED_A")
+    private String lugar;
 
     /** Categoría temática del parche (obligatorio) */
     @NotBlank(message = "Category is required")

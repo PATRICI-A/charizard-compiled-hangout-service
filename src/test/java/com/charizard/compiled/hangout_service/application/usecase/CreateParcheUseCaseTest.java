@@ -46,7 +46,7 @@ class CreateParcheUseCaseTest {
 
         request = CreateParcheRequest.builder()
                 .name("Parche de estudio")
-                .placeId(UUID.randomUUID())
+                .lugar("ED_A")
                 .maximumQuota(10)
                 .type(ParcheType.PUBLIC)
                 .build();

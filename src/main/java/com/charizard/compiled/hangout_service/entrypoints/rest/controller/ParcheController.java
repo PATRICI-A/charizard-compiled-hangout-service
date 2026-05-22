@@ -72,9 +72,9 @@ public class ParcheController {
             @Parameter(description = "Filter by name (partial, case-insensitive)") @RequestParam(required = false) String nombre,
             @Parameter(description = "Filter by date (yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
             @Parameter(description = "Filter by category") @RequestParam(required = false) String categoria,
-            @Parameter(description = "Filter by place UUID (from place-service)") @RequestParam(required = false) UUID placeId,
+            @Parameter(description = "Filter by campus zone code (from geo-service, ej: ED_A)") @RequestParam(required = false) String lugar,
             @Parameter(description = "true = has space, false = full") @RequestParam(required = false) Boolean cupoDisponible) {
-        return ResponseEntity.ok(getParcheUseCase.getParches(nombre, fecha, categoria, placeId, cupoDisponible));
+        return ResponseEntity.ok(getParcheUseCase.getParches(nombre, fecha, categoria, lugar, cupoDisponible));
     }
 
     @GetMapping("/me")

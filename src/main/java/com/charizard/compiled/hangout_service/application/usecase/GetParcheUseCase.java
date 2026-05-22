@@ -19,12 +19,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Caso de uso para consultar parches.
- * Búsqueda pública: solo PUBLIC + ACTIVE; filtros: nombre, fecha, categoria, cupoDisponible.
- * Detalle (/{id}): enriquecido con members, place y event via OpenFeign.
- * Mis parches: parches activos (PUBLIC o PRIVATE) donde el usuario es miembro.
- */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -36,8 +30,8 @@ public class GetParcheUseCase implements GetParcheInputPort {
     private final PlaceServicePort placeServicePort;
 
     @Override
-    public List<ParcheResponse> getParches(String nombre, LocalDate fecha, String categoria, UUID placeId, Boolean cupoDisponible) {
-        return parcheRepository.findByFilters(nombre, fecha, categoria, placeId).stream()
+    public List<ParcheResponse> getParches(String nombre, LocalDate fecha, String categoria, String lugar, Boolean cupoDisponible) {
+        return parcheRepository.findByFilters(nombre, fecha, categoria, lugar).stream()
                 .filter(p -> {
                     if (cupoDisponible == null) return true;
                     boolean hayEspacio = memberRepository.countByParcheId(p.getId()) < p.getMaximumQuota();
@@ -64,8 +58,11 @@ public class GetParcheUseCase implements GetParcheInputPort {
                         .build())
                 .toList();
 
-        var placeResponse = (parche.getPlaceId() != null)
-                ? placeServicePort.getPlaceById(parche.getPlaceId()).orElse(null)
+        var placeResponse = (parche.getLugar() != null)
+                ? placeServicePort.getPlaces().stream()
+                        .filter(p -> parche.getLugar().equals(p.getCode()))
+                        .findFirst()
+                        .orElse(null)
                 : null;
 
         return ParcheDetailResponse.builder()

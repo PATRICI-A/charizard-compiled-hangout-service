@@ -5,13 +5,9 @@ import com.charizard.compiled.hangout_service.domain.ports.out.PlaceServicePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
-/**
- * Adaptador que implementa {@link PlaceServicePort} delegando en {@link PlaceClient}.
- */
 @Component
 @RequiredArgsConstructor
 public class PlaceServiceAdapter implements PlaceServicePort {
@@ -20,11 +16,10 @@ public class PlaceServiceAdapter implements PlaceServicePort {
 
     @Override
     public List<PlaceResponse> getPlaces() {
-        return placeClient.getPlaces();
-    }
-
-    @Override
-    public Optional<PlaceResponse> getPlaceById(UUID placeId) {
-        return placeClient.getPlaceById(placeId);
+        List<PlaceResponse> all = new ArrayList<>();
+        all.addAll(placeClient.getBuildings());
+        all.addAll(placeClient.getFoodOutlets());
+        all.addAll(placeClient.getSportsAreas());
+        return all;
     }
 }
