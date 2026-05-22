@@ -49,7 +49,7 @@ class UpdateParcheUseCaseTest {
                 .id(parcheId)
                 .name("Original")
                 .description("Descripción original")
-                .place("Lugar original")
+                .placeId(UUID.randomUUID())
                 .maximumQuota(10)
                 .status(ParcheStatus.ACTIVE)
                 .type(ParcheType.PUBLIC)
@@ -135,9 +135,10 @@ class UpdateParcheUseCaseTest {
     @Test
     @DisplayName("updateParche actualiza todos los campos cuando se proveen en el request")
     void updateParche_conTodosLosCampos_actualizaTodo() {
+        UUID nuevoLugarId = UUID.randomUUID();
         UpdateParcheRequest req = UpdateParcheRequest.builder()
                 .description("Nueva desc")
-                .place("Nuevo lugar")
+                .placeId(nuevoLugarId)
                 .maximumQuota(20)
                 .type(ParcheType.PRIVATE)
                 .build();
@@ -151,7 +152,7 @@ class UpdateParcheUseCaseTest {
 
         assertThat(parche.getName()).isEqualTo("Original"); // name is immutable
         assertThat(parche.getDescription()).isEqualTo("Nueva desc");
-        assertThat(parche.getPlace()).isEqualTo("Nuevo lugar");
+        assertThat(parche.getPlaceId()).isEqualTo(nuevoLugarId);
         assertThat(parche.getMaximumQuota()).isEqualTo(20);
         assertThat(parche.getType()).isEqualTo(ParcheType.PRIVATE);
     }

@@ -31,7 +31,7 @@ class ParcheEntityTest {
         return ParcheEntity.builder()
                 .name("Parche del barrio")
                 .description("Un parche cualquiera")
-                .place("Escuela")
+                .placeId(UUID.randomUUID())
                 .category("CINEMA")
                 .type(ParcheType.PUBLIC)
                 .maximumQuota(10)

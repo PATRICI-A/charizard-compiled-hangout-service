@@ -11,6 +11,7 @@ import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
 import com.charizard.compiled.hangout_service.domain.ports.in.CloseParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.CreateParcheInputPort;
+import com.charizard.compiled.hangout_service.domain.ports.in.GetOpcionesInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.GetParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.UpdateParcheInputPort;
 import com.charizard.compiled.hangout_service.entrypoints.advice.GlobalExceptionHandler;
@@ -50,6 +51,7 @@ class ParcheControllerTest {
     @Mock GetParcheInputPort getParcheUseCase;
     @Mock UpdateParcheInputPort updateParcheUseCase;
     @Mock CloseParcheInputPort closeParcheUseCase;
+    @Mock GetOpcionesInputPort getOpcionesUseCase;
 
     @InjectMocks ParcheController controller;
 
@@ -225,7 +227,7 @@ class ParcheControllerTest {
 
         CreateParcheRequest req = CreateParcheRequest.builder()
                 .name("Parche nuevo")
-                .place("Parque")
+                .placeId(UUID.randomUUID())
                 .category("MUSIC")
                 .date(LocalDate.of(2027, 1, 1))
                 .hour(LocalTime.of(14, 0))
@@ -249,7 +251,7 @@ class ParcheControllerTest {
         setAuthentication(ownerId);
 
         CreateParcheRequest req = CreateParcheRequest.builder()
-                .name("Parche nuevo").place("Parque").category("MUSIC")
+                .name("Parche nuevo").placeId(UUID.randomUUID()).category("MUSIC")
                 .date(LocalDate.of(2027, 1, 1)).hour(LocalTime.of(14, 0))
                 .maximumQuota(10).type(ParcheType.PUBLIC).build();
 

@@ -8,7 +8,6 @@ import com.charizard.compiled.hangout_service.domain.model.Member;
 import com.charizard.compiled.hangout_service.domain.model.Parche;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheStatus;
 import com.charizard.compiled.hangout_service.domain.model.enums.ParcheType;
-import com.charizard.compiled.hangout_service.domain.ports.out.EventServicePort;
 import com.charizard.compiled.hangout_service.domain.ports.out.MemberRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.ParcheRepositoryPort;
 import com.charizard.compiled.hangout_service.domain.ports.out.PlaceServicePort;
@@ -37,7 +36,6 @@ class GetParcheUseCaseTest {
     @Mock MemberRepositoryPort memberRepository;
     @Mock ParcheMapper parcheMapper;
     @Mock PlaceServicePort placeServicePort;
-    @Mock EventServicePort eventServicePort;
 
     @InjectMocks GetParcheUseCase useCase;
 
