@@ -12,7 +12,6 @@ import com.charizard.compiled.hangout_service.domain.ports.in.CreateParcheInputP
 import com.charizard.compiled.hangout_service.domain.ports.in.GetOpcionesInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.GetParcheInputPort;
 import com.charizard.compiled.hangout_service.domain.ports.in.UpdateParcheInputPort;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -48,12 +47,10 @@ public class ParcheController {
     private final GetOpcionesInputPort getOpcionesUseCase;
 
     @PostMapping
-    @Operation(summary = "Create parche", parameters = {
-            @Parameter(name = "X-User-Id", description = "User UUID (who becomes the owner)", required = true, in = ParameterIn.HEADER)
-    })
+    @Operation(summary = "Create parche")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Parche created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request body or missing X-User-Id header"),
+            @ApiResponse(responseCode = "400", description = "Invalid request body"),
             @ApiResponse(responseCode = "409", description = "Student reached max active hangouts")
     })
     public ResponseEntity<ParcheResponse> createParche(
