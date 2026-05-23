@@ -40,7 +40,7 @@ public class UserCleanupController {
             @ApiResponse(responseCode = "204", description = "Cleanup completed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid userId format")
     })
-    @DeleteMapping("/parches/users/{userId}/cleanup")
+    @DeleteMapping("/parches/internal/users/{userId}/cleanup")
     public ResponseEntity<Void> cleanupUser(
             @Parameter(description = "ID of the deleted user", required = true)
             @PathVariable UUID userId) {
