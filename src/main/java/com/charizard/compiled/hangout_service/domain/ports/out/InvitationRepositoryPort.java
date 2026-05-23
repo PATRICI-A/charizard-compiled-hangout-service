@@ -23,4 +23,6 @@ public interface InvitationRepositoryPort {
     List<Invitation> findByParcheId(UUID parcheId);
     /** Busca una invitación por su ID */
     Optional<Invitation> findById(UUID invitationId);
+    /** Elimina todas las invitaciones en las que el usuario participó (como invitado o invitador) */
+    void deleteByUserId(UUID userId);
 }

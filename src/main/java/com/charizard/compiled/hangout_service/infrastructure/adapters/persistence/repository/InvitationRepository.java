@@ -37,4 +37,9 @@ public interface InvitationRepository extends JpaRepository<InvitationEntity, UU
     default void cancelPendingByParcheId(UUID parcheId) {
         cancelPendingByParcheId(parcheId, InvitationStatus.PENDING, InvitationStatus.REJECTED);
     }
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM InvitationEntity i WHERE i.invitedStudentId = :userId OR i.inviterId = :userId")
+    void deleteByInvitedStudentIdOrInviterId(@Param("userId") UUID userId);
 }

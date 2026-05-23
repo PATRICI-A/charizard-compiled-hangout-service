@@ -57,4 +57,9 @@ public class InvitationRepositoryAdapter implements InvitationRepositoryPort {
     public Optional<Invitation> findById(UUID invitationId) {
         return invitationRepository.findById(invitationId).map(mapper::toDomain);
     }
+
+    @Override
+    public void deleteByUserId(UUID userId) {
+        invitationRepository.deleteByInvitedStudentIdOrInviterId(userId);
+    }
 }
